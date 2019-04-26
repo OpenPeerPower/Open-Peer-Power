@@ -71,7 +71,7 @@ PRODUCT_LIST = [
     {'id': 5, 'title': 'Hot Water System', 'price': 11.99, 'inventory': 3}
     ]
 def product_list():
-    return json.dumps({'type': 'products', **PRODUCT_LIST})
+    return json.dumps(PRODUCT_LIST)
 
 def users_event():
     return json.dumps({'type': 'users', 'count': len(USERS)})
@@ -90,7 +90,7 @@ async def notify_users():
 
 async def register(websocket):
     USERS.add(websocket)
-    await notify_users()
+#    await notify_users()
 
 async def unregister(websocket):
     USERS.remove(websocket)
@@ -118,23 +118,10 @@ async def counter(websocket, path):
         await unregister(websocket)
 
 async def products(websocket, path):
-    # register(websocket) sends user_event() to websocket
-
+    # register(websocket) sends product list to websocket
     await register(websocket)
     try:
         await websocket.send(product_list())
-        async for message in websocket:
-            data = json.loads(message)
-            if data['action'] == 'minus':
-                STATE['value'] -= 1
-                await notify_state()
-            elif data['action'] == 'plus':
-                print('got a plus')
-                STATE['value'] += 1
-                await notify_state()
-            else:
-                logging.error(
-                    "unsupported event: {}", data)
     finally:
         await unregister(websocket)
 
