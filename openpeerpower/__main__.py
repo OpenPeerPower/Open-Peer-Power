@@ -63,15 +63,11 @@ def setup_and_run_opp() -> int:
 def state_event():
     return json.dumps({'type': 'state', **STATE})
 
-PRODUCT_LIST = [
-    {'id': 1, 'title': 'Refrigerator', 'price': 10.99, 'inventory': 2},
-    {'id': 2, 'title': 'Dishwasher', 'price': 29.99, 'inventory': 10},
-    {'id': 3, 'title': 'Washing Machine', 'price': 8.99, 'inventory': 5},
-    {'id': 4, 'title': 'Television', 'price': 24.99, 'inventory': 7},
-    {'id': 5, 'title': 'Hot Water System', 'price': 11.99, 'inventory': 3}
-    ]
+
 def product_list():
-    return json.dumps(PRODUCT_LIST)
+    print('product_list')
+    print(prods)
+    return json.dumps(prods)
 
 def users_event():
     return json.dumps({'type': 'users', 'count': len(USERS)})
@@ -87,6 +83,13 @@ async def notify_users():
         message = users_event()
         print('sending user message')
         await asyncio.wait([user.send(message) for user in USERS])
+
+async def notify_products(prods):
+    if USERS:       # asyncio.wait doesn't accept an empty list
+        message = json.dumps(prods)
+        print('sending product list')
+        print(message)
+        await asyncio.wait(USERS[0].send(message))
 
 async def register(websocket):
     USERS.add(websocket)
@@ -119,11 +122,19 @@ async def counter(websocket, path):
 
 async def products(websocket, path):
     # register(websocket) sends product list to websocket
-    await register(websocket)
-    try:
-        await websocket.send(product_list())
-    finally:
-        await unregister(websocket)
+    #await register(websocket)
+    #try:
+    print('products send')
+    await websocket.send(product_list())
+    print(product_list())
+    async for message in websocket:
+        prods = json.loads(message)
+      #      await notify_products(prods)
+        print('products receive')
+        print(prods)
+        await websocket.send(message)
+    #finally:
+    #    await unregister(websocket)
 
 async def run(cmd):
     proc = await asyncio.create_subprocess_shell(
@@ -149,8 +160,16 @@ def main() -> int:
     STATE = {'value': 0}
     global USERS
     USERS = set()
-    
-    exit_code = setup_and_run_opp()
+    PRODUCT_LIST = [
+    {'id': 1, 'title': 'Refrigerator', 'price': 10.99, 'inventory': 2},
+    {'id': 2, 'title': 'Dishwasher', 'price': 29.99, 'inventory': 10},
+    {'id': 3, 'title': 'Washing Machine', 'price': 8.99, 'inventory': 5},
+    {'id': 4, 'title': 'Television', 'price': 24.99, 'inventory': 7},
+    {'id': 5, 'title': 'Hot Water System', 'price': 11.99, 'inventory': 3}
+    ]
+    global prods
+    prods = PRODUCT_LIST
+    #exit_code = setup_and_run_opp()
     print('starting async loop')
     #pid = subprocess.Popen(["python", "scriptname.py"], creationflags=subprocess.DETACHED_PROCESS).pid
     #pid = subprocess.Popen(["c:/temp/OPP-ui/npm", "start"], cwd='c:/temp/OPP-ui').pid
