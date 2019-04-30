@@ -91,7 +91,7 @@ async def register(websocket):
 
 async def unregister(websocket):
     USERS.remove(websocket)
-    await notify_users()
+#    await notify_users()
 
 async def counter(websocket, path):
     # register(websocket) sends user_event() to websocket
