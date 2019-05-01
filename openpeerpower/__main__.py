@@ -64,8 +64,8 @@ def state_event():
     return json.dumps({'type': 'state', **STATE})
 
 
-def product_list():
-    return json.dumps(prods)
+def device_string():
+    return json.dumps(device_list)
 
 def users_event():
     return json.dumps({'type': 'users', 'count': len(USERS)})
@@ -80,9 +80,9 @@ async def notify_users():
         message = users_event()
         await asyncio.wait([user.send(message) for user in USERS])
 
-async def notify_products():
+async def notify_devices():
     if USERS:       # asyncio.wait doesn't accept an empty list
-        message = product_list()
+        message = device_string()
         await asyncio.wait([user.send(message) for user in USERS])
 
 async def register(websocket):
@@ -113,15 +113,15 @@ async def counter(websocket, path):
     finally:
         await unregister(websocket)
 
-async def products(websocket, path):
-    # register(websocket) sends product list to websocket
+async def devices_ws(websocket, path):
+    # register(websocket) sends device list to websocket
     await register(websocket)
     try:
-        await websocket.send(product_list())
-        global prods
+        await websocket.send(device_string())
+        global device_list
         async for message in websocket:
-            prods = json.loads(message)
-            await notify_products()
+            device_list = json.loads(message)
+            await notify_devices()
     finally:
         await unregister(websocket)
 
@@ -149,16 +149,16 @@ def main() -> int:
     STATE = {'value': 0}
     global USERS
     USERS = set()
-    PRODUCT_LIST = {
-    '1': {'id': 1, 'title': 'Refrigerator', 'price': 10.99, 'inventory': 2},
-    '2': {'id': 2, 'title': 'Dishwasher', 'price': 29.99, 'inventory': 10},
-    '3': {'id': 3, 'title': 'Washing Machine', 'price': 8.99, 'inventory': 5},
-    '4': {'id': 4, 'title': 'Television', 'price': 24.99, 'inventory': 7},
-    '5': {'id': 5, 'title': 'Hot Water System', 'price': 11.99, 'inventory': 3}
+    DEVICE_LIST = {
+    '1': {'id': 1, 'title': 'Refrigerator', 'cost': 10.99, 'power': 2},
+    '2': {'id': 2, 'title': 'Dishwasher', 'cost': 29.99, 'power': 10},
+    '3': {'id': 3, 'title': 'Washing Machine', 'cost': 8.99, 'power': 5},
+    '4': {'id': 4, 'title': 'Television', 'cost': 24.99, 'power': 7},
+    '5': {'id': 5, 'title': 'Hot Water System', 'cost': 11.99, 'power': 3}
     }
     
-    global prods
-    prods = PRODUCT_LIST
+    global device_list
+    device_list = DEVICE_LIST
     #exit_code = setup_and_run_opp()
     #pid = subprocess.Popen(["python", "scriptname.py"], creationflags=subprocess.DETACHED_PROCESS).pid
     #pid = subprocess.Popen(["c:/temp/OPP-ui/npm", "start"], cwd='c:/temp/OPP-ui').pid
@@ -166,7 +166,7 @@ def main() -> int:
     #asyncio.get_event_loop().run_until_complete(
     #    websockets.serve(counter, 'localhost', 6789))
     asyncio.get_event_loop().run_until_complete(
-        websockets.serve(products, 'localhost', 6789))
+        websockets.serve(devices_ws, 'localhost', 6789))
     asyncio.get_event_loop().run_forever()
 
 if __name__ == "__main__":
