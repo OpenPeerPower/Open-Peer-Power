@@ -64,8 +64,8 @@ def state_event():
     return json.dumps({'type': 'state', **STATE})
 
 
-def device_string():
-    return json.dumps(device_list)
+def appliance_string():
+    return json.dumps(appliance_list)
 
 def users_event():
     return json.dumps({'type': 'users', 'count': len(USERS)})
@@ -80,9 +80,9 @@ async def notify_users():
         message = users_event()
         await asyncio.wait([user.send(message) for user in USERS])
 
-async def notify_devices():
+async def notify_appliances():
     if USERS:       # asyncio.wait doesn't accept an empty list
-        message = device_string()
+        message = appliance_string()
         await asyncio.wait([user.send(message) for user in USERS])
 
 async def register(websocket):
@@ -113,15 +113,15 @@ async def counter(websocket, path):
     finally:
         await unregister(websocket)
 
-async def devices_ws(websocket, path):
-    # register(websocket) sends device list to websocket
+async def appliances_ws(websocket, path):
+    # register(websocket) sends appliance list to websocket
     await register(websocket)
     try:
-        await websocket.send(device_string())
-        global device_list
+        await websocket.send(appliance_string())
+        global appliance_list
         async for message in websocket:
-            device_list = json.loads(message)
-            await notify_devices()
+            appliance_list = json.loads(message)
+            await notify_appliances()
     finally:
         await unregister(websocket)
 
@@ -149,16 +149,33 @@ def main() -> int:
     STATE = {'value': 0}
     global USERS
     USERS = set()
-    DEVICE_LIST = {
-    '1': {'id': 1, 'title': 'Refrigerator', 'cost': 10.99, 'power': 2},
-    '2': {'id': 2, 'title': 'Dishwasher', 'cost': 29.99, 'power': 10},
-    '3': {'id': 3, 'title': 'Washing Machine', 'cost': 8.99, 'power': 5},
-    '4': {'id': 4, 'title': 'Television', 'cost': 24.99, 'power': 7},
-    '5': {'id': 5, 'title': 'Hot Water System', 'cost': 11.99, 'power': 3}
+    APPLIANCE_LIST = {
+    '1': {'id': 1, 'name': 'Refrigerator', 'cost': 10.99, 'power': 2},
+    '2': {'id': 2, 'name': 'Dishwasher', 'cost': 29.99, 'power': 10},
+    '3': {'id': 3, 'name': 'Washing Machine', 'cost': 8.99, 'power': 5},
+    '4': {'id': 4, 'name': 'Television', 'cost': 24.99, 'power': 7},
+    '5': {'id': 5, 'name': 'Hot Water System', 'cost': 11.99, 'power': 3}
     }
     
-    global device_list
-    device_list = DEVICE_LIST
+    global appliance_list
+    appliance_list = APPLIANCE_LIST
+    from .components import smappy
+    import datetime
+    client_id = 'pcaston'
+    client_secret = '2EgQ8BeJBh'
+    #token = smappy.Smappee(client_id, client_secret)
+    username = client_id
+    password = 'Boswald0'
+    #auth = token.authenticate(username, password)
+    #service_locations_dict = token.get_service_locations()
+    #service_locations = service_locations_dict['serviceLocations']
+    #info=token.get_service_location_info(service_locations[0]['serviceLocationId'])
+    #smappee_list = info["appliances"]
+    #print(smappee_list)
+    #appliance_list = {}
+    #for i, v in enumerate(smappee_list):
+    #    appliance_list[i+1] = v
+    #print(appliance_list)
     #exit_code = setup_and_run_opp()
     #pid = subprocess.Popen(["python", "scriptname.py"], creationflags=subprocess.DETACHED_PROCESS).pid
     #pid = subprocess.Popen(["c:/temp/OPP-ui/npm", "start"], cwd='c:/temp/OPP-ui').pid
@@ -166,7 +183,7 @@ def main() -> int:
     #asyncio.get_event_loop().run_until_complete(
     #    websockets.serve(counter, 'localhost', 6789))
     asyncio.get_event_loop().run_until_complete(
-        websockets.serve(devices_ws, 'localhost', 6789))
+        websockets.serve(appliances_ws, 'localhost', 6789))
     asyncio.get_event_loop().run_forever()
 
 if __name__ == "__main__":
