@@ -150,11 +150,11 @@ def main() -> int:
     global USERS
     USERS = set()
     APPLIANCE_LIST = {
-    '1': {'id': 1, 'name': 'Refrigerator', 'cost': 10.99, 'power': 2},
-    '2': {'id': 2, 'name': 'Dishwasher', 'cost': 29.99, 'power': 10},
-    '3': {'id': 3, 'name': 'Washing Machine', 'cost': 8.99, 'power': 5},
-    '4': {'id': 4, 'name': 'Television', 'cost': 24.99, 'power': 7},
-    '5': {'id': 5, 'name': 'Hot Water System', 'cost': 11.99, 'power': 3}
+    '1': {'id': 1, 'name': 'Kitchen Refrigerator', 'type': 'refrigerator', 'usage': 2, 'cost': 10.99},
+    '2': {'id': 2, 'name': 'Kitchen Dishwasher', 'type': 'dishwasher', 'usage': 10, 'cost': 29.99},
+    '3': {'id': 3, 'name': 'Fisher & Paykel Washsmart', 'type': 'washing machine', 'usage': 5, 'cost': 8.99},
+    '4': {'id': 4, 'name': 'LG Flat Screen Television', 'type': 'television', 'usage': 7, 'cost': 24.97},
+    '5': {'id': 5, 'name': 'Solar Hot Water System', 'type': 'emersion heater', 'usage': 3, 'cost': 11.99}
     }
     
     global appliance_list
