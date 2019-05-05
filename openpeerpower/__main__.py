@@ -150,13 +150,29 @@ def main() -> int:
     global USERS
     USERS = set()
     APPLIANCE_LIST = {
-    '1': {'id': 1, 'name': 'Kitchen Refrigerator', 'type': 'refrigerator', 'usage': 2, 'cost': 10.99},
-    '2': {'id': 2, 'name': 'Kitchen Dishwasher', 'type': 'dishwasher', 'usage': 10, 'cost': 29.99},
-    '3': {'id': 3, 'name': 'Fisher & Paykel Washsmart', 'type': 'washing machine', 'usage': 5, 'cost': 8.99},
-    '4': {'id': 4, 'name': 'LG Flat Screen Television', 'type': 'television', 'usage': 7, 'cost': 24.97},
-    '5': {'id': 5, 'name': 'Solar Hot Water System', 'type': 'emersion heater', 'usage': 3, 'cost': 11.99}
+    'NILM-65': {'appliance': {'id': 'NILM-65', 'name': 'Lights', 'type': 'LIGHTING'},
+    'usage': {'value': 3.552, 'unit': 'KILO_WATT_HOUR'},
+    'cost': {'currency': 'AUD', 'value': 1.32}},
+    'NILM-33': {'appliance': {'id': 'NILM-33', 'name': 'Refrigerator', 'type': 'REFRIGERATOR'},
+    'usage': {'value': 138.393, 'unit': 'KILO_WATT_HOUR'},
+    'cost': {'currency': 'AUD', 'value': 51.2}},
+    'NILM-1': {'appliance': {'id': 'NILM-1', 'name': 'Outside Refrigerator', 'type': 'REFRIGERATOR'},
+    'usage': {'value': 84.98, 'unit': 'KILO_WATT_HOUR'},
+    'cost': {'currency': 'AUD', 'value': 31.43}},
+    'NILM-52': {'appliance': {'id': 'NILM-52', 'name': 'Lights', 'type': 'LIGHTING'},
+    'usage': {'value': 8.157, 'unit': 'KILO_WATT_HOUR'},
+    'cost': {'currency': 'AUD', 'value': 3.02}},
+    'NILM-4': {'appliance': {'id': 'NILM-4', 'name': 'Refrigerator', 'type': 'REFRIGERATOR'},
+    'usage': {'value': 196.312, 'unit': 'KILO_WATT_HOUR'},
+    'cost': {'currency': 'AUD', 'value': 72.63}},
+    'NILM-7': {'appliance': {'id': 'NILM-7', 'name': 'Lights 7', 'type': 'LIGHTING'},
+    'usage': {'value': 5.516, 'unit': 'KILO_WATT_HOUR'},
+    'cost': {'currency': 'AUD', 'value': 2.04}},
+    'NILM-25': {'appliance': {'id': 'NILM-25', 'name': 'Water Pump', 'type': 'WATER_PUMP'},
+    'usage': {'value': 0.689, 'unit': 'KILO_WATT_HOUR'},
+    'cost': {'currency': 'AUD', 'value': 0.25}}
     }
-    
+
     global appliance_list
     appliance_list = APPLIANCE_LIST
     from .components import smappy
@@ -166,15 +182,18 @@ def main() -> int:
     #token = smappy.Smappee(client_id, client_secret)
     username = client_id
     password = 'Boswald0'
-    #auth = token.authenticate(username, password)
+    #token.authenticate(username, password)
     #service_locations_dict = token.get_service_locations()
     #service_locations = service_locations_dict['serviceLocations']
     #info=token.get_service_location_info(service_locations[0]['serviceLocationId'])
     #smappee_list = info["appliances"]
     #print(smappee_list)
+    today = datetime.datetime.now()
+    yesterday = today - datetime.timedelta(days = 365)
+    #smappee_list = token.get_costanalysis(service_locations[0]['serviceLocationId'], yesterday, today, 3)
     #appliance_list = {}
     #for i, v in enumerate(smappee_list):
-    #    appliance_list[i+1] = v
+    #    appliance_list[v['appliance']['id']] = v
     #print(appliance_list)
     #exit_code = setup_and_run_opp()
     #pid = subprocess.Popen(["python", "scriptname.py"], creationflags=subprocess.DETACHED_PROCESS).pid

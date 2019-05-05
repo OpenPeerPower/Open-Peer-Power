@@ -20,5 +20,9 @@ yesterday = today - datetime.timedelta(days = 365)
 #print(cons)
 #events = token.get_events(service_locations[0]['serviceLocationId'], 3, yesterday, today, 50)
 #print(events)
-costan = token.get_costanalysis(service_locations[0]['serviceLocationId'], yesterday, today, 3)
-print(costan)
+smappee_list = token.get_costanalysis(service_locations[0]['serviceLocationId'], yesterday, today, 3)
+
+appliance_list = {}
+for i, v in enumerate(smappee_list):
+    appliance_list[v['appliance']['id']] = v
+print(appliance_list)
