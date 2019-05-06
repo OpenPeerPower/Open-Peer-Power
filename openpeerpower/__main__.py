@@ -179,21 +179,21 @@ def main() -> int:
     import datetime
     client_id = 'pcaston'
     client_secret = '2EgQ8BeJBh'
-    #token = smappy.Smappee(client_id, client_secret)
+    token = smappy.Smappee(client_id, client_secret)
     username = client_id
     password = 'Boswald0'
-    #token.authenticate(username, password)
-    #service_locations_dict = token.get_service_locations()
-    #service_locations = service_locations_dict['serviceLocations']
+    token.authenticate(username, password)
+    service_locations_dict = token.get_service_locations()
+    service_locations = service_locations_dict['serviceLocations']
     #info=token.get_service_location_info(service_locations[0]['serviceLocationId'])
     #smappee_list = info["appliances"]
     #print(smappee_list)
     today = datetime.datetime.now()
     yesterday = today - datetime.timedelta(days = 365)
-    #smappee_list = token.get_costanalysis(service_locations[0]['serviceLocationId'], yesterday, today, 3)
-    #appliance_list = {}
-    #for i, v in enumerate(smappee_list):
-    #    appliance_list[v['appliance']['id']] = v
+    smappee_list = token.get_costanalysis(service_locations[0]['serviceLocationId'], yesterday, today, 3)
+    appliance_list = {}
+    for i, v in enumerate(smappee_list):
+        appliance_list[v['appliance']['id']] = v
     #print(appliance_list)
     #exit_code = setup_and_run_opp()
     #pid = subprocess.Popen(["python", "scriptname.py"], creationflags=subprocess.DETACHED_PROCESS).pid
