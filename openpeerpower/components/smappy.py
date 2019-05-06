@@ -10,10 +10,9 @@ __author__ = "EnergieID.be"
 __license__ = "MIT"
 
 URLS = {
-    'token': 'https://app1pub.smappee.net/dev/v1/oauth2/token',
-    'servicelocation': 'https://app1pub.smappee.net/dev/v1/servicelocation'
+    'token': 'https://app1pub.smappee.net/dev/v2/oauth2/token',
+    'servicelocation': 'https://app1pub.smappee.net/dev/v2/servicelocation'
 }
-
 
 def authenticated(func):
     """
@@ -272,6 +271,46 @@ class Smappee(object):
         r.raise_for_status()
         return r.json()
 
+    #### Start
+    @authenticated
+    def get_costanalysis(self, service_location_id, start, end, aggregation):
+        """
+        Returns the breakdown of energy per appliance on a specific service location
+        during a specified range of time. The call supports different aggregation
+        levels to obtain different levels of details.
+
+        Parameters
+        ----------
+        service_location_id : int
+        aggregation : int
+            1 = hourly values
+            2 = daily values
+            3 = monthly values
+            4 = quarterly values
+        start : int | dt.datetime | pd.Timestamp
+        end : int | dt.datetime | pd.Timestamp
+            start and end support epoch (in milliseconds),
+            datetime and Pandas Timestamp
+
+        Returns
+        -------
+        dict
+        """
+        url = urljoin(URLS['servicelocation'], service_location_id, "costanalysis")
+        headers = {"Authorization": "Bearer {}".format(self.access_token)}
+        start = self._to_milliseconds(start)
+        end = self._to_milliseconds(end)
+        params = {
+            "aggregation": aggregation,
+            "from": start,
+            "to": end
+        }
+        r = requests.get(url, headers=headers, params=params)
+        r.raise_for_status()
+        return r.json()
+
+    ### End
+    
     @authenticated
     def get_events(self, service_location_id, appliance_id, start, end,
                    max_number=None):
