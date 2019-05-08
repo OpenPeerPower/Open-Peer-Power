@@ -6,7 +6,7 @@ Datum: 18.3.07 / 18.3.07 / 18.3.07
 Datei: yasdiwrapper.py
 
 + SMA YASDI Library Wrapper for Python 3"""
-import ctypes         #ctypes laed die Libs in Python
+import ctypes         #ctypes load the Libs in Python
 
 class YasdiMaster:
     def __init__(self,
@@ -24,7 +24,8 @@ class YasdiMaster:
         """Konstruktor
                 Parameter:
                 ini_file = b"./yasdi.ini"            |erwartet Pfad zur ini Datei (mit Schnittstelleninformationen etc.)
-                yasdiMaster_lib = "libyasdimaster.so" |erwartet Pfad zur yasdimaster Lib
+                yasdiMaster_lib = "yasdimaster.dll" |erwartet Pfad zur yasdimaster Lib
+                #yasdiMaster_lib = "libyasdimaster.so" |erwartet Pfad zur yasdimaster Lib
                 iDeviceHandleCount = 50             |Anzahl der max. zu erfassenden Geraete
                 iChannelHandleCount = 142           |Anzahl der max. zu erfassenden Kanaele
                 DeviceNameBuffer = 30               |Anzahl der max. Namenslaenge eines Geraetes
