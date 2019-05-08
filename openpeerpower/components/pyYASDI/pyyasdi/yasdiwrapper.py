@@ -21,7 +21,7 @@ class YasdiMaster:
                  ChannelName=30,
                  cChanUnit=10,
                  status_text_buffer=30):
-        """Konstruktor
+        """Constructor
                 Parameter:
                 ini_file = b"./yasdi.ini"            |erwartet Pfad zur ini Datei (mit Schnittstelleninformationen etc.)
                 yasdiMaster_lib = "yasdimaster.dll" |erwartet Pfad zur yasdimaster Lib

@@ -1,5 +1,5 @@
 # import pyYASDI
-import pyyasdi
+import pyyasdi.objects
 sma = pyyasdi.objects.Plant(0,1,1)
 
 devices = sma.get_devices()
