@@ -9,7 +9,7 @@ File: pyYASDI.py
 
 import logging
 
-import pyyasdi.yasdiwrapper as yasdiwrapper
+import ../pyyasdi.yasdiwrapper
 
 
 logger = logging.getLogger(__name__)
