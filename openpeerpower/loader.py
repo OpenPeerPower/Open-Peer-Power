@@ -10,6 +10,16 @@ import importlib
 import logging
 import sys
 from types import ModuleType
+from typing import (
+    TYPE_CHECKING,
+    Callable,
+    TypeVar
+)
+
+if TYPE_CHECKING:
+    from openpeerpower.core import OpenPeerPower  # noqa
+
+CALLABLE_T = TypeVar('CALLABLE_T', bound=Callable) 
 
 from openpeerpower.const import PLATFORM_FORMAT
 
@@ -19,6 +29,10 @@ _LOGGER = logging.getLogger(__name__)
 DATA_KEY = 'components'
 PACKAGE_COMPONENTS = 'openpeerpower.components'
 
+def bind_opp(func: CALLABLE_T) -> CALLABLE_T:
+    """Decorate function to indicate that first argument is opp."""
+    setattr(func, '__bind_opp', True)
+    return func
 
 def set_component(opp,  # type: OpenPeerPower
                   comp_name: str, component: ModuleType) -> None:

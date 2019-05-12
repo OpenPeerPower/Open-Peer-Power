@@ -20,6 +20,13 @@ DEVICE_DEFAULT_NAME = 'Unnamed Device'
 SUN_EVENT_SUNSET = 'sunset'
 SUN_EVENT_SUNRISE = 'sunrise'
 
+# #### CONFIG ####
+CONF_ELEVATION = 'elevation'
+CONF_PLATFORM = 'platform'
+CONF_ID = 'id'
+CONF_NAME = 'name'
+CONF_TYPE = 'type'
+
 # #### EVENTS ####
 EVENT_OPENPEERPOWER_START = 'opp_start'
 EVENT_OPENPEERPOWER_STOP = 'opp_stop'
