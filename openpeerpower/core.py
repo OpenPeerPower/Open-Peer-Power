@@ -44,6 +44,7 @@ if TYPE_CHECKING:
 T = TypeVar('T')
 CALLABLE_T = TypeVar('CALLABLE_T', bound=Callable)
 CALLBACK_TYPE = Callable[[], None]
+DOMAIN = 'openpeerpower'
 
 def callback(func: CALLABLE_T) -> CALLABLE_T:
     """Annotation to mark method as safe to call from within the event loop."""

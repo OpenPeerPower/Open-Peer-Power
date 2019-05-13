@@ -271,7 +271,7 @@ def _write_default_config(config_dir: str, info: Dict)\
         CONFIG_PATH as SCRIPT_CONFIG_PATH)
     from openpeerpower.components.config.customize import (
         CONFIG_PATH as CUSTOMIZE_CONFIG_PATH)
-
+        
     config_path = os.path.join(config_dir, YAML_CONFIG_FILE)
     secret_path = os.path.join(config_dir, SECRET_YAML)
     version_path = os.path.join(config_dir, VERSION_FILE)
