@@ -1,4 +1,4 @@
-"""Home Assistant auth provider."""
+"""Open Peer Power auth provider."""
 import asyncio
 import base64
 from collections import OrderedDict
@@ -10,8 +10,8 @@ import bcrypt
 import voluptuous as vol
 
 from openpeerpower.const import CONF_ID
-from openpeerpower.core import callback, HomeAssistant
-from openpeerpower.exceptions import HomeAssistantError
+from openpeerpower.core import callback, OpenPeerPower
+from openpeerpower.exceptions import OpenPeerPowerError
 
 from . import AuthProvider, AUTH_PROVIDER_SCHEMA, AUTH_PROVIDERS, LoginFlow
 
@@ -34,11 +34,11 @@ def _disallow_id(conf: Dict[str, Any]) -> Dict[str, Any]:
 CONFIG_SCHEMA = vol.All(AUTH_PROVIDER_SCHEMA, _disallow_id)
 
 
-class InvalidAuth(HomeAssistantError):
+class InvalidAuth(OpenPeerPowerError):
     """Raised when we encounter invalid authentication."""
 
 
-class InvalidUser(HomeAssistantError):
+class InvalidUser(OpenPeerPowerError):
     """Raised when invalid user is specified.
 
     Will not be raised when validating authentication.
@@ -48,10 +48,10 @@ class InvalidUser(HomeAssistantError):
 class Data:
     """Hold the user data."""
 
-    def __init__(self, hass: HomeAssistant) -> None:
+    def __init__(self, opp: OpenPeerPower) -> None:
         """Initialize the user data store."""
-        self.hass = hass
-        self._store = hass.helpers.storage.Store(STORAGE_VERSION, STORAGE_KEY,
+        self.opp = opp
+        self._store = opp.helpers.storage.Store(STORAGE_VERSION, STORAGE_KEY,
                                                  private=True)
         self._data = None  # type: Optional[Dict[str, Any]]
         # Legacy mode will allow usernames to start/end with whitespace
@@ -88,7 +88,7 @@ class Data:
                 self.is_legacy = True
 
                 logging.getLogger(__name__).warning(
-                    "Home Assistant auth provider is running in legacy mode "
+                    "Open Peer Power auth provider is running in legacy mode "
                     "because we detected usernames that are case-insensitive"
                     "equivalent. Please change the username: '%s'.", username)
 
@@ -101,7 +101,7 @@ class Data:
                 self.is_legacy = True
 
                 logging.getLogger(__name__).warning(
-                    "Home Assistant auth provider is running in legacy mode "
+                    "Open Peer Power auth provider is running in legacy mode "
                     "because we detected usernames that start or end in a "
                     "space. Please change the username: '%s'.", username)
 
@@ -200,13 +200,13 @@ class Data:
 
 
 @AUTH_PROVIDERS.register('openpeerpower')
-class HassAuthProvider(AuthProvider):
+class OppAuthProvider(AuthProvider):
     """Auth provider based on a local storage of users in HASS config dir."""
 
-    DEFAULT_TITLE = 'Home Assistant Local'
+    DEFAULT_TITLE = 'Open Peer Power Local'
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
-        """Initialize an Home Assistant auth provider."""
+        """Initialize an Open Peer Power auth provider."""
         super().__init__(*args, **kwargs)
         self.data = None  # type: Optional[Data]
         self._init_lock = asyncio.Lock()
@@ -217,14 +217,14 @@ class HassAuthProvider(AuthProvider):
             if self.data is not None:
                 return
 
-            data = Data(self.hass)
+            data = Data(self.opp)
             await data.async_load()
             self.data = data
 
     async def async_login_flow(
             self, context: Optional[Dict]) -> LoginFlow:
         """Return a flow to login."""
-        return HassLoginFlow(self)
+        return OppLoginFlow(self)
 
     async def async_validate_login(self, username: str, password: str) -> None:
         """Validate a username and password."""
@@ -232,7 +232,7 @@ class HassAuthProvider(AuthProvider):
             await self.async_initialize()
             assert self.data is not None
 
-        await self.hass.async_add_executor_job(
+        await self.opp.async_add_executor_job(
             self.data.validate_login, username, password)
 
     async def async_get_or_create_credentials(
@@ -274,7 +274,7 @@ class HassAuthProvider(AuthProvider):
             pass
 
 
-class HassLoginFlow(LoginFlow):
+class OppLoginFlow(LoginFlow):
     """Handler for the login flow."""
 
     async def async_step_init(
@@ -285,7 +285,7 @@ class HassLoginFlow(LoginFlow):
 
         if user_input is not None:
             try:
-                await cast(HassAuthProvider, self._auth_provider)\
+                await cast(OppAuthProvider, self._auth_provider)\
                     .async_validate_login(user_input['username'],
                                           user_input['password'])
             except InvalidAuth:

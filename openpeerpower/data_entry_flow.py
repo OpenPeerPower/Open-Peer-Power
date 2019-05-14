@@ -4,7 +4,7 @@ from typing import Dict, Any, Callable, Hashable, List, Optional  # noqa pylint:
 import uuid
 import voluptuous as vol
 from .core import callback, OpenPeerPower
-from .exceptions import HomeAssistantError
+from .exceptions import OpenPeerPowerError
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -18,7 +18,7 @@ RESULT_TYPE_EXTERNAL_STEP_DONE = 'external_done'
 EVENT_DATA_ENTRY_FLOW_PROGRESSED = 'data_entry_flow_progressed'
 
 
-class FlowError(HomeAssistantError):
+class FlowError(OpenPeerPowerError):
     """Error while configuring an account."""
 
 
@@ -37,10 +37,10 @@ class UnknownStep(FlowError):
 class FlowManager:
     """Manage all the flows that are in progress."""
 
-    def __init__(self, hass: OpenPeerPower, async_create_flow: Callable,
+    def __init__(self, opp: OpenPeerPower, async_create_flow: Callable,
                  async_finish_flow: Callable) -> None:
         """Initialize the flow manager."""
-        self.hass = hass
+        self.opp = opp
         self._progress = {}  # type: Dict[str, Any]
         self._async_create_flow = async_create_flow
         self._async_finish_flow = async_finish_flow
@@ -60,7 +60,7 @@ class FlowManager:
         """Start a configuration flow."""
         flow = await self._async_create_flow(
             handler, context=context, data=data)
-        flow.hass = self.hass
+        flow.opp = self.opp
         flow.handler = handler
         flow.flow_id = uuid.uuid4().hex
         flow.context = context
@@ -94,7 +94,7 @@ class FlowManager:
             # the frontend.
             if cur_step['step_id'] != result.get('step_id'):
                 # Tell frontend to reload the flow state.
-                self.hass.bus.async_fire(EVENT_DATA_ENTRY_FLOW_PROGRESSED, {
+                self.opp.bus.async_fire(EVENT_DATA_ENTRY_FLOW_PROGRESSED, {
                     'handler': flow.handler,
                     'flow_id': flow_id,
                     'refresh': True
@@ -150,7 +150,7 @@ class FlowHandler:
 
     # Set by flow manager
     flow_id = None
-    hass = None
+    opp = None
     handler = None
     cur_step = None
     context = None

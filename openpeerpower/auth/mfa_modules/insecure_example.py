@@ -4,7 +4,7 @@ from typing import Any, Dict
 
 import voluptuous as vol
 
-from openpeerpower.core import HomeAssistant
+from openpeerpower.core import OpenPeerPower
 
 from . import MultiFactorAuthModule, MULTI_FACTOR_AUTH_MODULES, \
     MULTI_FACTOR_AUTH_MODULE_SCHEMA, SetupFlow
@@ -25,9 +25,9 @@ class InsecureExampleModule(MultiFactorAuthModule):
 
     DEFAULT_TITLE = 'Insecure Personal Identify Number'
 
-    def __init__(self, hass: HomeAssistant, config: Dict[str, Any]) -> None:
+    def __init__(self, opp: OpenPeerPower, config: Dict[str, Any]) -> None:
         """Initialize the user data store."""
-        super().__init__(hass, config)
+        super().__init__(opp, config)
         self._data = config['data']
 
     @property

@@ -6,9 +6,9 @@ import hmac
 from logging import getLogger
 from typing import Any, Dict, List, Optional  # noqa: F401
 
-from homeassistant.auth.const import ACCESS_TOKEN_EXPIRATION
-from homeassistant.core import HomeAssistant, callback
-from homeassistant.util import dt as dt_util
+from openpeerpower.auth.const import ACCESS_TOKEN_EXPIRATION
+from openpeerpower.core import OpenPeerPower, callback
+from openpeerpower.util import dt as dt_util
 
 from . import models
 from .const import GROUP_ID_ADMIN, GROUP_ID_USER, GROUP_ID_READ_ONLY
@@ -31,13 +31,13 @@ class AuthStore:
     called that needs it.
     """
 
-    def __init__(self, hass: HomeAssistant) -> None:
+    def __init__(self, opp: OpenPeerPower) -> None:
         """Initialize the auth store."""
-        self.hass = hass
+        self.opp = opp
         self._users = None  # type: Optional[Dict[str, models.User]]
         self._groups = None  # type: Optional[Dict[str, models.Group]]
         self._perm_lookup = None  # type: Optional[PermissionLookup]
-        self._store = hass.helpers.storage.Store(STORAGE_VERSION, STORAGE_KEY,
+        self._store = opp.helpers.storage.Store(STORAGE_VERSION, STORAGE_KEY,
                                                  private=True)
         self._lock = asyncio.Lock()
 
@@ -282,8 +282,8 @@ class AuthStore:
     async def _async_load_task(self) -> None:
         """Load the users."""
         [ent_reg, dev_reg, data] = await asyncio.gather(
-            self.hass.helpers.entity_registry.async_get_registry(),
-            self.hass.helpers.device_registry.async_get_registry(),
+            self.opp.helpers.entity_registry.async_get_registry(),
+            self.opp.helpers.device_registry.async_get_registry(),
             self._store.async_load(),
         )
 

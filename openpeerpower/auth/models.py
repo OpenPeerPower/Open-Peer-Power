@@ -5,7 +5,7 @@ import uuid
 
 import attr
 
-from homeassistant.util import dt as dt_util
+from openpeerpower.util import dt as dt_util
 
 from . import permissions as perm_mdl
 from .const import GROUP_ID_ADMIN

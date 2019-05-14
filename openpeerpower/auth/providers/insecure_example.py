@@ -5,7 +5,7 @@ from typing import Any, Dict, Optional, cast
 
 import voluptuous as vol
 
-from openpeerpower.exceptions import HomeAssistantError
+from openpeerpower.exceptions import OpenPeerPowerError
 from openpeerpower.core import callback
 
 from . import AuthProvider, AUTH_PROVIDER_SCHEMA, AUTH_PROVIDERS, LoginFlow
@@ -24,7 +24,7 @@ CONFIG_SCHEMA = AUTH_PROVIDER_SCHEMA.extend({
 }, extra=vol.PREVENT_EXTRA)
 
 
-class InvalidAuthError(HomeAssistantError):
+class InvalidAuthError(OpenPeerPowerError):
     """Raised when submitting invalid authentication."""
 
 

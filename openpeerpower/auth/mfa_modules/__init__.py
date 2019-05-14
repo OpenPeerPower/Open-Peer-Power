@@ -1,4 +1,4 @@
-"""Plugable auth modules for Home Assistant."""
+"""Plugable auth modules for Open Peer Power."""
 import importlib
 import logging
 import types
@@ -10,7 +10,7 @@ from voluptuous.humanize import humanize_error
 from openpeerpower import requirements, data_entry_flow
 from openpeerpower.const import CONF_ID, CONF_NAME, CONF_TYPE
 from openpeerpower.core import OpenPeerPower
-from openpeerpower.exceptions import HomeAssistantError
+from openpeerpower.exceptions import OpenPeerPowerError
 from openpeerpower.util.decorator import Registry
 
 MULTI_FACTOR_AUTH_MODULES = Registry()
@@ -150,7 +150,7 @@ async def _load_mfa_module(opp: OpenPeerPower, module_name: str) \
         module = importlib.import_module(module_path)
     except ImportError as err:
         _LOGGER.error('Unable to load mfa module %s: %s', module_name, err)
-        raise HomeAssistantError('Unable to load mfa module {}: {}'.format(
+        raise OpenPeerPowerError('Unable to load mfa module {}: {}'.format(
             module_name, err))
 
     if opp.config.skip_pip or not hasattr(module, 'REQUIREMENTS'):
@@ -167,7 +167,7 @@ async def _load_mfa_module(opp: OpenPeerPower, module_name: str) \
         opp, module_path, module.REQUIREMENTS)    # type: ignore
 
     if not req_success:
-        raise HomeAssistantError(
+        raise OpenPeerPowerError(
             'Unable to process requirements of mfa module {}'.format(
                 module_name))
 

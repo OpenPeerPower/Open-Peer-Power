@@ -1,4 +1,4 @@
-"""Permissions for Home Assistant."""
+"""Permissions for Open Peer Power."""
 import logging
 from typing import (  # noqa: F401
     cast, Any, Callable, Dict, List, Mapping, Set, Tuple, Union,

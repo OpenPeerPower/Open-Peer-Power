@@ -4,11 +4,11 @@ import logging
 
 from aiohttp.web import Response
 
-from homeassistant.components.http import HomeAssistantView
-from homeassistant.components.zwave import DEVICE_CONFIG_SCHEMA_ENTRY, const
-from homeassistant.const import HTTP_NOT_FOUND, HTTP_OK
-import homeassistant.core as ha
-import homeassistant.helpers.config_validation as cv
+from openpeerpower.components.http import OpenPeerPowerView
+from openpeerpower.components.zwave import DEVICE_CONFIG_SCHEMA_ENTRY, const
+from openpeerpower.const import HTTP_NOT_FOUND, HTTP_OK
+import openpeerpower.core as ha
+import openpeerpower.helpers.config_validation as cv
 
 from . import EditKeyBasedConfigView
 
@@ -17,24 +17,24 @@ CONFIG_PATH = 'zwave_device_config.yaml'
 OZW_LOG_FILENAME = 'OZW_Log.txt'
 
 
-async def async_setup(hass):
+async def async_setup(opp):
     """Set up the Z-Wave config API."""
-    hass.http.register_view(EditKeyBasedConfigView(
+    opp.http.register_view(EditKeyBasedConfigView(
         'zwave', 'device_config', CONFIG_PATH, cv.entity_id,
         DEVICE_CONFIG_SCHEMA_ENTRY
     ))
-    hass.http.register_view(ZWaveNodeValueView)
-    hass.http.register_view(ZWaveNodeGroupView)
-    hass.http.register_view(ZWaveNodeConfigView)
-    hass.http.register_view(ZWaveUserCodeView)
-    hass.http.register_view(ZWaveLogView)
-    hass.http.register_view(ZWaveConfigWriteView)
-    hass.http.register_view(ZWaveProtectionView)
+    opp.http.register_view(ZWaveNodeValueView)
+    opp.http.register_view(ZWaveNodeGroupView)
+    opp.http.register_view(ZWaveNodeConfigView)
+    opp.http.register_view(ZWaveUserCodeView)
+    opp.http.register_view(ZWaveLogView)
+    opp.http.register_view(ZWaveConfigWriteView)
+    opp.http.register_view(ZWaveProtectionView)
 
     return True
 
 
-class ZWaveLogView(HomeAssistantView):
+class ZWaveLogView(OpenPeerPowerView):
     """View to read the ZWave log file."""
 
     url = "/api/zwave/ozwlog"
@@ -48,14 +48,14 @@ class ZWaveLogView(HomeAssistantView):
         except ValueError:
             return Response(text='Invalid datetime', status=400)
 
-        hass = request.app['hass']
-        response = await hass.async_add_job(self._get_log, hass, lines)
+        opp = request.app['opp']
+        response = await opp.async_add_job(self._get_log, opp, lines)
 
         return Response(text='\n'.join(response))
 
-    def _get_log(self, hass, lines):
+    def _get_log(self, opp, lines):
         """Retrieve the logfile content."""
-        logfilepath = hass.config.path(OZW_LOG_FILENAME)
+        logfilepath = opp.config.path(OZW_LOG_FILENAME)
         with open(logfilepath, 'r') as logfile:
             data = (line.rstrip() for line in logfile)
             if lines == 0:
@@ -65,7 +65,7 @@ class ZWaveLogView(HomeAssistantView):
         return loglines
 
 
-class ZWaveConfigWriteView(HomeAssistantView):
+class ZWaveConfigWriteView(OpenPeerPowerView):
     """View to save the ZWave configuration to zwcfg_xxxxx.xml."""
 
     url = "/api/zwave/saveconfig"
@@ -74,8 +74,8 @@ class ZWaveConfigWriteView(HomeAssistantView):
     @ha.callback
     def post(self, request):
         """Save cache configuration to zwcfg_xxxxx.xml."""
-        hass = request.app['hass']
-        network = hass.data.get(const.DATA_NETWORK)
+        opp = request.app['opp']
+        network = opp.data.get(const.DATA_NETWORK)
         if network is None:
             return self.json_message('No Z-Wave network data found',
                                      HTTP_NOT_FOUND)
@@ -85,7 +85,7 @@ class ZWaveConfigWriteView(HomeAssistantView):
                                  HTTP_OK)
 
 
-class ZWaveNodeValueView(HomeAssistantView):
+class ZWaveNodeValueView(OpenPeerPowerView):
     """View to return the node values."""
 
     url = r"/api/zwave/values/{node_id:\d+}"
@@ -95,8 +95,8 @@ class ZWaveNodeValueView(HomeAssistantView):
     def get(self, request, node_id):
         """Retrieve groups of node."""
         nodeid = int(node_id)
-        hass = request.app['hass']
-        values_list = hass.data[const.DATA_ENTITY_VALUES]
+        opp = request.app['opp']
+        values_list = opp.data[const.DATA_ENTITY_VALUES]
 
         values_data = {}
         # Return a list of values for this node that are used as a
@@ -114,7 +114,7 @@ class ZWaveNodeValueView(HomeAssistantView):
         return self.json(values_data)
 
 
-class ZWaveNodeGroupView(HomeAssistantView):
+class ZWaveNodeGroupView(OpenPeerPowerView):
     """View to return the nodes group configuration."""
 
     url = r"/api/zwave/groups/{node_id:\d+}"
@@ -124,8 +124,8 @@ class ZWaveNodeGroupView(HomeAssistantView):
     def get(self, request, node_id):
         """Retrieve groups of node."""
         nodeid = int(node_id)
-        hass = request.app['hass']
-        network = hass.data.get(const.DATA_NETWORK)
+        opp = request.app['opp']
+        network = opp.data.get(const.DATA_NETWORK)
         node = network.nodes.get(nodeid)
         if node is None:
             return self.json_message('Node not found', HTTP_NOT_FOUND)
@@ -140,7 +140,7 @@ class ZWaveNodeGroupView(HomeAssistantView):
         return self.json(groups)
 
 
-class ZWaveNodeConfigView(HomeAssistantView):
+class ZWaveNodeConfigView(OpenPeerPowerView):
     """View to return the nodes configuration options."""
 
     url = r"/api/zwave/config/{node_id:\d+}"
@@ -150,8 +150,8 @@ class ZWaveNodeConfigView(HomeAssistantView):
     def get(self, request, node_id):
         """Retrieve configurations of node."""
         nodeid = int(node_id)
-        hass = request.app['hass']
-        network = hass.data.get(const.DATA_NETWORK)
+        opp = request.app['opp']
+        network = opp.data.get(const.DATA_NETWORK)
         node = network.nodes.get(nodeid)
         if node is None:
             return self.json_message('Node not found', HTTP_NOT_FOUND)
@@ -169,7 +169,7 @@ class ZWaveNodeConfigView(HomeAssistantView):
         return self.json(config)
 
 
-class ZWaveUserCodeView(HomeAssistantView):
+class ZWaveUserCodeView(OpenPeerPowerView):
     """View to return the nodes usercode configuration."""
 
     url = r"/api/zwave/usercodes/{node_id:\d+}"
@@ -179,8 +179,8 @@ class ZWaveUserCodeView(HomeAssistantView):
     def get(self, request, node_id):
         """Retrieve usercodes of node."""
         nodeid = int(node_id)
-        hass = request.app['hass']
-        network = hass.data.get(const.DATA_NETWORK)
+        opp = request.app['opp']
+        network = opp.data.get(const.DATA_NETWORK)
         node = network.nodes.get(nodeid)
         if node is None:
             return self.json_message('Node not found', HTTP_NOT_FOUND)
@@ -198,7 +198,7 @@ class ZWaveUserCodeView(HomeAssistantView):
         return self.json(usercodes)
 
 
-class ZWaveProtectionView(HomeAssistantView):
+class ZWaveProtectionView(OpenPeerPowerView):
     """View for the protection commandclass of a node."""
 
     url = r"/api/zwave/protection/{node_id:\d+}"
@@ -207,8 +207,8 @@ class ZWaveProtectionView(HomeAssistantView):
     async def get(self, request, node_id):
         """Retrieve the protection commandclass options of node."""
         nodeid = int(node_id)
-        hass = request.app['hass']
-        network = hass.data.get(const.DATA_NETWORK)
+        opp = request.app['opp']
+        network = opp.data.get(const.DATA_NETWORK)
 
         def _fetch_protection():
             """Get protection data."""
@@ -225,13 +225,13 @@ class ZWaveProtectionView(HomeAssistantView):
                 'options': node.get_protection_items(list(protections)[0])}
             return self.json(protection_options)
 
-        return await hass.async_add_executor_job(_fetch_protection)
+        return await opp.async_add_executor_job(_fetch_protection)
 
     async def post(self, request, node_id):
         """Change the selected option in protection commandclass."""
         nodeid = int(node_id)
-        hass = request.app['hass']
-        network = hass.data.get(const.DATA_NETWORK)
+        opp = request.app['opp']
+        network = opp.data.get(const.DATA_NETWORK)
         protection_data = await request.json()
 
         def _set_protection():
@@ -251,4 +251,4 @@ class ZWaveProtectionView(HomeAssistantView):
             return self.json_message(
                 'Protection setting succsessfully set', HTTP_OK)
 
-        return await hass.async_add_executor_job(_set_protection)
+        return await opp.async_add_executor_job(_set_protection)

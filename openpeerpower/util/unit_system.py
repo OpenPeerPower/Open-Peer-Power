@@ -4,16 +4,16 @@ import logging
 from typing import Optional
 from numbers import Number
 
-from homeassistant.const import (
+from openpeerpower.const import (
     TEMP_CELSIUS, TEMP_FAHRENHEIT, LENGTH_MILES, LENGTH_KILOMETERS,
     PRESSURE_PA, PRESSURE_PSI, VOLUME_LITERS, VOLUME_GALLONS,
     MASS_GRAMS, MASS_KILOGRAMS, MASS_OUNCES, MASS_POUNDS,
     CONF_UNIT_SYSTEM_METRIC, CONF_UNIT_SYSTEM_IMPERIAL, LENGTH, MASS, PRESSURE,
     VOLUME, TEMPERATURE, UNIT_NOT_RECOGNIZED_TEMPLATE)
-from homeassistant.util import temperature as temperature_util
-from homeassistant.util import distance as distance_util
-from homeassistant.util import pressure as pressure_util
-from homeassistant.util import volume as volume_util
+from openpeerpower.util import temperature as temperature_util
+from openpeerpower.util import distance as distance_util
+from openpeerpower.util import pressure as pressure_util
+from openpeerpower.util import volume as volume_util
 
 _LOGGER = logging.getLogger(__name__)
 

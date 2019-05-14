@@ -8,7 +8,7 @@ from typing import Callable, Container, Optional, Union, cast
 from openpeerpower.helpers.template import Template
 from openpeerpower.helpers.typing import ConfigType, TemplateVarsType
 
-from openpeerpower.core import HomeAssistant, State
+from openpeerpower.core import OpenPeerPower, State
 from openpeerpower.components import zone as zone_cmp
 from openpeerpower.const import (
     ATTR_GPS_ACCURACY, ATTR_LATITUDE, ATTR_LONGITUDE,
@@ -16,7 +16,7 @@ from openpeerpower.const import (
     WEEKDAYS, CONF_STATE, CONF_ZONE, CONF_BEFORE,
     CONF_AFTER, CONF_WEEKDAY, SUN_EVENT_SUNRISE, SUN_EVENT_SUNSET,
     CONF_BELOW, CONF_ABOVE, STATE_UNAVAILABLE, STATE_UNKNOWN)
-from openpeerpower.exceptions import TemplateError, HomeAssistantError
+from openpeerpower.exceptions import TemplateError, OpenPeerPowerError
 import openpeerpower.helpers.config_validation as cv
 from openpeerpower.helpers.sun import get_astral_event_date
 import openpeerpower.util.dt as dt_util
@@ -41,11 +41,11 @@ def _threaded_factory(async_factory:
         """Threaded factory."""
         async_check = async_factory(config, config_validation)
 
-        def condition_if(hass: HomeAssistant,
+        def condition_if(opp: OpenPeerPower,
                          variables: TemplateVarsType = None) -> bool:
             """Validate condition."""
             return cast(bool, run_callback_threadsafe(
-                hass.loop, async_check, hass, variables,
+                opp.loop, async_check, opp, variables,
             ).result())
 
         return condition_if
@@ -68,7 +68,7 @@ def async_from_config(config: ConfigType,
             break
 
     if factory is None:
-        raise HomeAssistantError('Invalid condition "{}" specified {}'.format(
+        raise OpenPeerPowerError('Invalid condition "{}" specified {}'.format(
             config.get(CONF_CONDITION), config))
 
     return cast(Callable[..., bool], factory(config, config_validation))
@@ -85,7 +85,7 @@ def async_and_from_config(config: ConfigType,
         config = cv.AND_CONDITION_SCHEMA(config)
     checks = None
 
-    def if_and_condition(hass: HomeAssistant,
+    def if_and_condition(opp: OpenPeerPower,
                          variables: TemplateVarsType = None) -> bool:
         """Test and condition."""
         nonlocal checks
@@ -96,7 +96,7 @@ def async_and_from_config(config: ConfigType,
 
         try:
             for check in checks:
-                if not check(hass, variables):
+                if not check(opp, variables):
                     return False
         except Exception as ex:  # pylint: disable=broad-except
             _LOGGER.warning("Error during and-condition: %s", ex)
@@ -118,7 +118,7 @@ def async_or_from_config(config: ConfigType,
         config = cv.OR_CONDITION_SCHEMA(config)
     checks = None
 
-    def if_or_condition(hass: HomeAssistant,
+    def if_or_condition(opp: OpenPeerPower,
                         variables: TemplateVarsType = None) -> bool:
         """Test and condition."""
         nonlocal checks
@@ -129,7 +129,7 @@ def async_or_from_config(config: ConfigType,
 
         try:
             for check in checks:
-                if check(hass, variables):
+                if check(opp, variables):
                     return True
         except Exception as ex:  # pylint: disable=broad-except
             _LOGGER.warning("Error during or-condition: %s", ex)
@@ -142,25 +142,25 @@ def async_or_from_config(config: ConfigType,
 or_from_config = _threaded_factory(async_or_from_config)
 
 
-def numeric_state(hass: HomeAssistant, entity: Union[None, str, State],
+def numeric_state(opp: OpenPeerPower, entity: Union[None, str, State],
                   below: Optional[float] = None, above: Optional[float] = None,
                   value_template: Optional[Template] = None,
                   variables: TemplateVarsType = None) -> bool:
     """Test a numeric state condition."""
     return cast(bool, run_callback_threadsafe(
-        hass.loop, async_numeric_state, hass, entity, below, above,
+        opp.loop, async_numeric_state, opp, entity, below, above,
         value_template, variables,
     ).result())
 
 
-def async_numeric_state(hass: HomeAssistant, entity: Union[None, str, State],
+def async_numeric_state(opp: OpenPeerPower, entity: Union[None, str, State],
                         below: Optional[float] = None,
                         above: Optional[float] = None,
                         value_template: Optional[Template] = None,
                         variables: TemplateVarsType = None) -> bool:
     """Test a numeric state condition."""
     if isinstance(entity, str):
-        entity = hass.states.get(entity)
+        entity = opp.states.get(entity)
 
     if entity is None:
         return False
@@ -206,14 +206,14 @@ def async_numeric_state_from_config(config: ConfigType,
     above = config.get(CONF_ABOVE)
     value_template = config.get(CONF_VALUE_TEMPLATE)
 
-    def if_numeric_state(hass: HomeAssistant,
+    def if_numeric_state(opp: OpenPeerPower,
                          variables: TemplateVarsType = None) -> bool:
         """Test numeric state condition."""
         if value_template is not None:
-            value_template.hass = hass
+            value_template.opp = opp
 
         return async_numeric_state(
-            hass, entity_id, below, above, value_template, variables)
+            opp, entity_id, below, above, value_template, variables)
 
     return if_numeric_state
 
@@ -221,14 +221,14 @@ def async_numeric_state_from_config(config: ConfigType,
 numeric_state_from_config = _threaded_factory(async_numeric_state_from_config)
 
 
-def state(hass: HomeAssistant, entity: Union[None, str, State], req_state: str,
+def state(opp: OpenPeerPower, entity: Union[None, str, State], req_state: str,
           for_period: Optional[timedelta] = None) -> bool:
     """Test if state matches requirements.
 
     Async friendly.
     """
     if isinstance(entity, str):
-        entity = hass.states.get(entity)
+        entity = opp.states.get(entity)
 
     if entity is None:
         return False
@@ -251,15 +251,15 @@ def state_from_config(config: ConfigType,
     req_state = cast(str, config.get(CONF_STATE))
     for_period = config.get('for')
 
-    def if_state(hass: HomeAssistant,
+    def if_state(opp: OpenPeerPower,
                  variables: TemplateVarsType = None) -> bool:
         """Test if condition."""
-        return state(hass, entity_id, req_state, for_period)
+        return state(opp, entity_id, req_state, for_period)
 
     return if_state
 
 
-def sun(hass: HomeAssistant, before: Optional[str] = None,
+def sun(opp: OpenPeerPower, before: Optional[str] = None,
         after: Optional[str] = None, before_offset: Optional[timedelta] = None,
         after_offset: Optional[timedelta] = None) -> bool:
     """Test if current time matches sun requirements."""
@@ -268,8 +268,8 @@ def sun(hass: HomeAssistant, before: Optional[str] = None,
     before_offset = before_offset or timedelta(0)
     after_offset = after_offset or timedelta(0)
 
-    sunrise = get_astral_event_date(hass, SUN_EVENT_SUNRISE, today)
-    sunset = get_astral_event_date(hass, SUN_EVENT_SUNSET, today)
+    sunrise = get_astral_event_date(opp, SUN_EVENT_SUNRISE, today)
+    sunset = get_astral_event_date(opp, SUN_EVENT_SUNSET, today)
 
     if sunrise is None and SUN_EVENT_SUNRISE in (before, after):
         # There is no sunrise today
@@ -308,23 +308,23 @@ def sun_from_config(config: ConfigType,
     before_offset = config.get('before_offset')
     after_offset = config.get('after_offset')
 
-    def time_if(hass: HomeAssistant,
+    def time_if(opp: OpenPeerPower,
                 variables: TemplateVarsType = None) -> bool:
         """Validate time based if-condition."""
-        return sun(hass, before, after, before_offset, after_offset)
+        return sun(opp, before, after, before_offset, after_offset)
 
     return time_if
 
 
-def template(hass: HomeAssistant, value_template: Template,
+def template(opp: OpenPeerPower, value_template: Template,
              variables: TemplateVarsType = None) -> bool:
     """Test if template condition matches."""
     return cast(bool, run_callback_threadsafe(
-        hass.loop, async_template, hass, value_template, variables,
+        opp.loop, async_template, opp, value_template, variables,
     ).result())
 
 
-def async_template(hass: HomeAssistant, value_template: Template,
+def async_template(opp: OpenPeerPower, value_template: Template,
                    variables: TemplateVarsType = None) -> bool:
     """Test if template condition matches."""
     try:
@@ -344,12 +344,12 @@ def async_template_from_config(config: ConfigType,
         config = cv.TEMPLATE_CONDITION_SCHEMA(config)
     value_template = cast(Template, config.get(CONF_VALUE_TEMPLATE))
 
-    def template_if(hass: HomeAssistant,
+    def template_if(opp: OpenPeerPower,
                     variables: TemplateVarsType = None) -> bool:
         """Validate template based if-condition."""
-        value_template.hass = hass
+        value_template.opp = opp
 
-        return async_template(hass, value_template, variables)
+        return async_template(opp, value_template, variables)
 
     return template_if
 
@@ -401,7 +401,7 @@ def time_from_config(config: ConfigType,
     after = config.get(CONF_AFTER)
     weekday = config.get(CONF_WEEKDAY)
 
-    def time_if(hass: HomeAssistant,
+    def time_if(opp: OpenPeerPower,
                 variables: TemplateVarsType = None) -> bool:
         """Validate time based if-condition."""
         return time(before, after, weekday)
@@ -409,20 +409,20 @@ def time_from_config(config: ConfigType,
     return time_if
 
 
-def zone(hass: HomeAssistant, zone_ent: Union[None, str, State],
+def zone(opp: OpenPeerPower, zone_ent: Union[None, str, State],
          entity: Union[None, str, State]) -> bool:
     """Test if zone-condition matches.
 
     Async friendly.
     """
     if isinstance(zone_ent, str):
-        zone_ent = hass.states.get(zone_ent)
+        zone_ent = opp.states.get(zone_ent)
 
     if zone_ent is None:
         return False
 
     if isinstance(entity, str):
-        entity = hass.states.get(entity)
+        entity = opp.states.get(entity)
 
     if entity is None:
         return False
@@ -445,9 +445,9 @@ def zone_from_config(config: ConfigType,
     entity_id = config.get(CONF_ENTITY_ID)
     zone_entity_id = config.get(CONF_ZONE)
 
-    def if_in_zone(hass: HomeAssistant,
+    def if_in_zone(opp: OpenPeerPower,
                    variables: TemplateVarsType = None) -> bool:
         """Test if condition."""
-        return zone(hass, zone_entity_id, entity_id)
+        return zone(opp, zone_entity_id, entity_id)
 
     return if_in_zone

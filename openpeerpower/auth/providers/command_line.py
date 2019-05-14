@@ -9,7 +9,7 @@ import os
 
 import voluptuous as vol
 
-from openpeerpower.exceptions import HomeAssistantError
+from openpeerpower.exceptions import OpenPeerPowerError
 
 from . import AuthProvider, AUTH_PROVIDER_SCHEMA, AUTH_PROVIDERS, LoginFlow
 from ..models import Credentials, UserMeta
@@ -32,7 +32,7 @@ CONFIG_SCHEMA = AUTH_PROVIDER_SCHEMA.extend({
 _LOGGER = logging.getLogger(__name__)
 
 
-class InvalidAuthError(HomeAssistantError):
+class InvalidAuthError(OpenPeerPowerError):
     """Raised when authentication with given credentials fails."""
 
 

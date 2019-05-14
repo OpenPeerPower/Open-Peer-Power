@@ -35,8 +35,8 @@ async def async_setup(opp, config):
     """Track the state of the sun."""
     if config.get(CONF_ELEVATION) is not None:
         _LOGGER.warning(
-            "Elevation is now configured in home assistant core. "
-            "See https://home-assistant.io/docs/configuration/basic/")
+            "Elevation is now configured in open peer power core. "
+            "See https://open-peer-power.io/docs/configuration/basic/")
 
     sun = Sun(opp, get_astral_location(opp))
     sun.point_in_time_listener(dt_util.utcnow())

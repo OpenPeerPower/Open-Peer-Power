@@ -1,11 +1,11 @@
-"""Offer API to configure the Home Assistant auth provider."""
+"""Offer API to configure the Open Peer Power auth provider."""
 import voluptuous as vol
 
-from homeassistant.auth.providers import homeassistant as auth_ha
-from homeassistant.components import websocket_api
+from openpeerpower.auth.providers import openpeerpower as auth_ha
+from openpeerpower.components import websocket_api
 
 
-WS_TYPE_CREATE = 'config/auth_provider/homeassistant/create'
+WS_TYPE_CREATE = 'config/auth_provider/openpeerpower/create'
 SCHEMA_WS_CREATE = websocket_api.BASE_COMMAND_MESSAGE_SCHEMA.extend({
     vol.Required('type'): WS_TYPE_CREATE,
     vol.Required('user_id'): str,
@@ -13,13 +13,13 @@ SCHEMA_WS_CREATE = websocket_api.BASE_COMMAND_MESSAGE_SCHEMA.extend({
     vol.Required('password'): str,
 })
 
-WS_TYPE_DELETE = 'config/auth_provider/homeassistant/delete'
+WS_TYPE_DELETE = 'config/auth_provider/openpeerpower/delete'
 SCHEMA_WS_DELETE = websocket_api.BASE_COMMAND_MESSAGE_SCHEMA.extend({
     vol.Required('type'): WS_TYPE_DELETE,
     vol.Required('username'): str,
 })
 
-WS_TYPE_CHANGE_PASSWORD = 'config/auth_provider/homeassistant/change_password'
+WS_TYPE_CHANGE_PASSWORD = 'config/auth_provider/openpeerpower/change_password'
 SCHEMA_WS_CHANGE_PASSWORD = websocket_api.BASE_COMMAND_MESSAGE_SCHEMA.extend({
     vol.Required('type'): WS_TYPE_CHANGE_PASSWORD,
     vol.Required('current_password'): str,
@@ -27,27 +27,27 @@ SCHEMA_WS_CHANGE_PASSWORD = websocket_api.BASE_COMMAND_MESSAGE_SCHEMA.extend({
 })
 
 
-async def async_setup(hass):
-    """Enable the Home Assistant views."""
-    hass.components.websocket_api.async_register_command(
+async def async_setup(opp):
+    """Enable the Open Peer Power views."""
+    opp.components.websocket_api.async_register_command(
         WS_TYPE_CREATE, websocket_create,
         SCHEMA_WS_CREATE
     )
-    hass.components.websocket_api.async_register_command(
+    opp.components.websocket_api.async_register_command(
         WS_TYPE_DELETE, websocket_delete,
         SCHEMA_WS_DELETE
     )
-    hass.components.websocket_api.async_register_command(
+    opp.components.websocket_api.async_register_command(
         WS_TYPE_CHANGE_PASSWORD, websocket_change_password,
         SCHEMA_WS_CHANGE_PASSWORD
     )
     return True
 
 
-def _get_provider(hass):
-    """Get homeassistant auth provider."""
-    for prv in hass.auth.auth_providers:
-        if prv.type == 'homeassistant':
+def _get_provider(opp):
+    """Get openpeerpower auth provider."""
+    for prv in opp.auth.auth_providers:
+        if prv.type == 'openpeerpower':
             return prv
 
     raise RuntimeError('Provider not found')
@@ -55,12 +55,12 @@ def _get_provider(hass):
 
 @websocket_api.require_admin
 @websocket_api.async_response
-async def websocket_create(hass, connection, msg):
+async def websocket_create(opp, connection, msg):
     """Create credentials and attach to a user."""
-    provider = _get_provider(hass)
+    provider = _get_provider(opp)
     await provider.async_initialize()
 
-    user = await hass.auth.async_get_user(msg['user_id'])
+    user = await opp.auth.async_get_user(msg['user_id'])
 
     if user is None:
         connection.send_message(websocket_api.error_message(
@@ -74,7 +74,7 @@ async def websocket_create(hass, connection, msg):
         return
 
     try:
-        await hass.async_add_executor_job(
+        await opp.async_add_executor_job(
             provider.data.add_auth, msg['username'], msg['password'])
     except auth_ha.InvalidUser:
         connection.send_message(websocket_api.error_message(
@@ -84,7 +84,7 @@ async def websocket_create(hass, connection, msg):
     credentials = await provider.async_get_or_create_credentials({
         'username': msg['username']
     })
-    await hass.auth.async_link_user(user, credentials)
+    await opp.auth.async_link_user(user, credentials)
 
     await provider.data.async_save()
     connection.send_message(websocket_api.result_message(msg['id']))
@@ -92,9 +92,9 @@ async def websocket_create(hass, connection, msg):
 
 @websocket_api.require_admin
 @websocket_api.async_response
-async def websocket_delete(hass, connection, msg):
+async def websocket_delete(opp, connection, msg):
     """Delete username and related credential."""
-    provider = _get_provider(hass)
+    provider = _get_provider(opp)
     await provider.async_initialize()
 
     credentials = await provider.async_get_or_create_credentials({
@@ -104,7 +104,7 @@ async def websocket_delete(hass, connection, msg):
     # if not new, an existing credential exists.
     # Removing the credential will also remove the auth.
     if not credentials.is_new:
-        await hass.auth.async_remove_credentials(credentials)
+        await opp.auth.async_remove_credentials(credentials)
 
         connection.send_message(
             websocket_api.result_message(msg['id']))
@@ -123,7 +123,7 @@ async def websocket_delete(hass, connection, msg):
 
 
 @websocket_api.async_response
-async def websocket_change_password(hass, connection, msg):
+async def websocket_change_password(opp, connection, msg):
     """Change user password."""
     user = connection.user
     if user is None:
@@ -131,7 +131,7 @@ async def websocket_change_password(hass, connection, msg):
             msg['id'], 'user_not_found', 'User not found'))
         return
 
-    provider = _get_provider(hass)
+    provider = _get_provider(opp)
     await provider.async_initialize()
 
     username = None
@@ -153,7 +153,7 @@ async def websocket_change_password(hass, connection, msg):
             msg['id'], 'invalid_password', 'Invalid password'))
         return
 
-    await hass.async_add_executor_job(
+    await opp.async_add_executor_job(
         provider.data.change_password, username, msg['new_password'])
     await provider.data.async_save()
 

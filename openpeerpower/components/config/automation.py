@@ -2,22 +2,22 @@
 from collections import OrderedDict
 import uuid
 
-from homeassistant.components.automation import DOMAIN, PLATFORM_SCHEMA
-from homeassistant.const import CONF_ID, SERVICE_RELOAD
-import homeassistant.helpers.config_validation as cv
+from openpeerpower.components.automation import DOMAIN, PLATFORM_SCHEMA
+from openpeerpower.const import CONF_ID, SERVICE_RELOAD
+import openpeerpower.helpers.config_validation as cv
 
 from . import EditIdBasedConfigView
 
 CONFIG_PATH = 'automations.yaml'
 
 
-async def async_setup(hass):
+async def async_setup(opp):
     """Set up the Automation config API."""
-    async def hook(hass):
+    async def hook(opp):
         """post_write_hook for Config View that reloads automations."""
-        await hass.services.async_call(DOMAIN, SERVICE_RELOAD)
+        await opp.services.async_call(DOMAIN, SERVICE_RELOAD)
 
-    hass.http.register_view(EditAutomationConfigView(
+    opp.http.register_view(EditAutomationConfigView(
         DOMAIN, 'config', CONFIG_PATH, cv.string,
         PLATFORM_SCHEMA, post_write_hook=hook
     ))
@@ -27,7 +27,7 @@ async def async_setup(hass):
 class EditAutomationConfigView(EditIdBasedConfigView):
     """Edit automation config."""
 
-    def _write_value(self, hass, data, config_key, new_value):
+    def _write_value(self, opp, data, config_key, new_value):
         """Set value."""
         index = None
         for index, cur_value in enumerate(data):

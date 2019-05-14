@@ -9,8 +9,8 @@ from urllib.parse import urlparse
 
 import pkg_resources
 
-import homeassistant.util.package as pkg_util
-from homeassistant.core import HomeAssistant
+import openpeerpower.util.package as pkg_util
+from openpeerpower.core import OpenPeerPower
 
 DATA_PIP_LOCK = 'pip_lock'
 DATA_PKG_CACHE = 'pkg_cache'
@@ -18,29 +18,29 @@ CONSTRAINT_FILE = 'package_constraints.txt'
 _LOGGER = logging.getLogger(__name__)
 
 
-async def async_process_requirements(hass: HomeAssistant, name: str,
+async def async_process_requirements(opp: OpenPeerPower, name: str,
                                      requirements: List[str]) -> bool:
     """Install the requirements for a component or platform.
 
     This method is a coroutine.
     """
-    pip_lock = hass.data.get(DATA_PIP_LOCK)
+    pip_lock = opp.data.get(DATA_PIP_LOCK)
     if pip_lock is None:
-        pip_lock = hass.data[DATA_PIP_LOCK] = asyncio.Lock(loop=hass.loop)
+        pip_lock = opp.data[DATA_PIP_LOCK] = asyncio.Lock(loop=opp.loop)
 
-    pkg_cache = hass.data.get(DATA_PKG_CACHE)
+    pkg_cache = opp.data.get(DATA_PKG_CACHE)
     if pkg_cache is None:
-        pkg_cache = hass.data[DATA_PKG_CACHE] = PackageLoadable(hass)
+        pkg_cache = opp.data[DATA_PKG_CACHE] = PackageLoadable(opp)
 
     pip_install = partial(pkg_util.install_package,
-                          **pip_kwargs(hass.config.config_dir))
+                          **pip_kwargs(opp.config.config_dir))
 
     async with pip_lock:
         for req in requirements:
             if await pkg_cache.loadable(req):
                 continue
 
-            ret = await hass.async_add_executor_job(pip_install, req)
+            ret = await opp.async_add_executor_job(pip_install, req)
 
             if not ret:
                 _LOGGER.error("Not initializing %s because could not install "
@@ -63,10 +63,10 @@ def pip_kwargs(config_dir: Optional[str]) -> Dict[str, Any]:
 class PackageLoadable:
     """Class to check if a package is loadable, with built-in cache."""
 
-    def __init__(self, hass: HomeAssistant) -> None:
+    def __init__(self, opp: OpenPeerPower) -> None:
         """Initialize the PackageLoadable class."""
         self.dist_cache = {}  # type: Dict[str, pkg_resources.Distribution]
-        self.hass = hass
+        self.opp = opp
 
     async def loadable(self, package: str) -> bool:
         """Check if a package is what will be loaded when we import it.
@@ -79,7 +79,7 @@ class PackageLoadable:
         try:
             req = pkg_resources.Requirement.parse(package)
         except ValueError:
-            # This is a zip file. We no longer use this in Home Assistant,
+            # This is a zip file. We no longer use this in Open Peer Power,
             # leaving it in for custom components.
             req = pkg_resources.Requirement.parse(urlparse(package).fragment)
 
@@ -92,7 +92,7 @@ class PackageLoadable:
         for path in sys.path:
             # We read the whole mount point as we're already here
             # Caching it on first call makes subsequent calls a lot faster.
-            await self.hass.async_add_executor_job(self._fill_cache, path)
+            await self.opp.async_add_executor_job(self._fill_cache, path)
 
             dist = dist_cache.get(req_proj_name)
             if dist is not None:

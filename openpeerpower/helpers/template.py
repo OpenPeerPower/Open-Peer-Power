@@ -1,4 +1,4 @@
-"""Template helper methods for rendering strings with Home Assistant data."""
+"""Template helper methods for rendering strings with Open Peer Power data."""
 import base64
 import json
 import logging
@@ -12,18 +12,18 @@ from jinja2 import contextfilter
 from jinja2.sandbox import ImmutableSandboxedEnvironment
 from jinja2.utils import Namespace
 
-from homeassistant.const import (ATTR_LATITUDE, ATTR_LONGITUDE, MATCH_ALL,
+from openpeerpower.const import (ATTR_LATITUDE, ATTR_LONGITUDE, MATCH_ALL,
                                  ATTR_UNIT_OF_MEASUREMENT, STATE_UNKNOWN)
-from homeassistant.core import (
+from openpeerpower.core import (
     State, callback, valid_entity_id, split_entity_id)
-from homeassistant.exceptions import TemplateError
-from homeassistant.helpers import location as loc_helper
-from homeassistant.helpers.typing import TemplateVarsType
-from homeassistant.loader import bind_hass
-from homeassistant.util import convert
-from homeassistant.util import dt as dt_util
-from homeassistant.util import location as loc_util
-from homeassistant.util.async_ import run_callback_threadsafe
+from openpeerpower.exceptions import TemplateError
+from openpeerpower.helpers import location as loc_helper
+from openpeerpower.helpers.typing import TemplateVarsType
+from openpeerpower.loader import bind_opp
+from openpeerpower.util import convert
+from openpeerpower.util import dt as dt_util
+from openpeerpower.util import location as loc_util
+from openpeerpower.util.async_ import run_callback_threadsafe
 
 _LOGGER = logging.getLogger(__name__)
 _SENTINEL = object()
@@ -39,17 +39,17 @@ _RE_GET_ENTITIES = re.compile(
 _RE_JINJA_DELIMITERS = re.compile(r"\{%|\{\{")
 
 
-@bind_hass
-def attach(hass, obj):
-    """Recursively attach hass to all template instances in list and dict."""
+@bind_opp
+def attach(opp, obj):
+    """Recursively attach opp to all template instances in list and dict."""
     if isinstance(obj, list):
         for child in obj:
-            attach(hass, child)
+            attach(opp, child)
     elif isinstance(obj, dict):
         for child in obj.values():
-            attach(hass, child)
+            attach(opp, child)
     elif isinstance(obj, Template):
-        obj.hass = hass
+        obj.opp = opp
 
 
 def render_complex(value, variables=None):
@@ -142,7 +142,7 @@ class RenderInfo:
 class Template:
     """Class to hold a template and manage caching and rendering."""
 
-    def __init__(self, template, hass=None):
+    def __init__(self, template, opp=None):
         """Instantiate a template."""
         if not isinstance(template, str):
             raise TypeError('Expected template to be a string')
@@ -150,7 +150,7 @@ class Template:
         self.template = template
         self._compiled_code = None
         self._compiled = None
-        self.hass = hass
+        self.opp = opp
 
     def ensure_valid(self):
         """Return if template is valid."""
@@ -172,7 +172,7 @@ class Template:
             kwargs.update(variables)
 
         return run_callback_threadsafe(
-            self.hass.loop, self.async_render, kwargs).result()
+            self.opp.loop, self.async_render, kwargs).result()
 
     @callback
     def async_render(self, variables: TemplateVarsType = None,
@@ -197,15 +197,15 @@ class Template:
             self, variables: TemplateVarsType = None,
             **kwargs) -> RenderInfo:
         """Render the template and collect an entity filter."""
-        assert self.hass and _RENDER_INFO not in self.hass.data
-        render_info = self.hass.data[_RENDER_INFO] = RenderInfo(self)
+        assert self.opp and _RENDER_INFO not in self.opp.data
+        render_info = self.opp.data[_RENDER_INFO] = RenderInfo(self)
         # pylint: disable=protected-access
         try:
             render_info._result = self.async_render(variables, **kwargs)
         except TemplateError as ex:
             render_info._exception = ex
         finally:
-            del self.hass.data[_RENDER_INFO]
+            del self.opp.data[_RENDER_INFO]
             render_info._freeze()
         return render_info
 
@@ -215,7 +215,7 @@ class Template:
         If valid JSON will expose value_json too.
         """
         return run_callback_threadsafe(
-            self.hass.loop, self.async_render_with_possible_json_value, value,
+            self.opp.loop, self.async_render_with_possible_json_value, value,
             error_value).result()
 
     @callback
@@ -249,12 +249,12 @@ class Template:
             return value if error_value is _SENTINEL else error_value
 
     def _ensure_compiled(self):
-        """Bind a template to a specific hass instance."""
+        """Bind a template to a specific opp instance."""
         self.ensure_valid()
 
-        assert self.hass is not None, 'hass variable not set on template'
+        assert self.opp is not None, 'opp variable not set on template'
 
-        template_methods = TemplateMethods(self.hass)
+        template_methods = TemplateMethods(self.opp)
 
         global_vars = ENV.make_globals({
             'closest': template_methods.closest,
@@ -262,7 +262,7 @@ class Template:
             'is_state': template_methods.is_state,
             'is_state_attr': template_methods.is_state_attr,
             'state_attr': template_methods.state_attr,
-            'states': AllStates(self.hass),
+            'states': AllStates(self.opp),
         })
 
         self._compiled = jinja2.Template.from_code(
@@ -274,7 +274,7 @@ class Template:
         """Compare template with another."""
         return (self.__class__ == other.__class__ and
                 self.template == other.template and
-                self.hass == other.hass)
+                self.opp == other.opp)
 
     def __hash__(self):
         """Hash code for template."""
@@ -288,22 +288,22 @@ class Template:
 class AllStates:
     """Class to expose all HA states as attributes."""
 
-    def __init__(self, hass):
+    def __init__(self, opp):
         """Initialize all states."""
-        self._hass = hass
+        self._opp = opp
 
     def __getattr__(self, name):
         """Return the domain state."""
         if '.' in name:
             if not valid_entity_id(name):
                 raise TemplateError("Invalid entity ID '{}'".format(name))
-            return _get_state(self._hass, name)
+            return _get_state(self._opp, name)
         if not valid_entity_id(name + '.entity'):
             raise TemplateError("Invalid domain name '{}'".format(name))
-        return DomainStates(self._hass, name)
+        return DomainStates(self._opp, name)
 
     def _collect_all(self):
-        render_info = self._hass.data.get(_RENDER_INFO)
+        render_info = self._opp.data.get(_RENDER_INFO)
         if render_info is not None:
             # pylint: disable=protected-access
             render_info._all_states = True
@@ -312,18 +312,18 @@ class AllStates:
         """Return all states."""
         self._collect_all()
         return iter(
-            _wrap_state(self._hass, state) for state in
-            sorted(self._hass.states.async_all(),
+            _wrap_state(self._opp, state) for state in
+            sorted(self._opp.states.async_all(),
                    key=lambda state: state.entity_id))
 
     def __len__(self):
         """Return number of states."""
         self._collect_all()
-        return len(self._hass.states.async_entity_ids())
+        return len(self._opp.states.async_entity_ids())
 
     def __call__(self, entity_id):
         """Return the states."""
-        state = _get_state(self._hass, entity_id)
+        state = _get_state(self._opp, entity_id)
         return STATE_UNKNOWN if state is None else state.state
 
     def __repr__(self):
@@ -334,9 +334,9 @@ class AllStates:
 class DomainStates:
     """Class to expose a specific HA domain as attributes."""
 
-    def __init__(self, hass, domain):
+    def __init__(self, opp, domain):
         """Initialize the domain states."""
-        self._hass = hass
+        self._opp = opp
         self._domain = domain
 
     def __getattr__(self, name):
@@ -344,10 +344,10 @@ class DomainStates:
         entity_id = '{}.{}'.format(self._domain, name)
         if not valid_entity_id(entity_id):
             raise TemplateError("Invalid entity ID '{}'".format(entity_id))
-        return _get_state(self._hass, entity_id)
+        return _get_state(self._opp, entity_id)
 
     def _collect_domain(self):
-        entity_collect = self._hass.data.get(_RENDER_INFO)
+        entity_collect = self._opp.data.get(_RENDER_INFO)
         if entity_collect is not None:
             # pylint: disable=protected-access
             entity_collect._domains.append(self._domain)
@@ -356,15 +356,15 @@ class DomainStates:
         """Return the iteration over all the states."""
         self._collect_domain()
         return iter(sorted(
-            (_wrap_state(self._hass, state)
-             for state in self._hass.states.async_all()
+            (_wrap_state(self._opp, state)
+             for state in self._opp.states.async_all()
              if state.domain == self._domain),
             key=lambda state: state.entity_id))
 
     def __len__(self):
         """Return number of states."""
         self._collect_domain()
-        return len(self._hass.states.async_entity_ids(self._domain))
+        return len(self._opp.states.async_entity_ids(self._domain))
 
     def __repr__(self):
         """Representation of Domain States."""
@@ -376,15 +376,15 @@ class TemplateState(State):
 
     # Inheritance is done so functions that check against State keep working
     # pylint: disable=super-init-not-called
-    def __init__(self, hass, state):
+    def __init__(self, opp, state):
         """Initialize template state."""
-        self._hass = hass
+        self._opp = opp
         self._state = state
 
     def _access_state(self):
         state = object.__getattribute__(self, '_state')
-        hass = object.__getattribute__(self, '_hass')
-        _collect_state(hass, state.entity_id)
+        opp = object.__getattribute__(self, '_opp')
+        _collect_state(opp, state.entity_id)
         return state
 
     @property
@@ -416,34 +416,34 @@ class TemplateState(State):
         return '<template ' + rep[1:]
 
 
-def _collect_state(hass, entity_id):
-    entity_collect = hass.data.get(_RENDER_INFO)
+def _collect_state(opp, entity_id):
+    entity_collect = opp.data.get(_RENDER_INFO)
     if entity_collect is not None:
         # pylint: disable=protected-access
         entity_collect._entities.append(entity_id)
 
 
-def _wrap_state(hass, state):
+def _wrap_state(opp, state):
     """Wrap a state."""
-    return None if state is None else TemplateState(hass, state)
+    return None if state is None else TemplateState(opp, state)
 
 
-def _get_state(hass, entity_id):
-    state = hass.states.get(entity_id)
+def _get_state(opp, entity_id):
+    state = opp.states.get(entity_id)
     if state is None:
         # Only need to collect if none, if not none collect first actuall
         # access to the state properties in the state wrapper.
-        _collect_state(hass, entity_id)
+        _collect_state(opp, entity_id)
         return None
-    return _wrap_state(hass, state)
+    return _wrap_state(opp, state)
 
 
 class TemplateMethods:
     """Class to expose helpers to templates."""
 
-    def __init__(self, hass):
+    def __init__(self, opp):
         """Initialize the helpers."""
-        self._hass = hass
+        self._opp = opp
 
     def closest(self, *args):
         """Find closest entity.
@@ -460,8 +460,8 @@ class TemplateMethods:
           closest(states.zone.school, 'group.children')
         """
         if len(args) == 1:
-            latitude = self._hass.config.latitude
-            longitude = self._hass.config.longitude
+            latitude = self._opp.config.latitude
+            longitude = self._opp.config.longitude
             entities = args[0]
 
         elif len(args) == 2:
@@ -501,10 +501,10 @@ class TemplateMethods:
             else:
                 gr_entity_id = str(entities)
 
-            _collect_state(self._hass, gr_entity_id)
+            _collect_state(self._opp, gr_entity_id)
 
-            group = self._hass.components.group
-            states = [_get_state(self._hass, entity_id) for entity_id
+            group = self._opp.components.group
+            states = [_get_state(self._opp, entity_id) for entity_id
                       in group.expand_entity_ids([gr_entity_id])]
 
         # state will already be wrapped here
@@ -554,14 +554,14 @@ class TemplateMethods:
             locations.append((latitude, longitude))
 
         if len(locations) == 1:
-            return self._hass.config.distance(*locations[0])
+            return self._opp.config.distance(*locations[0])
 
-        return self._hass.config.units.length(
+        return self._opp.config.units.length(
             loc_util.distance(*locations[0] + locations[1]), 'm')
 
     def is_state(self, entity_id: str, state: State) -> bool:
         """Test if a state is a specific value."""
-        state_obj = _get_state(self._hass, entity_id)
+        state_obj = _get_state(self._opp, entity_id)
         return state_obj is not None and state_obj.state == state
 
     def is_state_attr(self, entity_id, name, value):
@@ -571,7 +571,7 @@ class TemplateMethods:
 
     def state_attr(self, entity_id, name):
         """Get a specific attribute from a state."""
-        state_obj = _get_state(self._hass, entity_id)
+        state_obj = _get_state(self._opp, entity_id)
         if state_obj is not None:
             return state_obj.attributes.get(name)
         return None
@@ -581,7 +581,7 @@ class TemplateMethods:
         if isinstance(entity_id_or_state, State):
             return entity_id_or_state
         if isinstance(entity_id_or_state, str):
-            return _get_state(self._hass, entity_id_or_state)
+            return _get_state(self._opp, entity_id_or_state)
         return None
 
 
@@ -788,7 +788,7 @@ def random_every_time(context, values):
 
 
 class TemplateEnvironment(ImmutableSandboxedEnvironment):
-    """The Home Assistant template environment."""
+    """The Open Peer Power template environment."""
 
     def is_safe_callable(self, obj):
         """Test if callback is safe."""

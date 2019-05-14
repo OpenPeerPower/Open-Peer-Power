@@ -1,13 +1,13 @@
 """HTTP views to interact with the entity registry."""
 import voluptuous as vol
 
-from homeassistant.core import callback
-from homeassistant.helpers.entity_registry import async_get_registry
-from homeassistant.components import websocket_api
-from homeassistant.components.websocket_api.const import ERR_NOT_FOUND
-from homeassistant.components.websocket_api.decorators import (
+from openpeerpower.core import callback
+from openpeerpower.helpers.entity_registry import async_get_registry
+from openpeerpower.components import websocket_api
+from openpeerpower.components.websocket_api.const import ERR_NOT_FOUND
+from openpeerpower.components.websocket_api.decorators import (
     async_response, require_admin)
-from homeassistant.helpers import config_validation as cv
+from openpeerpower.helpers import config_validation as cv
 
 WS_TYPE_LIST = 'config/entity_registry/list'
 SCHEMA_WS_LIST = websocket_api.BASE_COMMAND_MESSAGE_SCHEMA.extend({
@@ -36,21 +36,21 @@ SCHEMA_WS_REMOVE = websocket_api.BASE_COMMAND_MESSAGE_SCHEMA.extend({
 })
 
 
-async def async_setup(hass):
+async def async_setup(opp):
     """Enable the Entity Registry views."""
-    hass.components.websocket_api.async_register_command(
+    opp.components.websocket_api.async_register_command(
         WS_TYPE_LIST, websocket_list_entities,
         SCHEMA_WS_LIST
     )
-    hass.components.websocket_api.async_register_command(
+    opp.components.websocket_api.async_register_command(
         WS_TYPE_GET, websocket_get_entity,
         SCHEMA_WS_GET
     )
-    hass.components.websocket_api.async_register_command(
+    opp.components.websocket_api.async_register_command(
         WS_TYPE_UPDATE, websocket_update_entity,
         SCHEMA_WS_UPDATE
     )
-    hass.components.websocket_api.async_register_command(
+    opp.components.websocket_api.async_register_command(
         WS_TYPE_REMOVE, websocket_remove_entity,
         SCHEMA_WS_REMOVE
     )
@@ -58,24 +58,24 @@ async def async_setup(hass):
 
 
 @async_response
-async def websocket_list_entities(hass, connection, msg):
+async def websocket_list_entities(opp, connection, msg):
     """Handle list registry entries command.
 
     Async friendly.
     """
-    registry = await async_get_registry(hass)
+    registry = await async_get_registry(opp)
     connection.send_message(websocket_api.result_message(
         msg['id'], [_entry_dict(entry) for entry in registry.entities.values()]
     ))
 
 
 @async_response
-async def websocket_get_entity(hass, connection, msg):
+async def websocket_get_entity(opp, connection, msg):
     """Handle get entity registry entry command.
 
     Async friendly.
     """
-    registry = await async_get_registry(hass)
+    registry = await async_get_registry(opp)
     entry = registry.entities.get(msg['entity_id'])
 
     if entry is None:
@@ -90,12 +90,12 @@ async def websocket_get_entity(hass, connection, msg):
 
 @require_admin
 @async_response
-async def websocket_update_entity(hass, connection, msg):
+async def websocket_update_entity(opp, connection, msg):
     """Handle update entity websocket command.
 
     Async friendly.
     """
-    registry = await async_get_registry(hass)
+    registry = await async_get_registry(opp)
 
     if msg['entity_id'] not in registry.entities:
         connection.send_message(websocket_api.error_message(
@@ -109,7 +109,7 @@ async def websocket_update_entity(hass, connection, msg):
 
     if 'new_entity_id' in msg and msg['new_entity_id'] != msg['entity_id']:
         changes['new_entity_id'] = msg['new_entity_id']
-        if hass.states.get(msg['new_entity_id']) is not None:
+        if opp.states.get(msg['new_entity_id']) is not None:
             connection.send_message(websocket_api.error_message(
                 msg['id'], 'invalid_info', 'Entity is already registered'))
             return
@@ -130,12 +130,12 @@ async def websocket_update_entity(hass, connection, msg):
 
 @require_admin
 @async_response
-async def websocket_remove_entity(hass, connection, msg):
+async def websocket_remove_entity(opp, connection, msg):
     """Handle remove entity websocket command.
 
     Async friendly.
     """
-    registry = await async_get_registry(hass)
+    registry = await async_get_registry(opp)
 
     if msg['entity_id'] not in registry.entities:
         connection.send_message(websocket_api.error_message(

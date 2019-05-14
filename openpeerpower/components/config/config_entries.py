@@ -1,26 +1,26 @@
 """Http views to control the config manager."""
 
-from homeassistant import config_entries, data_entry_flow
-from homeassistant.auth.permissions.const import CAT_CONFIG_ENTRIES
-from homeassistant.components.http import HomeAssistantView
-from homeassistant.exceptions import Unauthorized
-from homeassistant.helpers.data_entry_flow import (
+from openpeerpower import config_entries, data_entry_flow
+from openpeerpower.auth.permissions.const import CAT_CONFIG_ENTRIES
+from openpeerpower.components.http import OpenPeerPowerView
+from openpeerpower.exceptions import Unauthorized
+from openpeerpower.helpers.data_entry_flow import (
     FlowManagerIndexView, FlowManagerResourceView)
 
 
-async def async_setup(hass):
-    """Enable the Home Assistant views."""
-    hass.http.register_view(ConfigManagerEntryIndexView)
-    hass.http.register_view(ConfigManagerEntryResourceView)
-    hass.http.register_view(
-        ConfigManagerFlowIndexView(hass.config_entries.flow))
-    hass.http.register_view(
-        ConfigManagerFlowResourceView(hass.config_entries.flow))
-    hass.http.register_view(ConfigManagerAvailableFlowView)
-    hass.http.register_view(
-        OptionManagerFlowIndexView(hass.config_entries.options.flow))
-    hass.http.register_view(
-        OptionManagerFlowResourceView(hass.config_entries.options.flow))
+async def async_setup(opp):
+    """Enable the Open Peer Power views."""
+    opp.http.register_view(ConfigManagerEntryIndexView)
+    opp.http.register_view(ConfigManagerEntryResourceView)
+    opp.http.register_view(
+        ConfigManagerFlowIndexView(opp.config_entries.flow))
+    opp.http.register_view(
+        ConfigManagerFlowResourceView(opp.config_entries.flow))
+    opp.http.register_view(ConfigManagerAvailableFlowView)
+    opp.http.register_view(
+        OptionManagerFlowIndexView(opp.config_entries.options.flow))
+    opp.http.register_view(
+        OptionManagerFlowResourceView(opp.config_entries.options.flow))
     return True
 
 
@@ -42,7 +42,7 @@ def _prepare_json(result):
     return data
 
 
-class ConfigManagerEntryIndexView(HomeAssistantView):
+class ConfigManagerEntryIndexView(OpenPeerPowerView):
     """View to get available config entries."""
 
     url = '/api/config/config_entries/entry'
@@ -50,7 +50,7 @@ class ConfigManagerEntryIndexView(HomeAssistantView):
 
     async def get(self, request):
         """List available config entries."""
-        hass = request.app['hass']
+        opp = request.app['opp']
 
         return self.json([{
             'entry_id': entry.entry_id,
@@ -62,10 +62,10 @@ class ConfigManagerEntryIndexView(HomeAssistantView):
             'supports_options': hasattr(
                 config_entries.HANDLERS[entry.domain],
                 'async_get_options_flow'),
-        } for entry in hass.config_entries.async_entries()])
+        } for entry in opp.config_entries.async_entries()])
 
 
-class ConfigManagerEntryResourceView(HomeAssistantView):
+class ConfigManagerEntryResourceView(OpenPeerPowerView):
     """View to interact with a config entry."""
 
     url = '/api/config/config_entries/entry/{entry_id}'
@@ -73,13 +73,13 @@ class ConfigManagerEntryResourceView(HomeAssistantView):
 
     async def delete(self, request, entry_id):
         """Delete a config entry."""
-        if not request['hass_user'].is_admin:
+        if not request['opp_user'].is_admin:
             raise Unauthorized(config_entry_id=entry_id, permission='remove')
 
-        hass = request.app['hass']
+        opp = request.app['opp']
 
         try:
-            result = await hass.config_entries.async_remove(entry_id)
+            result = await opp.config_entries.async_remove(entry_id)
         except config_entries.UnknownEntry:
             return self.json_message('Invalid entry specified', 404)
 
@@ -98,20 +98,20 @@ class ConfigManagerFlowIndexView(FlowManagerIndexView):
         Example of a non-user initiated flow is a discovered Hue hub that
         requires user interaction to finish setup.
         """
-        if not request['hass_user'].is_admin:
+        if not request['opp_user'].is_admin:
             raise Unauthorized(
                 perm_category=CAT_CONFIG_ENTRIES, permission='add')
 
-        hass = request.app['hass']
+        opp = request.app['opp']
 
         return self.json([
-            flw for flw in hass.config_entries.flow.async_progress()
+            flw for flw in opp.config_entries.flow.async_progress()
             if flw['context']['source'] != config_entries.SOURCE_USER])
 
     # pylint: disable=arguments-differ
     async def post(self, request):
         """Handle a POST request."""
-        if not request['hass_user'].is_admin:
+        if not request['opp_user'].is_admin:
             raise Unauthorized(
                 perm_category=CAT_CONFIG_ENTRIES, permission='add')
 
@@ -137,7 +137,7 @@ class ConfigManagerFlowResourceView(FlowManagerResourceView):
 
     async def get(self, request, flow_id):
         """Get the current state of a data_entry_flow."""
-        if not request['hass_user'].is_admin:
+        if not request['opp_user'].is_admin:
             raise Unauthorized(
                 perm_category=CAT_CONFIG_ENTRIES, permission='add')
 
@@ -146,7 +146,7 @@ class ConfigManagerFlowResourceView(FlowManagerResourceView):
     # pylint: disable=arguments-differ
     async def post(self, request, flow_id):
         """Handle a POST request."""
-        if not request['hass_user'].is_admin:
+        if not request['opp_user'].is_admin:
             raise Unauthorized(
                 perm_category=CAT_CONFIG_ENTRIES, permission='add')
 
@@ -164,7 +164,7 @@ class ConfigManagerFlowResourceView(FlowManagerResourceView):
         return data
 
 
-class ConfigManagerAvailableFlowView(HomeAssistantView):
+class ConfigManagerAvailableFlowView(OpenPeerPowerView):
     """View to query available flows."""
 
     url = '/api/config/config_entries/flow_handlers'
@@ -187,7 +187,7 @@ class OptionManagerFlowIndexView(FlowManagerIndexView):
 
         handler in request is entry_id.
         """
-        if not request['hass_user'].is_admin:
+        if not request['opp_user'].is_admin:
             raise Unauthorized(
                 perm_category=CAT_CONFIG_ENTRIES, permission='edit')
 
@@ -203,7 +203,7 @@ class OptionManagerFlowResourceView(FlowManagerResourceView):
 
     async def get(self, request, flow_id):
         """Get the current state of a data_entry_flow."""
-        if not request['hass_user'].is_admin:
+        if not request['opp_user'].is_admin:
             raise Unauthorized(
                 perm_category=CAT_CONFIG_ENTRIES, permission='edit')
 
@@ -212,7 +212,7 @@ class OptionManagerFlowResourceView(FlowManagerResourceView):
     # pylint: disable=arguments-differ
     async def post(self, request, flow_id):
         """Handle a POST request."""
-        if not request['hass_user'].is_admin:
+        if not request['opp_user'].is_admin:
             raise Unauthorized(
                 perm_category=CAT_CONFIG_ENTRIES, permission='edit')
 

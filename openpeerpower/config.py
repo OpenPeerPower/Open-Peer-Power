@@ -23,8 +23,8 @@ from openpeerpower.const import (
     __version__, CONF_CUSTOMIZE, CONF_CUSTOMIZE_DOMAIN, CONF_CUSTOMIZE_GLOB,
     CONF_WHITELIST_EXTERNAL_DIRS, CONF_AUTH_PROVIDERS, CONF_AUTH_MFA_MODULES,
     CONF_TYPE, CONF_ID)
-from openpeerpower.core import callback, DOMAIN as CONF_CORE, HomeAssistant
-from openpeerpower.exceptions import HomeAssistantError
+from openpeerpower.core import callback, DOMAIN as CONF_CORE, OpenPeerPower
+from openpeerpower.exceptions import OpenPeerPowerError
 from openpeerpower.loader import (
     Integration, async_get_integration, IntegrationNotFound
 )
@@ -40,11 +40,11 @@ _LOGGER = logging.getLogger(__name__)
 DATA_PERSISTENT_ERRORS = 'bootstrap_persistent_errors'
 RE_YAML_ERROR = re.compile(r"openpeerpower\.util\.yaml")
 RE_ASCII = re.compile(r"\033\[[^m]*m")
-HA_COMPONENT_URL = '[{}](https://home-assistant.io/components/{}/)'
+HA_COMPONENT_URL = '[{}](https://open-peer-power.io/components/{}/)'
 YAML_CONFIG_FILE = 'configuration.yaml'
 VERSION_FILE = '.HA_VERSION'
 CONFIG_DIR_NAME = '.openpeerpower'
-DATA_CUSTOMIZE = 'hass_customize'
+DATA_CUSTOMIZE = 'opp_customize'
 
 FILE_MIGRATION = (
     ('ios.conf', '.ios.conf'),
@@ -52,7 +52,7 @@ FILE_MIGRATION = (
 
 DEFAULT_CORE_CONFIG = (
     # Tuples (attribute, default, auto detect property, description)
-    (CONF_NAME, 'Home', None, 'Name of the location where Home Assistant is '
+    (CONF_NAME, 'Home', None, 'Name of the location where Open Peer Power is '
      'running'),
     (CONF_LATITUDE, 0, 'latitude', 'Location required to calculate the time'
      ' the sun rises and sets'),
@@ -67,7 +67,7 @@ DEFAULT_CORE_CONFIG = (
     (CONF_CUSTOMIZE, '!include customize.yaml', None, 'Customization file'),
 )  # type: Tuple[Tuple[str, Any, Any, Optional[str]], ...]
 DEFAULT_CONFIG = """
-# Configure a default setup of Home Assistant (frontend, api, etc)
+# Configure a default setup of Open Peer Power (frontend, api, etc)
 default_config:
 
 # Uncomment this if you are using SSL/TLS, running in Docker container, etc.
@@ -92,7 +92,7 @@ script: !include scripts.yaml
 """
 DEFAULT_SECRETS = """
 # Use this file to store secrets like usernames and passwords.
-# Learn more at https://home-assistant.io/docs/configuration/secrets/
+# Learn more at https://open-peer-power.io/docs/configuration/secrets/
 some_password: welcome
 """
 TTS_PRE_92 = """
@@ -205,7 +205,7 @@ def get_default_config_dir() -> str:
     return os.path.join(data_dir, CONFIG_DIR_NAME)  # type: ignore
 
 
-async def async_ensure_config_exists(hass: HomeAssistant, config_dir: str,
+async def async_ensure_config_exists(opp: OpenPeerPower, config_dir: str,
                                      detect_location: bool = True)\
         -> Optional[str]:
     """Ensure a configuration file exists in given configuration directory.
@@ -219,13 +219,13 @@ async def async_ensure_config_exists(hass: HomeAssistant, config_dir: str,
         print("Unable to find configuration. Creating default one in",
               config_dir)
         config_path = await async_create_default_config(
-            hass, config_dir, detect_location)
+            opp, config_dir, detect_location)
 
     return config_path
 
 
 async def async_create_default_config(
-        hass: HomeAssistant, config_dir: str, detect_location: bool = True
+        opp: OpenPeerPower, config_dir: str, detect_location: bool = True
         ) -> Optional[str]:
     """Create a default configuration file in given configuration directory.
 
@@ -235,7 +235,7 @@ async def async_create_default_config(
     info = {attr: default for attr, default, _, _ in DEFAULT_CORE_CONFIG}
 
     if detect_location:
-        session = hass.helpers.aiohttp_client.async_get_clientsession()
+        session = opp.helpers.aiohttp_client.async_get_clientsession()
         location_info = await loc_util.async_detect_location_info(session)
     else:
         location_info = None
@@ -255,7 +255,7 @@ async def async_create_default_config(
             info[CONF_ELEVATION] = await loc_util.async_get_elevation(
                 session, location_info.latitude, location_info.longitude)
 
-    return await hass.async_add_executor_job(
+    return await opp.async_add_executor_job(
         _write_default_config, config_dir, info
     )
 
@@ -271,7 +271,7 @@ def _write_default_config(config_dir: str, info: Dict)\
         CONFIG_PATH as SCRIPT_CONFIG_PATH)
     from openpeerpower.components.config.customize import (
         CONFIG_PATH as CUSTOMIZE_CONFIG_PATH)
-        
+
     config_path = os.path.join(config_dir, YAML_CONFIG_FILE)
     secret_path = os.path.join(config_dir, SECRET_YAML)
     version_path = os.path.join(config_dir, VERSION_FILE)
@@ -320,26 +320,26 @@ def _write_default_config(config_dir: str, info: Dict)\
         return None
 
 
-async def async_hass_config_yaml(hass: HomeAssistant) -> Dict:
-    """Load YAML from a Home Assistant configuration file.
+async def async_opp_config_yaml(opp: OpenPeerPower) -> Dict:
+    """Load YAML from a Open Peer Power configuration file.
 
     This function allow a component inside the asyncio loop to reload its
     configuration by itself. Include package merge.
 
     This method is a coroutine.
     """
-    def _load_hass_yaml_config() -> Dict:
-        path = find_config_file(hass.config.config_dir)
+    def _load_opp_yaml_config() -> Dict:
+        path = find_config_file(opp.config.config_dir)
         if path is None:
-            raise HomeAssistantError(
-                "Config file not found in: {}".format(hass.config.config_dir))
+            raise OpenPeerPowerError(
+                "Config file not found in: {}".format(opp.config.config_dir))
         config = load_yaml_config_file(path)
         return config
 
-    config = await hass.async_add_executor_job(_load_hass_yaml_config)
+    config = await opp.async_add_executor_job(_load_opp_yaml_config)
     core_config = config.get(CONF_CORE, {})
     await merge_packages_config(
-        hass, config, core_config.get(CONF_PACKAGES, {})
+        opp, config, core_config.get(CONF_PACKAGES, {})
     )
     return config
 
@@ -361,14 +361,14 @@ def load_yaml_config_file(config_path: str) -> Dict[Any, Any]:
     try:
         conf_dict = load_yaml(config_path)
     except FileNotFoundError as err:
-        raise HomeAssistantError("Config file not found: {}".format(
+        raise OpenPeerPowerError("Config file not found: {}".format(
             getattr(err, 'filename', err)))
 
     if not isinstance(conf_dict, dict):
         msg = "The configuration file {} does not contain a dictionary".format(
             os.path.basename(config_path))
         _LOGGER.error(msg)
-        raise HomeAssistantError(msg)
+        raise OpenPeerPowerError(msg)
 
     # Convert values to dictionaries if they are None
     for key, value in conf_dict.items():
@@ -376,12 +376,12 @@ def load_yaml_config_file(config_path: str) -> Dict[Any, Any]:
     return conf_dict
 
 
-def process_ha_config_upgrade(hass: HomeAssistant) -> None:
+def process_ha_config_upgrade(opp: OpenPeerPower) -> None:
     """Upgrade configuration if necessary.
 
     This method needs to run in an executor.
     """
-    version_path = hass.config.path(VERSION_FILE)
+    version_path = opp.config.path(VERSION_FILE)
 
     try:
         with open(version_path, 'rt') as inp:
@@ -398,13 +398,13 @@ def process_ha_config_upgrade(hass: HomeAssistant) -> None:
 
     if LooseVersion(conf_version) < LooseVersion('0.50'):
         # 0.50 introduced persistent deps dir.
-        lib_path = hass.config.path('deps')
+        lib_path = opp.config.path('deps')
         if os.path.isdir(lib_path):
             shutil.rmtree(lib_path)
 
     if LooseVersion(conf_version) < LooseVersion('0.92'):
         # 0.92 moved google/tts.py to google_translate/tts.py
-        config_path = find_config_file(hass.config.config_dir)
+        config_path = find_config_file(opp.config.config_dir)
         assert config_path is not None
 
         with open(config_path, 'rt', encoding='utf-8') as config_file:
@@ -425,20 +425,20 @@ def process_ha_config_upgrade(hass: HomeAssistant) -> None:
 
     _LOGGER.debug("Migrating old system configuration files to new locations")
     for oldf, newf in FILE_MIGRATION:
-        if os.path.isfile(hass.config.path(oldf)):
+        if os.path.isfile(opp.config.path(oldf)):
             _LOGGER.info("Migrating %s to %s", oldf, newf)
-            os.rename(hass.config.path(oldf), hass.config.path(newf))
+            os.rename(opp.config.path(oldf), opp.config.path(newf))
 
 
 @callback
 def async_log_exception(ex: vol.Invalid, domain: str, config: Dict,
-                        hass: HomeAssistant) -> None:
+                        opp: OpenPeerPower) -> None:
     """Log an error for configuration validation.
 
     This method must be run in the event loop.
     """
-    if hass is not None:
-        async_notify_setup_error(hass, domain, True)
+    if opp is not None:
+        async_notify_setup_error(opp, domain, True)
     _LOGGER.error(_format_config_error(ex, domain, config))
 
 
@@ -468,13 +468,13 @@ def _format_config_error(ex: vol.Invalid, domain: str, config: Dict) -> str:
 
     if domain != CONF_CORE:
         message += ('Please check the docs at '
-                    'https://home-assistant.io/components/{}/'.format(domain))
+                    'https://open-peer-power.io/components/{}/'.format(domain))
 
     return message
 
 
 async def async_process_ha_core_config(
-        hass: HomeAssistant, config: Dict,
+        opp: OpenPeerPower, config: Dict,
         api_password: Optional[str] = None,
         trusted_networks: Optional[Any] = None) -> None:
     """Process the [openpeerpower] section from the configuration.
@@ -484,7 +484,7 @@ async def async_process_ha_core_config(
     config = CORE_CONFIG_SCHEMA(config)
 
     # Only load auth during startup.
-    if not hasattr(hass, 'auth'):
+    if not hasattr(opp, 'auth'):
         auth_conf = config.get(CONF_AUTH_PROVIDERS)
 
         if auth_conf is None:
@@ -506,12 +506,12 @@ async def async_process_ha_core_config(
             {'type': 'totp', 'id': 'totp', 'name': 'Authenticator app'},
         ])
 
-        setattr(hass, 'auth', await auth.auth_manager_from_config(
-            hass,
+        setattr(opp, 'auth', await auth.auth_manager_from_config(
+            opp,
             auth_conf,
             mfa_conf))
 
-    hac = hass.config
+    hac = opp.config
 
     def set_time_zone(time_zone_str: Optional[str]) -> None:
         """Help to set the time zone."""
@@ -536,7 +536,7 @@ async def async_process_ha_core_config(
     set_time_zone(config.get(CONF_TIME_ZONE))
 
     # Init whitelist external dir
-    hac.whitelist_external_dirs = {hass.config.path('www')}
+    hac.whitelist_external_dirs = {opp.config.path('www')}
     if CONF_WHITELIST_EXTERNAL_DIRS in config:
         hac.whitelist_external_dirs.update(
             set(config[CONF_WHITELIST_EXTERNAL_DIRS]))
@@ -562,7 +562,7 @@ async def async_process_ha_core_config(
         cust_domain.update(pkg_cust[CONF_CUSTOMIZE_DOMAIN])
         cust_glob.update(pkg_cust[CONF_CUSTOMIZE_GLOB])
 
-    hass.data[DATA_CUSTOMIZE] = \
+    opp.data[DATA_CUSTOMIZE] = \
         EntityValues(cust_exact, cust_domain, cust_glob)
 
     if CONF_UNIT_SYSTEM in config:
@@ -592,7 +592,7 @@ async def async_process_ha_core_config(
     if None in (hac.latitude, hac.longitude, hac.units,
                 hac.time_zone):
         info = await loc_util.async_detect_location_info(
-            hass.helpers.aiohttp_client.async_get_clientsession()
+            opp.helpers.aiohttp_client.async_get_clientsession()
         )
 
         if info is None:
@@ -619,7 +619,7 @@ async def async_process_ha_core_config(
     if hac.elevation is None and hac.latitude is not None and \
        hac.longitude is not None:
         elevation = await loc_util.async_get_elevation(
-            hass.helpers.aiohttp_client.async_get_clientsession(),
+            opp.helpers.aiohttp_client.async_get_clientsession(),
             hac.latitude, hac.longitude)
         hac.elevation = elevation
         discovered.append(('elevation', elevation))
@@ -683,7 +683,7 @@ def _recursive_merge(
     return error
 
 
-async def merge_packages_config(hass: HomeAssistant, config: Dict,
+async def merge_packages_config(opp: OpenPeerPower, config: Dict,
                                 packages: Dict,
                                 _log_pkg_error: Callable = _log_pkg_error) \
         -> Dict:
@@ -699,7 +699,7 @@ async def merge_packages_config(hass: HomeAssistant, config: Dict,
             domain = comp_name.split(' ')[0]
 
             try:
-                integration = await async_get_integration(hass, domain)
+                integration = await async_get_integration(opp, domain)
             except IntegrationNotFound:
                 _log_pkg_error(pack_name, comp_name, config, "does not exist")
                 continue
@@ -761,7 +761,7 @@ async def merge_packages_config(hass: HomeAssistant, config: Dict,
 
 
 async def async_process_component_config(
-        hass: HomeAssistant, config: Dict, integration: Integration) \
+        opp: OpenPeerPower, config: Dict, integration: Integration) \
             -> Optional[Dict]:
     """Check component configuration and return processed configuration.
 
@@ -776,7 +776,7 @@ async def async_process_component_config(
         try:
             return component.CONFIG_SCHEMA(config)  # type: ignore
         except vol.Invalid as ex:
-            async_log_exception(ex, domain, config, hass)
+            async_log_exception(ex, domain, config, opp)
             return None
 
     component_platform_schema = getattr(
@@ -792,7 +792,7 @@ async def async_process_component_config(
         try:
             p_validated = component_platform_schema(p_config)
         except vol.Invalid as ex:
-            async_log_exception(ex, domain, p_config, hass)
+            async_log_exception(ex, domain, p_config, opp)
             continue
 
         # Not all platform components follow same pattern for platforms
@@ -803,7 +803,7 @@ async def async_process_component_config(
             continue
 
         try:
-            p_integration = await async_get_integration(hass, p_name)
+            p_integration = await async_get_integration(opp, p_name)
             platform = p_integration.get_platform(domain)
         except (IntegrationNotFound, ImportError):
             continue
@@ -816,7 +816,7 @@ async def async_process_component_config(
                     p_config)
             except vol.Invalid as ex:
                 async_log_exception(ex, '{}.{}'.format(domain, p_name),
-                                    p_config, hass)
+                                    p_config, opp)
                 continue
 
         platforms.append(p_validated)
@@ -831,14 +831,14 @@ async def async_process_component_config(
     return config
 
 
-async def async_check_ha_config_file(hass: HomeAssistant) -> Optional[str]:
-    """Check if Home Assistant configuration file is valid.
+async def async_check_ha_config_file(opp: OpenPeerPower) -> Optional[str]:
+    """Check if Open Peer Power configuration file is valid.
 
     This method is a coroutine.
     """
     from openpeerpower.scripts.check_config import check_ha_config_file
 
-    res = await check_ha_config_file(hass)  # type: ignore
+    res = await check_ha_config_file(opp)  # type: ignore
 
     if not res.errors:
         return None
@@ -847,7 +847,7 @@ async def async_check_ha_config_file(hass: HomeAssistant) -> Optional[str]:
 
 @callback
 def async_notify_setup_error(
-        hass: HomeAssistant, component: str,
+        opp: OpenPeerPower, component: str,
         display_link: bool = False) -> None:
     """Print a persistent notification.
 
@@ -855,10 +855,10 @@ def async_notify_setup_error(
     """
     from openpeerpower.components import persistent_notification
 
-    errors = hass.data.get(DATA_PERSISTENT_ERRORS)
+    errors = opp.data.get(DATA_PERSISTENT_ERRORS)
 
     if errors is None:
-        errors = hass.data[DATA_PERSISTENT_ERRORS] = {}
+        errors = opp.data[DATA_PERSISTENT_ERRORS] = {}
 
     errors[component] = errors.get(component) or display_link
 
@@ -875,4 +875,4 @@ def async_notify_setup_error(
     message += '\nPlease check your config.'
 
     persistent_notification.async_create(
-        hass, message, 'Invalid config', 'invalid_config')
+        opp, message, 'Invalid config', 'invalid_config')

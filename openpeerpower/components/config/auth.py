@@ -1,7 +1,7 @@
-"""Offer API to configure Home Assistant auth."""
+"""Offer API to configure Open Peer Power auth."""
 import voluptuous as vol
 
-from homeassistant.components import websocket_api
+from openpeerpower.components import websocket_api
 
 
 WS_TYPE_LIST = 'config/auth/list'
@@ -22,29 +22,29 @@ SCHEMA_WS_CREATE = websocket_api.BASE_COMMAND_MESSAGE_SCHEMA.extend({
 })
 
 
-async def async_setup(hass):
-    """Enable the Home Assistant views."""
-    hass.components.websocket_api.async_register_command(
+async def async_setup(opp):
+    """Enable the Open Peer Power views."""
+    opp.components.websocket_api.async_register_command(
         WS_TYPE_LIST, websocket_list,
         SCHEMA_WS_LIST
     )
-    hass.components.websocket_api.async_register_command(
+    opp.components.websocket_api.async_register_command(
         WS_TYPE_DELETE, websocket_delete,
         SCHEMA_WS_DELETE
     )
-    hass.components.websocket_api.async_register_command(
+    opp.components.websocket_api.async_register_command(
         WS_TYPE_CREATE, websocket_create,
         SCHEMA_WS_CREATE
     )
-    hass.components.websocket_api.async_register_command(websocket_update)
+    opp.components.websocket_api.async_register_command(websocket_update)
     return True
 
 
 @websocket_api.require_admin
 @websocket_api.async_response
-async def websocket_list(hass, connection, msg):
+async def websocket_list(opp, connection, msg):
     """Return a list of users."""
-    result = [_user_info(u) for u in await hass.auth.async_get_users()]
+    result = [_user_info(u) for u in await opp.auth.async_get_users()]
 
     connection.send_message(
         websocket_api.result_message(msg['id'], result))
@@ -52,7 +52,7 @@ async def websocket_list(hass, connection, msg):
 
 @websocket_api.require_admin
 @websocket_api.async_response
-async def websocket_delete(hass, connection, msg):
+async def websocket_delete(opp, connection, msg):
     """Delete a user."""
     if msg['user_id'] == connection.user.id:
         connection.send_message(websocket_api.error_message(
@@ -60,14 +60,14 @@ async def websocket_delete(hass, connection, msg):
             'Unable to delete your own account'))
         return
 
-    user = await hass.auth.async_get_user(msg['user_id'])
+    user = await opp.auth.async_get_user(msg['user_id'])
 
     if not user:
         connection.send_message(websocket_api.error_message(
             msg['id'], 'not_found', 'User not found'))
         return
 
-    await hass.auth.async_remove_user(user)
+    await opp.auth.async_remove_user(user)
 
     connection.send_message(
         websocket_api.result_message(msg['id']))
@@ -75,9 +75,9 @@ async def websocket_delete(hass, connection, msg):
 
 @websocket_api.require_admin
 @websocket_api.async_response
-async def websocket_create(hass, connection, msg):
+async def websocket_create(opp, connection, msg):
     """Create a user."""
-    user = await hass.auth.async_create_user(msg['name'])
+    user = await opp.auth.async_create_user(msg['name'])
 
     connection.send_message(
         websocket_api.result_message(msg['id'], {
@@ -93,9 +93,9 @@ async def websocket_create(hass, connection, msg):
     vol.Optional('name'): str,
     vol.Optional('group_ids'): [str]
 })
-async def websocket_update(hass, connection, msg):
+async def websocket_update(opp, connection, msg):
     """Update a user."""
-    user = await hass.auth.async_get_user(msg.pop('user_id'))
+    user = await opp.auth.async_get_user(msg.pop('user_id'))
 
     if not user:
         connection.send_message(websocket_api.error_message(
@@ -111,7 +111,7 @@ async def websocket_update(hass, connection, msg):
     msg.pop('type')
     msg_id = msg.pop('id')
 
-    await hass.auth.async_update_user(user, **msg)
+    await opp.auth.async_update_user(user, **msg)
 
     connection.send_message(
         websocket_api.result_message(msg_id, {

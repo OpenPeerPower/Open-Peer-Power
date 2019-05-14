@@ -1,4 +1,4 @@
-"""Provide an authentication layer for Home Assistant."""
+"""Provide an authentication layer for Open Peer Power."""
 import asyncio
 import logging
 from collections import OrderedDict
@@ -64,7 +64,7 @@ async def auth_manager_from_config(
 
 
 class AuthManager:
-    """Manage the authentication for Home Assistant."""
+    """Manage the authentication for Open Peer Power."""
 
     def __init__(self, opp: OpenPeerPower, store: auth_store.AuthStore,
                  providers: _ProviderDict, mfa_modules: _MfaModuleDict) \

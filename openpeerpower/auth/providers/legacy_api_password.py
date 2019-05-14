@@ -8,8 +8,8 @@ from typing import Any, Dict, Optional, cast
 
 import voluptuous as vol
 
-from openpeerpower.core import HomeAssistant, callback
-from openpeerpower.exceptions import HomeAssistantError
+from openpeerpower.core import OpenPeerPower, callback
+from openpeerpower.exceptions import OpenPeerPowerError
 import openpeerpower.helpers.config_validation as cv
 
 from . import AuthProvider, AUTH_PROVIDER_SCHEMA, AUTH_PROVIDERS, LoginFlow
@@ -26,14 +26,14 @@ CONFIG_SCHEMA = AUTH_PROVIDER_SCHEMA.extend({
 LEGACY_USER_NAME = 'Legacy API password user'
 
 
-class InvalidAuthError(HomeAssistantError):
+class InvalidAuthError(OpenPeerPowerError):
     """Raised when submitting invalid authentication."""
 
 
-async def async_validate_password(hass: HomeAssistant, password: str)\
+async def async_validate_password(opp: OpenPeerPower, password: str)\
         -> Optional[User]:
     """Return a user if password is valid. None if not."""
-    auth = cast(AuthManager, hass.auth)  # type: ignore
+    auth = cast(AuthManager, opp.auth)  # type: ignore
     providers = auth.get_auth_providers(AUTH_PROVIDER_TYPE)
     if not providers:
         raise ValueError('Legacy API password provider not found')

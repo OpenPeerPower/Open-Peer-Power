@@ -4,7 +4,7 @@ import fnmatch
 import re
 from typing import Any, Dict, Optional, Pattern  # noqa: F401
 
-from homeassistant.core import split_entity_id
+from openpeerpower.core import split_entity_id
 
 
 class EntityValues:

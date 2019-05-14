@@ -1,4 +1,4 @@
-"""Auth providers for Home Assistant."""
+"""Auth providers for Open Peer Power."""
 import importlib
 import logging
 import types
@@ -10,7 +10,7 @@ from voluptuous.humanize import humanize_error
 from openpeerpower import data_entry_flow, requirements
 from openpeerpower.core import callback, OpenPeerPower
 from openpeerpower.const import CONF_ID, CONF_NAME, CONF_TYPE
-from openpeerpower.exceptions import HomeAssistantError
+from openpeerpower.exceptions import OpenPeerPowerError
 from openpeerpower.util import dt as dt_util
 from openpeerpower.util.decorator import Registry
 
@@ -134,7 +134,7 @@ async def load_auth_provider_module(
             'openpeerpower.auth.providers.{}'.format(provider))
     except ImportError as err:
         _LOGGER.error('Unable to load auth provider %s: %s', provider, err)
-        raise HomeAssistantError('Unable to load auth provider {}: {}'.format(
+        raise OpenPeerPowerError('Unable to load auth provider {}: {}'.format(
             provider, err))
 
     if opp.config.skip_pip or not hasattr(module, 'REQUIREMENTS'):
@@ -153,7 +153,7 @@ async def load_auth_provider_module(
         opp, 'auth provider {}'.format(provider), reqs)
 
     if not req_success:
-        raise HomeAssistantError(
+        raise OpenPeerPowerError(
             'Unable to process requirements of auth provider {}'.format(
                 provider))
 
@@ -228,7 +228,7 @@ class LoginFlow(data_entry_flow.FlowHandler):
                                           'async_initialize_login_mfa_step'):
             try:
                 await auth_module.async_initialize_login_mfa_step(self.user.id)
-            except HomeAssistantError:
+            except OpenPeerPowerError:
                 _LOGGER.exception('Error initializing MFA step')
                 return self.async_abort(reason='unknown_error')
 

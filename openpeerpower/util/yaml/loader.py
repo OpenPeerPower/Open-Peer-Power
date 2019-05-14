@@ -18,7 +18,7 @@ try:
 except ImportError:
     credstash = None
 
-from homeassistant.exceptions import HomeAssistantError
+from openpeerpower.exceptions import OpenPeerPowerError
 
 from .const import _SECRET_NAMESPACE, SECRET_YAML
 from .objects import NodeListClass, NodeStrClass
@@ -62,10 +62,10 @@ def load_yaml(fname: str) -> JSON_TYPE:
             return yaml.load(conf_file, Loader=SafeLineLoader) or OrderedDict()
     except yaml.YAMLError as exc:
         _LOGGER.error(str(exc))
-        raise HomeAssistantError(exc)
+        raise OpenPeerPowerError(exc)
     except UnicodeDecodeError as exc:
         _LOGGER.error("Unable to read file %s: %s", fname, exc)
-        raise HomeAssistantError(exc)
+        raise OpenPeerPowerError(exc)
 
 
 # pylint: disable=pointless-statement
@@ -222,7 +222,7 @@ def _env_var_yaml(loader: SafeLineLoader,
     if args[0] in os.environ:
         return os.environ[args[0]]
     _LOGGER.error("Environment variable %s not defined.", node.value)
-    raise HomeAssistantError(node.value)
+    raise OpenPeerPowerError(node.value)
 
 
 def _load_secret_yaml(secret_path: str) -> JSON_TYPE:
@@ -235,7 +235,7 @@ def _load_secret_yaml(secret_path: str) -> JSON_TYPE:
     try:
         secrets = load_yaml(secret_path)
         if not isinstance(secrets, dict):
-            raise HomeAssistantError('Secrets is not a dictionary')
+            raise OpenPeerPowerError('Secrets is not a dictionary')
         if 'logger' in secrets:
             logger = str(secrets['logger']).lower()
             if logger == 'debug':
@@ -267,7 +267,7 @@ def secret_yaml(loader: SafeLineLoader,
 
         secret_path = os.path.dirname(secret_path)
         if not os.path.exists(secret_path) or len(secret_path) < 5:
-            break  # Somehow we got past the .homeassistant config folder
+            break  # Somehow we got past the .openpeerpower config folder
 
     if keyring:
         # do some keyring stuff
@@ -291,7 +291,7 @@ def secret_yaml(loader: SafeLineLoader,
             # Catch if package installed and no config
             credstash = None
 
-    raise HomeAssistantError("Secret {} not defined".format(node.value))
+    raise OpenPeerPowerError("Secret {} not defined".format(node.value))
 
 
 yaml.SafeLoader.add_constructor('!include', _include_yaml)

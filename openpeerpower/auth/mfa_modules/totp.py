@@ -7,7 +7,7 @@ from typing import Any, Dict, Optional, Tuple  # noqa: F401
 import voluptuous as vol
 
 from openpeerpower.auth.models import User
-from openpeerpower.core import HomeAssistant
+from openpeerpower.core import OpenPeerPower
 
 from . import MultiFactorAuthModule, MULTI_FACTOR_AUTH_MODULES, \
     MULTI_FACTOR_AUTH_MODULE_SCHEMA, SetupFlow
@@ -51,7 +51,7 @@ def _generate_secret_and_qr_code(username: str) -> Tuple[str, str, str]:
 
     ota_secret = pyotp.random_base32()
     url = pyotp.totp.TOTP(ota_secret).provisioning_uri(
-        username, issuer_name="Home Assistant")
+        username, issuer_name="Open Peer Power")
     image = _generate_qr_code(url)
     return ota_secret, url, image
 
@@ -63,11 +63,11 @@ class TotpAuthModule(MultiFactorAuthModule):
     DEFAULT_TITLE = 'Time-based One Time Password'
     MAX_RETRY_TIME = 5
 
-    def __init__(self, hass: HomeAssistant, config: Dict[str, Any]) -> None:
+    def __init__(self, opp: OpenPeerPower, config: Dict[str, Any]) -> None:
         """Initialize the user data store."""
-        super().__init__(hass, config)
+        super().__init__(opp, config)
         self._users = None  # type: Optional[Dict[str, str]]
-        self._user_store = hass.helpers.storage.Store(
+        self._user_store = opp.helpers.storage.Store(
             STORAGE_VERSION, STORAGE_KEY, private=True)
         self._init_lock = asyncio.Lock()
 
@@ -108,7 +108,7 @@ class TotpAuthModule(MultiFactorAuthModule):
 
         Mfa module should extend SetupFlow
         """
-        user = await self.hass.auth.async_get_user(user_id)   # type: ignore
+        user = await self.opp.auth.async_get_user(user_id)   # type: ignore
         return TotpSetupFlow(self, self.input_schema, user)
 
     async def async_setup_user(self, user_id: str, setup_data: Any) -> str:
@@ -116,7 +116,7 @@ class TotpAuthModule(MultiFactorAuthModule):
         if self._users is None:
             await self._async_load()
 
-        result = await self.hass.async_add_executor_job(
+        result = await self.opp.async_add_executor_job(
             self._add_ota_secret, user_id, setup_data.get('secret'))
 
         await self._async_save()
@@ -145,7 +145,7 @@ class TotpAuthModule(MultiFactorAuthModule):
 
         # user_input has been validate in caller
         # set INPUT_FIELD_CODE as vol.Required is not user friendly
-        return await self.hass.async_add_executor_job(
+        return await self.opp.async_add_executor_job(
             self._validate_2fa, user_id, user_input.get(INPUT_FIELD_CODE, ''))
 
     def _validate_2fa(self, user_id: str, code: str) -> bool:
@@ -190,7 +190,7 @@ class TotpSetupFlow(SetupFlow):
         errors = {}  # type: Dict[str, str]
 
         if user_input:
-            verified = await self.hass.async_add_executor_job(  # type: ignore
+            verified = await self.opp.async_add_executor_job(  # type: ignore
                 pyotp.TOTP(self._ota_secret).verify, user_input['code'])
             if verified:
                 result = await self._auth_module.async_setup_user(
@@ -203,9 +203,9 @@ class TotpSetupFlow(SetupFlow):
             errors['base'] = 'invalid_code'
 
         else:
-            hass = self._auth_module.hass
+            opp = self._auth_module.opp
             self._ota_secret, self._url, self._image = \
-                await hass.async_add_executor_job(  # type: ignore
+                await opp.async_add_executor_job(  # type: ignore
                     _generate_secret_and_qr_code, str(self._user.name))
 
         return self.async_show_form(

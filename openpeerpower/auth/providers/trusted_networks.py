@@ -11,7 +11,7 @@ import voluptuous as vol
 
 import openpeerpower.helpers.config_validation as cv
 from openpeerpower.core import callback
-from openpeerpower.exceptions import HomeAssistantError
+from openpeerpower.exceptions import OpenPeerPowerError
 from . import AuthProvider, AUTH_PROVIDER_SCHEMA, AUTH_PROVIDERS, LoginFlow
 from ..models import Credentials, UserMeta
 
@@ -41,11 +41,11 @@ CONFIG_SCHEMA = AUTH_PROVIDER_SCHEMA.extend({
 }, extra=vol.PREVENT_EXTRA)
 
 
-class InvalidAuthError(HomeAssistantError):
+class InvalidAuthError(OpenPeerPowerError):
     """Raised when try to access from untrusted networks."""
 
 
-class InvalidUserError(HomeAssistantError):
+class InvalidUserError(OpenPeerPowerError):
     """Raised when try to login as invalid user."""
 
 

@@ -14,17 +14,17 @@ from uuid import UUID
 import voluptuous as vol
 from pkg_resources import parse_version
 
-import homeassistant.util.dt as dt_util
-from homeassistant.const import (
+import openpeerpower.util.dt as dt_util
+from openpeerpower.const import (
     CONF_ABOVE, CONF_ALIAS, CONF_BELOW, CONF_CONDITION, CONF_ENTITY_ID,
     CONF_ENTITY_NAMESPACE, CONF_NAME, CONF_PLATFORM, CONF_SCAN_INTERVAL,
     CONF_UNIT_SYSTEM_IMPERIAL, CONF_UNIT_SYSTEM_METRIC, CONF_VALUE_TEMPLATE,
     CONF_TIMEOUT, ENTITY_MATCH_ALL, SUN_EVENT_SUNRISE, SUN_EVENT_SUNSET,
     TEMP_CELSIUS, TEMP_FAHRENHEIT, WEEKDAYS, __version__)
-from homeassistant.core import valid_entity_id, split_entity_id
-from homeassistant.exceptions import TemplateError
-from homeassistant.helpers.logging import KeywordStyleAdapter
-from homeassistant.util import slugify as util_slugify
+from openpeerpower.core import valid_entity_id, split_entity_id
+from openpeerpower.exceptions import TemplateError
+from openpeerpower.helpers.logging import KeywordStyleAdapter
+from openpeerpower.util import slugify as util_slugify
 
 # pylint: disable=invalid-name
 
@@ -38,7 +38,7 @@ INVALID_ENTITY_IDS_FOUND = {}
 INVALID_EXTRA_KEYS_FOUND = []
 
 
-# Home Assistant types
+# Open Peer Power types
 byte = vol.All(vol.Coerce(int), vol.Range(min=0, max=255))
 small_float = vol.All(vol.Coerce(float), vol.Range(min=0, max=1))
 positive_int = vol.All(vol.Coerce(int), vol.Range(min=0))
@@ -444,7 +444,7 @@ unit_system = vol.All(vol.Lower, vol.Any(CONF_UNIT_SYSTEM_METRIC,
 
 def template(value):
     """Validate a jinja2 template."""
-    from homeassistant.helpers import template as template_helper
+    from openpeerpower.helpers import template as template_helper
 
     if value is None:
         raise vol.Invalid('template value is None')

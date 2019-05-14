@@ -11,7 +11,7 @@ import attr
 import voluptuous as vol
 
 from openpeerpower.const import CONF_EXCLUDE, CONF_INCLUDE
-from openpeerpower.core import HomeAssistant, callback
+from openpeerpower.core import OpenPeerPower, callback
 from openpeerpower.exceptions import ServiceNotFound
 from openpeerpower.helpers import config_validation as cv
 
@@ -26,7 +26,7 @@ CONFIG_SCHEMA = MULTI_FACTOR_AUTH_MODULE_SCHEMA.extend({
     vol.Optional(CONF_INCLUDE): vol.All(cv.ensure_list, [cv.string]),
     vol.Optional(CONF_EXCLUDE): vol.All(cv.ensure_list, [cv.string]),
     vol.Optional(CONF_MESSAGE,
-                 default='{} is your Home Assistant login code'): str
+                 default='{} is your Open Peer Power login code'): str
 }, extra=vol.PREVENT_EXTRA)
 
 STORAGE_VERSION = 1
@@ -82,11 +82,11 @@ class NotifyAuthModule(MultiFactorAuthModule):
 
     DEFAULT_TITLE = 'Notify One-Time Password'
 
-    def __init__(self, hass: HomeAssistant, config: Dict[str, Any]) -> None:
+    def __init__(self, opp: OpenPeerPower, config: Dict[str, Any]) -> None:
         """Initialize the user data store."""
-        super().__init__(hass, config)
+        super().__init__(opp, config)
         self._user_settings = None  # type: Optional[_UsersDict]
-        self._user_store = hass.helpers.storage.Store(
+        self._user_store = opp.helpers.storage.Store(
             STORAGE_VERSION, STORAGE_KEY, private=True)
         self._include = config.get(CONF_INCLUDE, [])
         self._exclude = config.get(CONF_EXCLUDE, [])
@@ -134,7 +134,7 @@ class NotifyAuthModule(MultiFactorAuthModule):
         """Return list of notify services."""
         unordered_services = set()
 
-        for service in self.hass.services.async_services().get('notify', {}):
+        for service in self.opp.services.async_services().get('notify', {}):
             if service not in self._exclude:
                 unordered_services.add(service)
 
@@ -194,7 +194,7 @@ class NotifyAuthModule(MultiFactorAuthModule):
             return False
 
         # user_input has been validate in caller
-        return await self.hass.async_add_executor_job(
+        return await self.opp.async_add_executor_job(
             _verify_otp, notify_setting.secret,
             user_input.get(INPUT_FIELD_CODE, ''),
             notify_setting.counter)
@@ -218,7 +218,7 @@ class NotifyAuthModule(MultiFactorAuthModule):
             return _generate_otp(
                 notify_setting.secret, notify_setting.counter)
 
-        code = await self.hass.async_add_executor_job(
+        code = await self.opp.async_add_executor_job(
             generate_secret_and_one_time_password)
 
         await self.async_notify_user(user_id, code)
@@ -244,7 +244,7 @@ class NotifyAuthModule(MultiFactorAuthModule):
         if target:
             data['target'] = [target]
 
-        await self.hass.services.async_call('notify', notify_service, data)
+        await self.opp.services.async_call('notify', notify_service, data)
 
 
 class NotifySetupFlow(SetupFlow):
@@ -270,12 +270,12 @@ class NotifySetupFlow(SetupFlow):
         """Let user select available notify services."""
         errors = {}  # type: Dict[str, str]
 
-        hass = self._auth_module.hass
+        opp = self._auth_module.opp
         if user_input:
             self._notify_service = user_input['notify_service']
             self._target = user_input.get('target')
-            self._secret = await hass.async_add_executor_job(_generate_secret)
-            self._count = await hass.async_add_executor_job(_generate_random)
+            self._secret = await opp.async_add_executor_job(_generate_secret)
+            self._count = await opp.async_add_executor_job(_generate_random)
 
             return await self.async_step_setup()
 
@@ -298,9 +298,9 @@ class NotifySetupFlow(SetupFlow):
         """Verify user can recevie one-time password."""
         errors = {}  # type: Dict[str, str]
 
-        hass = self._auth_module.hass
+        opp = self._auth_module.opp
         if user_input:
-            verified = await hass.async_add_executor_job(
+            verified = await opp.async_add_executor_job(
                 _verify_otp, self._secret, user_input['code'], self._count)
             if verified:
                 await self._auth_module.async_setup_user(
@@ -317,7 +317,7 @@ class NotifySetupFlow(SetupFlow):
 
         # generate code every time, no retry logic
         assert self._secret and self._count
-        code = await hass.async_add_executor_job(
+        code = await opp.async_add_executor_job(
             _generate_otp, self._secret, self._count)
 
         assert self._notify_service

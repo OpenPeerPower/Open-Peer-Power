@@ -1,4 +1,4 @@
-"""The exceptions used by Home Assistant."""
+"""The exceptions used by Open Peer Power."""
 from typing import Optional, Tuple, TYPE_CHECKING
 import jinja2
 
@@ -7,17 +7,17 @@ if TYPE_CHECKING:
     # pylint: disable=unused-import
     from .core import Context  # noqa
 
-class HomeAssistantError(Exception):
-    """General Home Assistant exception occurred."""
+class OpenPeerPowerError(Exception):
+    """General Open Peer Power exception occurred."""
 
-class InvalidEntityFormatError(HomeAssistantError):
+class InvalidEntityFormatError(OpenPeerPowerError):
     """When an invalid formatted entity is encountered."""
 
 
-class NoEntitySpecifiedError(HomeAssistantError):
+class NoEntitySpecifiedError(OpenPeerPowerError):
     """When no entity is specified."""
 
-class TemplateError(HomeAssistantError):
+class TemplateError(OpenPeerPowerError):
     """Error during template rendering."""
 
     def __init__(self, exception: jinja2.TemplateError) -> None:
@@ -25,16 +25,16 @@ class TemplateError(HomeAssistantError):
         super().__init__('{}: {}'.format(exception.__class__.__name__,
                                          exception))
 
-class PlatformNotReady(HomeAssistantError):
+class PlatformNotReady(OpenPeerPowerError):
     """Error to indicate that platform is not ready."""
 
-class ConfigEntryNotReady(HomeAssistantError):
+class ConfigEntryNotReady(OpenPeerPowerError):
     """Error to indicate that config entry is not ready."""
 
-class InvalidStateError(HomeAssistantError):
+class InvalidStateError(OpenPeerPowerError):
     """When an invalid state is encountered."""
 
-class Unauthorized(HomeAssistantError):
+class Unauthorized(OpenPeerPowerError):
     """When an action is unauthorized."""
 
     def __init__(self, context: Optional['Context'] = None,
@@ -57,7 +57,7 @@ class Unauthorized(HomeAssistantError):
 class UnknownUser(Unauthorized):
     """When call is made with user ID that doesn't exist."""
 
-class ServiceNotFound(HomeAssistantError):
+class ServiceNotFound(OpenPeerPowerError):
     """Raised when a service is not found."""
 
     def __init__(self, domain: str, service: str) -> None:

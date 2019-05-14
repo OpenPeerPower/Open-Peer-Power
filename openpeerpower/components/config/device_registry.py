@@ -1,11 +1,11 @@
 """HTTP views to interact with the device registry."""
 import voluptuous as vol
 
-from homeassistant.components import websocket_api
-from homeassistant.components.websocket_api.decorators import (
+from openpeerpower.components import websocket_api
+from openpeerpower.components.websocket_api.decorators import (
     async_response, require_admin)
-from homeassistant.core import callback
-from homeassistant.helpers.device_registry import async_get_registry
+from openpeerpower.core import callback
+from openpeerpower.helpers.device_registry import async_get_registry
 
 WS_TYPE_LIST = 'config/device_registry/list'
 SCHEMA_WS_LIST = websocket_api.BASE_COMMAND_MESSAGE_SCHEMA.extend({
@@ -21,22 +21,22 @@ SCHEMA_WS_UPDATE = websocket_api.BASE_COMMAND_MESSAGE_SCHEMA.extend({
 })
 
 
-async def async_setup(hass):
+async def async_setup(opp):
     """Enable the Device Registry views."""
-    hass.components.websocket_api.async_register_command(
+    opp.components.websocket_api.async_register_command(
         WS_TYPE_LIST, websocket_list_devices,
         SCHEMA_WS_LIST
     )
-    hass.components.websocket_api.async_register_command(
+    opp.components.websocket_api.async_register_command(
         WS_TYPE_UPDATE, websocket_update_device, SCHEMA_WS_UPDATE
     )
     return True
 
 
 @async_response
-async def websocket_list_devices(hass, connection, msg):
+async def websocket_list_devices(opp, connection, msg):
     """Handle list devices command."""
-    registry = await async_get_registry(hass)
+    registry = await async_get_registry(opp)
     connection.send_message(websocket_api.result_message(
         msg['id'], [_entry_dict(entry) for entry in registry.devices.values()]
     ))
@@ -44,9 +44,9 @@ async def websocket_list_devices(hass, connection, msg):
 
 @require_admin
 @async_response
-async def websocket_update_device(hass, connection, msg):
+async def websocket_update_device(opp, connection, msg):
     """Handle update area websocket command."""
-    registry = await async_get_registry(hass)
+    registry = await async_get_registry(opp)
 
     msg.pop('type')
     msg_id = msg.pop('id')

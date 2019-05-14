@@ -5,10 +5,10 @@ import attr
 
 if TYPE_CHECKING:
     # pylint: disable=unused-import
-    from homeassistant.helpers import (  # noqa
+    from openpeerpower.helpers import (  # noqa
         entity_registry as ent_reg,
     )
-    from homeassistant.helpers import (  # noqa
+    from openpeerpower.helpers import (  # noqa
         device_registry as dev_reg,
     )
 

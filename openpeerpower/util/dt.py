@@ -1,4 +1,4 @@
-"""Helper methods to handle the time in Home Assistant."""
+"""Helper methods to handle the time in Open Peer Power."""
 import datetime as dt
 import re
 from typing import (Any, Union, Optional,  # noqa pylint: disable=unused-import
@@ -8,7 +8,7 @@ import pytz
 import pytz.exceptions as pytzexceptions
 import pytz.tzinfo as pytzinfo  # noqa pylint: disable=unused-import
 
-from homeassistant.const import MATCH_ALL
+from openpeerpower.const import MATCH_ALL
 
 DATE_STR_FORMAT = "%Y-%m-%d"
 UTC = pytz.utc

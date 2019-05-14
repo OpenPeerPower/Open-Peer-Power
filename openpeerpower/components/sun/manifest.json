@@ -1,10 +1,10 @@
 {
   "domain": "sun",
   "name": "Sun",
-  "documentation": "https://www.home-assistant.io/components/sun",
+  "documentation": "https://www.open-peer-power.io/components/sun",
   "requirements": [],
   "dependencies": [],
   "codeowners": [
-    "@home-assistant/core"
+    "@open-peer-power/core"
   ]
 }
