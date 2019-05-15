@@ -1,7 +1,7 @@
 {
   "domain": "lock",
   "name": "Lock",
-  "documentation": "https://www.home-assistant.io/components/lock",
+  "documentation": "https://www.open-peer-power.io/components/lock",
   "requirements": [],
   "dependencies": [
     "group"

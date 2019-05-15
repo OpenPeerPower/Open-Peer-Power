@@ -18,11 +18,11 @@
                 "description": "Introdueix la informaci\u00f3 de connexi\u00f3 del teu broker MQTT.",
                 "title": "MQTT"
             },
-            "hassio_confirm": {
+            "oppio_confirm": {
                 "data": {
                     "discovery": "Habilitar descobriment autom\u00e0tic"
                 },
-                "description": "Vols configurar Home Assistant perqu\u00e8 es connecti amb el broker MQTT proporcionat pel complement de hass.io {addon}?",
+                "description": "Vols configurar Home Assistant perqu\u00e8 es connecti amb el broker MQTT proporcionat pel complement de opp.io {addon}?",
                 "title": "Broker MQTT a trav\u00e9s del complement de Hass.io"
             }
         },

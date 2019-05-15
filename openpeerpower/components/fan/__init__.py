@@ -5,15 +5,15 @@ import logging
 
 import voluptuous as vol
 
-from homeassistant.components import group
-from homeassistant.const import (SERVICE_TURN_ON, SERVICE_TOGGLE,
+from openpeerpower.components import group
+from openpeerpower.const import (SERVICE_TURN_ON, SERVICE_TOGGLE,
                                  SERVICE_TURN_OFF, ATTR_ENTITY_ID)
-from homeassistant.loader import bind_hass
-from homeassistant.helpers.entity import ToggleEntity
-from homeassistant.helpers.entity_component import EntityComponent
-from homeassistant.helpers.config_validation import (  # noqa
+from openpeerpower.loader import bind_opp
+from openpeerpower.helpers.entity import ToggleEntity
+from openpeerpower.helpers.entity_component import EntityComponent
+from openpeerpower.helpers.config_validation import (  # noqa
     PLATFORM_SCHEMA, PLATFORM_SCHEMA_BASE)
-import homeassistant.helpers.config_validation as cv
+import openpeerpower.helpers.config_validation as cv
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -83,18 +83,18 @@ FAN_SET_DIRECTION_SCHEMA = vol.Schema({
 })  # type: dict
 
 
-@bind_hass
-def is_on(hass, entity_id: str = None) -> bool:
+@bind_opp
+def is_on(opp, entity_id: str = None) -> bool:
     """Return if the fans are on based on the statemachine."""
     entity_id = entity_id or ENTITY_ID_ALL_FANS
-    state = hass.states.get(entity_id)
+    state = opp.states.get(entity_id)
     return state.attributes[ATTR_SPEED] not in [SPEED_OFF, None]
 
 
-async def async_setup(hass, config: dict):
+async def async_setup(opp, config: dict):
     """Expose fan control via statemachine and services."""
-    component = hass.data[DOMAIN] = EntityComponent(
-        _LOGGER, DOMAIN, hass, SCAN_INTERVAL, GROUP_NAME_ALL_FANS)
+    component = opp.data[DOMAIN] = EntityComponent(
+        _LOGGER, DOMAIN, opp, SCAN_INTERVAL, GROUP_NAME_ALL_FANS)
 
     await component.async_setup(config)
 
@@ -126,14 +126,14 @@ async def async_setup(hass, config: dict):
     return True
 
 
-async def async_setup_entry(hass, entry):
+async def async_setup_entry(opp, entry):
     """Set up a config entry."""
-    return await hass.data[DOMAIN].async_setup_entry(entry)
+    return await opp.data[DOMAIN].async_setup_entry(entry)
 
 
-async def async_unload_entry(hass, entry):
+async def async_unload_entry(opp, entry):
     """Unload a config entry."""
-    return await hass.data[DOMAIN].async_unload_entry(entry)
+    return await opp.data[DOMAIN].async_unload_entry(entry)
 
 
 class FanEntity(ToggleEntity):
@@ -150,7 +150,7 @@ class FanEntity(ToggleEntity):
         """
         if speed is SPEED_OFF:
             return self.async_turn_off()
-        return self.hass.async_add_job(self.set_speed, speed)
+        return self.opp.async_add_job(self.set_speed, speed)
 
     def set_direction(self, direction: str) -> None:
         """Set the direction of the fan."""
@@ -161,7 +161,7 @@ class FanEntity(ToggleEntity):
 
         This method must be run in the event loop and returns a coroutine.
         """
-        return self.hass.async_add_job(self.set_direction, direction)
+        return self.opp.async_add_job(self.set_direction, direction)
 
     # pylint: disable=arguments-differ
     def turn_on(self, speed: str = None, **kwargs) -> None:
@@ -176,7 +176,7 @@ class FanEntity(ToggleEntity):
         """
         if speed is SPEED_OFF:
             return self.async_turn_off()
-        return self.hass.async_add_job(
+        return self.opp.async_add_job(
             ft.partial(self.turn_on, speed, **kwargs))
 
     def oscillate(self, oscillating: bool) -> None:
@@ -188,7 +188,7 @@ class FanEntity(ToggleEntity):
 
         This method must be run in the event loop and returns a coroutine.
         """
-        return self.hass.async_add_job(self.oscillate, oscillating)
+        return self.opp.async_add_job(self.oscillate, oscillating)
 
     @property
     def is_on(self):

@@ -43,7 +43,7 @@ def create_stream_buffer(stream_output, video_stream, audio_frame):
     return (a_packet, StreamBuffer(segment, output, vstream, astream))
 
 
-def stream_worker(hass, stream, quit_event):
+def stream_worker(opp, stream, quit_event):
     """Handle consuming streams."""
     import av
     container = av.open(stream.source, options=stream.options)
@@ -78,7 +78,7 @@ def stream_worker(hass, stream, quit_event):
         except (av.AVError, StopIteration) as ex:
             # End of stream, clear listeners and stop thread
             for fmt, _ in outputs.items():
-                hass.loop.call_soon_threadsafe(
+                opp.loop.call_soon_threadsafe(
                     stream.outputs[fmt].put, None)
             _LOGGER.error("Error demuxing stream: %s", str(ex))
             break
@@ -104,7 +104,7 @@ def stream_worker(hass, stream, quit_event):
                 buffer.output.close()
                 del audio_packets[buffer.astream]
                 if stream.outputs.get(fmt):
-                    hass.loop.call_soon_threadsafe(
+                    opp.loop.call_soon_threadsafe(
                         stream.outputs[fmt].put, Segment(
                             sequence, buffer.segment, segment_duration
                         ))

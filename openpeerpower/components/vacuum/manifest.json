@@ -1,7 +1,7 @@
 {
   "domain": "vacuum",
   "name": "Vacuum",
-  "documentation": "https://www.home-assistant.io/components/vacuum",
+  "documentation": "https://www.open-peer-power.io/components/vacuum",
   "requirements": [],
   "dependencies": [
     "group"

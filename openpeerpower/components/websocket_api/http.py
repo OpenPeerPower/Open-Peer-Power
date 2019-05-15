@@ -8,10 +8,10 @@ import logging
 from aiohttp import web, WSMsgType
 import async_timeout
 
-from homeassistant.const import EVENT_HOMEASSISTANT_STOP
-from homeassistant.core import callback
-from homeassistant.components.http import OpenPeerPowerView
-from homeassistant.helpers.json import JSONEncoder
+from openpeerpower.const import EVENT_HOMEASSISTANT_STOP
+from openpeerpower.core import callback
+from openpeerpower.components.http import OpenPeerPowerView
+from openpeerpower.helpers.json import JSONEncoder
 
 from .const import (
     MAX_PENDING_MSG, CANCELLATION_ERRORS, URL, ERR_UNKNOWN_ERROR,
@@ -34,18 +34,18 @@ class WebsocketAPIView(OpenPeerPowerView):
     async def get(self, request):
         """Handle an incoming websocket connection."""
         return await WebSocketHandler(
-            request.app['hass'], request).async_handle()
+            request.app['opp'], request).async_handle()
 
 
 class WebSocketHandler:
     """Handle an active websocket client connection."""
 
-    def __init__(self, hass, request):
+    def __init__(self, opp, request):
         """Initialize an active connection."""
-        self.hass = hass
+        self.opp = opp
         self.request = request
         self.wsock = None
-        self._to_write = asyncio.Queue(maxsize=MAX_PENDING_MSG, loop=hass.loop)
+        self._to_write = asyncio.Queue(maxsize=MAX_PENDING_MSG, loop=opp.loop)
         self._handle_task = None
         self._writer_task = None
         self._logger = logging.getLogger(
@@ -103,19 +103,19 @@ class WebSocketHandler:
             # pylint: disable=no-member
             self._handle_task = asyncio.current_task()
         else:
-            self._handle_task = asyncio.Task.current_task(loop=self.hass.loop)
+            self._handle_task = asyncio.Task.current_task(loop=self.opp.loop)
 
         @callback
-        def handle_hass_stop(event):
+        def handle_opp_stop(event):
             """Cancel this connection."""
             self._cancel()
 
-        unsub_stop = self.hass.bus.async_listen(
-            EVENT_HOMEASSISTANT_STOP, handle_hass_stop)
+        unsub_stop = self.opp.bus.async_listen(
+            EVENT_HOMEASSISTANT_STOP, handle_opp_stop)
 
-        self._writer_task = self.hass.async_create_task(self._writer())
+        self._writer_task = self.opp.async_create_task(self._writer())
 
-        auth = AuthPhase(self._logger, self.hass, self._send_message, request)
+        auth = AuthPhase(self._logger, self.opp, self._send_message, request)
         connection = None
         disconnect_warn = None
 
@@ -146,9 +146,9 @@ class WebSocketHandler:
 
             self._logger.debug("Received %s", msg)
             connection = await auth.async_handle(msg)
-            self.hass.data[DATA_CONNECTIONS] = \
-                self.hass.data.get(DATA_CONNECTIONS, 0) + 1
-            self.hass.helpers.dispatcher.async_dispatcher_send(
+            self.opp.data[DATA_CONNECTIONS] = \
+                self.opp.data.get(DATA_CONNECTIONS, 0) + 1
+            self.opp.helpers.dispatcher.async_dispatcher_send(
                 SIGNAL_WEBSOCKET_CONNECTED)
 
             # Command phase
@@ -201,8 +201,8 @@ class WebSocketHandler:
                 self._logger.warning("Disconnected: %s", disconnect_warn)
 
             if connection is not None:
-                self.hass.data[DATA_CONNECTIONS] -= 1
-            self.hass.helpers.dispatcher.async_dispatcher_send(
+                self.opp.data[DATA_CONNECTIONS] -= 1
+            self.opp.helpers.dispatcher.async_dispatcher_send(
                 SIGNAL_WEBSOCKET_DISCONNECTED)
 
         return wsock

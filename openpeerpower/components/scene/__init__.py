@@ -5,19 +5,19 @@ import logging
 
 import voluptuous as vol
 
-from homeassistant.const import ATTR_ENTITY_ID, CONF_PLATFORM, SERVICE_TURN_ON
-import homeassistant.helpers.config_validation as cv
-from homeassistant.helpers.entity import Entity
-from homeassistant.helpers.entity_component import EntityComponent
-from homeassistant.helpers.state import HASS_DOMAIN
+from openpeerpower.const import ATTR_ENTITY_ID, CONF_PLATFORM, SERVICE_TURN_ON
+import openpeerpower.helpers.config_validation as cv
+from openpeerpower.helpers.entity import Entity
+from openpeerpower.helpers.entity_component import EntityComponent
+from openpeerpower.helpers.state import HASS_DOMAIN
 
 DOMAIN = 'scene'
 STATE = 'scening'
 STATES = 'states'
 
 
-def _hass_domain_validator(config):
-    """Validate platform in config for homeassistant domain."""
+def _opp_domain_validator(config):
+    """Validate platform in config for openpeerpower domain."""
     if CONF_PLATFORM not in config:
         config = {CONF_PLATFORM: HASS_DOMAIN, STATES: config}
 
@@ -32,7 +32,7 @@ def _platform_validator(config):
     except ImportError:
         try:
             platform = importlib.import_module(
-                'homeassistant.components.{}.scene'.format(
+                'openpeerpower.components.{}.scene'.format(
                     config[CONF_PLATFORM]))
         except ImportError:
             raise vol.Invalid('Invalid platform specified') from None
@@ -45,7 +45,7 @@ def _platform_validator(config):
 
 PLATFORM_SCHEMA = vol.Schema(
     vol.All(
-        _hass_domain_validator,
+        _opp_domain_validator,
         vol.Schema({
             vol.Required(CONF_PLATFORM): str
         }, extra=vol.ALLOW_EXTRA),
@@ -57,10 +57,10 @@ SCENE_SERVICE_SCHEMA = vol.Schema({
 })
 
 
-async def async_setup(hass, config):
+async def async_setup(opp, config):
     """Set up the scenes."""
     logger = logging.getLogger(__name__)
-    component = hass.data[DOMAIN] = EntityComponent(logger, DOMAIN, hass)
+    component = opp.data[DOMAIN] = EntityComponent(logger, DOMAIN, opp)
 
     await component.async_setup(config)
 
@@ -70,23 +70,23 @@ async def async_setup(hass, config):
 
         tasks = [scene.async_activate() for scene in target_scenes]
         if tasks:
-            await asyncio.wait(tasks, loop=hass.loop)
+            await asyncio.wait(tasks, loop=opp.loop)
 
-    hass.services.async_register(
+    opp.services.async_register(
         DOMAIN, SERVICE_TURN_ON, async_handle_scene_service,
         schema=SCENE_SERVICE_SCHEMA)
 
     return True
 
 
-async def async_setup_entry(hass, entry):
+async def async_setup_entry(opp, entry):
     """Set up a config entry."""
-    return await hass.data[DOMAIN].async_setup_entry(entry)
+    return await opp.data[DOMAIN].async_setup_entry(entry)
 
 
-async def async_unload_entry(hass, entry):
+async def async_unload_entry(opp, entry):
     """Unload a config entry."""
-    return await hass.data[DOMAIN].async_unload_entry(entry)
+    return await opp.data[DOMAIN].async_unload_entry(entry)
 
 
 class Scene(Entity):
@@ -111,4 +111,4 @@ class Scene(Entity):
 
         This method must be run in the event loop and returns a coroutine.
         """
-        return self.hass.async_add_job(self.activate)
+        return self.opp.async_add_job(self.activate)

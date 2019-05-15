@@ -1,14 +1,14 @@
 """Support for MySensors covers."""
-from homeassistant.components import mysensors
-from homeassistant.components.cover import ATTR_POSITION, DOMAIN, CoverDevice
-from homeassistant.const import STATE_OFF, STATE_ON
+from openpeerpower.components import mysensors
+from openpeerpower.components.cover import ATTR_POSITION, DOMAIN, CoverDevice
+from openpeerpower.const import STATE_OFF, STATE_ON
 
 
 async def async_setup_platform(
-        hass, config, async_add_entities, discovery_info=None):
+        opp, config, async_add_entities, discovery_info=None):
     """Set up the mysensors platform for covers."""
     mysensors.setup_mysensors_platform(
-        hass, DOMAIN, discovery_info, MySensorsCover,
+        opp, DOMAIN, discovery_info, MySensorsCover,
         async_add_entities=async_add_entities)
 
 

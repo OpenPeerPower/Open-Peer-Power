@@ -18,7 +18,7 @@
                 "description": "Wprowad\u017a informacje o po\u0142\u0105czeniu po\u015brednika MQTT.",
                 "title": "MQTT"
             },
-            "hassio_confirm": {
+            "oppio_confirm": {
                 "data": {
                     "discovery": "W\u0142\u0105cz wykrywanie"
                 },

@@ -3,11 +3,11 @@ import logging
 
 import voluptuous as vol
 
-from homeassistant.components.mqtt import (
+from openpeerpower.components.mqtt import (
     valid_publish_topic, valid_subscribe_topic)
-from homeassistant.const import CONF_OPTIMISTIC
-from homeassistant.core import callback
-import homeassistant.helpers.config_validation as cv
+from openpeerpower.const import CONF_OPTIMISTIC
+from openpeerpower.core import callback
+import openpeerpower.helpers.config_validation as cv
 
 from .const import (
     ATTR_DEVICES, CONF_BAUD_RATE, CONF_DEVICE, CONF_GATEWAYS,
@@ -93,18 +93,18 @@ CONFIG_SCHEMA = vol.Schema({
 }, extra=vol.ALLOW_EXTRA)
 
 
-async def async_setup(hass, config):
+async def async_setup(opp, config):
     """Set up the MySensors component."""
-    gateways = await setup_gateways(hass, config)
+    gateways = await setup_gateways(opp, config)
 
     if not gateways:
         _LOGGER.error(
             "No devices could be setup as gateways, check your configuration")
         return False
 
-    hass.data[MYSENSORS_GATEWAYS] = gateways
+    opp.data[MYSENSORS_GATEWAYS] = gateways
 
-    hass.async_create_task(finish_setup(hass, config, gateways))
+    opp.async_create_task(finish_setup(opp, config, gateways))
 
     return True
 
@@ -122,7 +122,7 @@ def _get_mysensors_name(gateway, node_id, child_id):
 
 @callback
 def setup_mysensors_platform(
-        hass, domain, discovery_info, device_class, device_args=None,
+        opp, domain, discovery_info, device_class, device_args=None,
         async_add_entities=None):
     """Set up a MySensors platform."""
     # Only act if called via MySensors by discovery event.
@@ -134,11 +134,11 @@ def setup_mysensors_platform(
     new_devices = []
     new_dev_ids = discovery_info[ATTR_DEVICES]
     for dev_id in new_dev_ids:
-        devices = get_mysensors_devices(hass, domain)
+        devices = get_mysensors_devices(opp, domain)
         if dev_id in devices:
             continue
         gateway_id, node_id, child_id, value_type = dev_id
-        gateway = get_mysensors_gateway(hass, gateway_id)
+        gateway = get_mysensors_gateway(opp, gateway_id)
         if not gateway:
             continue
         device_class_copy = device_class

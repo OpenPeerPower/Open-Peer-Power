@@ -2,21 +2,21 @@
 
 import voluptuous as vol
 
-import homeassistant.helpers.config_validation as cv
-from homeassistant import config_entries
-from homeassistant.const import (
+import openpeerpower.helpers.config_validation as cv
+from openpeerpower import config_entries
+from openpeerpower.const import (
     CONF_NAME, CONF_LATITUDE, CONF_LONGITUDE, CONF_ICON, CONF_RADIUS)
-from homeassistant.core import callback
-from homeassistant.util import slugify
+from openpeerpower.core import callback
+from openpeerpower.util import slugify
 
 from .const import CONF_PASSIVE, DOMAIN, HOME_ZONE
 
 
 @callback
-def configured_zones(hass):
+def configured_zones(opp):
     """Return a set of the configured zones."""
     return set((slugify(entry.data[CONF_NAME])) for
-               entry in hass.config_entries.async_entries(DOMAIN))
+               entry in opp.config_entries.async_entries(DOMAIN))
 
 
 @config_entries.HANDLERS.register(DOMAIN)
@@ -39,7 +39,7 @@ class ZoneFlowHandler(config_entries.ConfigFlow):
 
         if user_input is not None:
             name = slugify(user_input[CONF_NAME])
-            if name not in configured_zones(self.hass) and name != HOME_ZONE:
+            if name not in configured_zones(self.opp) and name != HOME_ZONE:
                 return self.async_create_entry(
                     title=user_input[CONF_NAME],
                     data=user_input,

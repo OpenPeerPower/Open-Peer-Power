@@ -5,14 +5,14 @@ import functools as ft
 
 import voluptuous as vol
 
-from homeassistant.helpers.temperature import display_temp as show_temp
-from homeassistant.util.temperature import convert as convert_temperature
-from homeassistant.helpers.entity_component import EntityComponent
-from homeassistant.helpers.entity import Entity
-from homeassistant.helpers.config_validation import (  # noqa
+from openpeerpower.helpers.temperature import display_temp as show_temp
+from openpeerpower.util.temperature import convert as convert_temperature
+from openpeerpower.helpers.entity_component import EntityComponent
+from openpeerpower.helpers.entity import Entity
+from openpeerpower.helpers.config_validation import (  # noqa
     PLATFORM_SCHEMA, PLATFORM_SCHEMA_BASE)
-import homeassistant.helpers.config_validation as cv
-from homeassistant.const import (
+import openpeerpower.helpers.config_validation as cv
+from openpeerpower.const import (
     ATTR_ENTITY_ID, ATTR_TEMPERATURE, SERVICE_TURN_ON, SERVICE_TURN_OFF,
     STATE_ON, STATE_OFF, TEMP_CELSIUS, PRECISION_WHOLE,
     PRECISION_TENTHS)
@@ -121,10 +121,10 @@ SET_SWING_MODE_SCHEMA = vol.Schema({
 })
 
 
-async def async_setup(hass, config):
+async def async_setup(opp, config):
     """Set up climate devices."""
-    component = hass.data[DOMAIN] = \
-        EntityComponent(_LOGGER, DOMAIN, hass, SCAN_INTERVAL)
+    component = opp.data[DOMAIN] = \
+        EntityComponent(_LOGGER, DOMAIN, opp, SCAN_INTERVAL)
     await component.async_setup(config)
 
     component.async_register_entity_service(
@@ -171,14 +171,14 @@ async def async_setup(hass, config):
     return True
 
 
-async def async_setup_entry(hass, entry):
+async def async_setup_entry(opp, entry):
     """Set up a config entry."""
-    return await hass.data[DOMAIN].async_setup_entry(entry)
+    return await opp.data[DOMAIN].async_setup_entry(entry)
 
 
-async def async_unload_entry(hass, entry):
+async def async_unload_entry(opp, entry):
     """Unload a config entry."""
-    return await hass.data[DOMAIN].async_unload_entry(entry)
+    return await opp.data[DOMAIN].async_unload_entry(entry)
 
 
 class ClimateDevice(Entity):
@@ -198,7 +198,7 @@ class ClimateDevice(Entity):
     @property
     def precision(self):
         """Return the precision of the system."""
-        if self.hass.config.units.temperature_unit == TEMP_CELSIUS:
+        if self.opp.config.units.temperature_unit == TEMP_CELSIUS:
             return PRECISION_TENTHS
         return PRECISION_WHOLE
 
@@ -207,16 +207,16 @@ class ClimateDevice(Entity):
         """Return the optional state attributes."""
         data = {
             ATTR_CURRENT_TEMPERATURE: show_temp(
-                self.hass, self.current_temperature, self.temperature_unit,
+                self.opp, self.current_temperature, self.temperature_unit,
                 self.precision),
             ATTR_MIN_TEMP: show_temp(
-                self.hass, self.min_temp, self.temperature_unit,
+                self.opp, self.min_temp, self.temperature_unit,
                 self.precision),
             ATTR_MAX_TEMP: show_temp(
-                self.hass, self.max_temp, self.temperature_unit,
+                self.opp, self.max_temp, self.temperature_unit,
                 self.precision),
             ATTR_TEMPERATURE: show_temp(
-                self.hass, self.target_temperature, self.temperature_unit,
+                self.opp, self.target_temperature, self.temperature_unit,
                 self.precision),
         }
 
@@ -226,12 +226,12 @@ class ClimateDevice(Entity):
 
         if supported_features & SUPPORT_TARGET_TEMPERATURE_HIGH:
             data[ATTR_TARGET_TEMP_HIGH] = show_temp(
-                self.hass, self.target_temperature_high, self.temperature_unit,
+                self.opp, self.target_temperature_high, self.temperature_unit,
                 self.precision)
 
         if supported_features & SUPPORT_TARGET_TEMPERATURE_LOW:
             data[ATTR_TARGET_TEMP_LOW] = show_temp(
-                self.hass, self.target_temperature_low, self.temperature_unit,
+                self.opp, self.target_temperature_low, self.temperature_unit,
                 self.precision)
 
         if self.current_humidity is not None:
@@ -373,7 +373,7 @@ class ClimateDevice(Entity):
 
         This method must be run in the event loop and returns a coroutine.
         """
-        return self.hass.async_add_job(
+        return self.opp.async_add_job(
             ft.partial(self.set_temperature, **kwargs))
 
     def set_humidity(self, humidity):
@@ -385,7 +385,7 @@ class ClimateDevice(Entity):
 
         This method must be run in the event loop and returns a coroutine.
         """
-        return self.hass.async_add_job(self.set_humidity, humidity)
+        return self.opp.async_add_job(self.set_humidity, humidity)
 
     def set_fan_mode(self, fan_mode):
         """Set new target fan mode."""
@@ -396,7 +396,7 @@ class ClimateDevice(Entity):
 
         This method must be run in the event loop and returns a coroutine.
         """
-        return self.hass.async_add_job(self.set_fan_mode, fan_mode)
+        return self.opp.async_add_job(self.set_fan_mode, fan_mode)
 
     def set_operation_mode(self, operation_mode):
         """Set new target operation mode."""
@@ -407,7 +407,7 @@ class ClimateDevice(Entity):
 
         This method must be run in the event loop and returns a coroutine.
         """
-        return self.hass.async_add_job(self.set_operation_mode, operation_mode)
+        return self.opp.async_add_job(self.set_operation_mode, operation_mode)
 
     def set_swing_mode(self, swing_mode):
         """Set new target swing operation."""
@@ -418,7 +418,7 @@ class ClimateDevice(Entity):
 
         This method must be run in the event loop and returns a coroutine.
         """
-        return self.hass.async_add_job(self.set_swing_mode, swing_mode)
+        return self.opp.async_add_job(self.set_swing_mode, swing_mode)
 
     def turn_away_mode_on(self):
         """Turn away mode on."""
@@ -429,7 +429,7 @@ class ClimateDevice(Entity):
 
         This method must be run in the event loop and returns a coroutine.
         """
-        return self.hass.async_add_job(self.turn_away_mode_on)
+        return self.opp.async_add_job(self.turn_away_mode_on)
 
     def turn_away_mode_off(self):
         """Turn away mode off."""
@@ -440,7 +440,7 @@ class ClimateDevice(Entity):
 
         This method must be run in the event loop and returns a coroutine.
         """
-        return self.hass.async_add_job(self.turn_away_mode_off)
+        return self.opp.async_add_job(self.turn_away_mode_off)
 
     def set_hold_mode(self, hold_mode):
         """Set new target hold mode."""
@@ -451,7 +451,7 @@ class ClimateDevice(Entity):
 
         This method must be run in the event loop and returns a coroutine.
         """
-        return self.hass.async_add_job(self.set_hold_mode, hold_mode)
+        return self.opp.async_add_job(self.set_hold_mode, hold_mode)
 
     def turn_aux_heat_on(self):
         """Turn auxiliary heater on."""
@@ -462,7 +462,7 @@ class ClimateDevice(Entity):
 
         This method must be run in the event loop and returns a coroutine.
         """
-        return self.hass.async_add_job(self.turn_aux_heat_on)
+        return self.opp.async_add_job(self.turn_aux_heat_on)
 
     def turn_aux_heat_off(self):
         """Turn auxiliary heater off."""
@@ -473,7 +473,7 @@ class ClimateDevice(Entity):
 
         This method must be run in the event loop and returns a coroutine.
         """
-        return self.hass.async_add_job(self.turn_aux_heat_off)
+        return self.opp.async_add_job(self.turn_aux_heat_off)
 
     def turn_on(self):
         """Turn device on."""
@@ -484,7 +484,7 @@ class ClimateDevice(Entity):
 
         This method must be run in the event loop and returns a coroutine.
         """
-        return self.hass.async_add_job(self.turn_on)
+        return self.opp.async_add_job(self.turn_on)
 
     def turn_off(self):
         """Turn device off."""
@@ -495,7 +495,7 @@ class ClimateDevice(Entity):
 
         This method must be run in the event loop and returns a coroutine.
         """
-        return self.hass.async_add_job(self.turn_off)
+        return self.opp.async_add_job(self.turn_off)
 
     @property
     def supported_features(self):
@@ -543,14 +543,14 @@ async def async_service_aux_heat(entity, service):
 
 async def async_service_temperature_set(entity, service):
     """Handle set temperature service."""
-    hass = entity.hass
+    opp = entity.opp
     kwargs = {}
 
     for value, temp in service.data.items():
         if value in CONVERTIBLE_ATTRIBUTE:
             kwargs[value] = convert_temperature(
                 temp,
-                hass.config.units.temperature_unit,
+                opp.config.units.temperature_unit,
                 entity.temperature_unit
             )
         else:

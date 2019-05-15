@@ -5,17 +5,17 @@ import logging
 
 import voluptuous as vol
 
-from homeassistant.components import group
-from homeassistant.const import (
+from openpeerpower.components import group
+from openpeerpower.const import (
     ATTR_BATTERY_LEVEL, ATTR_COMMAND, ATTR_ENTITY_ID, SERVICE_TOGGLE,
     SERVICE_TURN_OFF, SERVICE_TURN_ON, STATE_ON, STATE_PAUSED, STATE_IDLE)
-from homeassistant.loader import bind_hass
-import homeassistant.helpers.config_validation as cv
-from homeassistant.helpers.config_validation import (  # noqa
+from openpeerpower.loader import bind_opp
+import openpeerpower.helpers.config_validation as cv
+from openpeerpower.helpers.config_validation import (  # noqa
     PLATFORM_SCHEMA, PLATFORM_SCHEMA_BASE)
-from homeassistant.helpers.entity_component import EntityComponent
-from homeassistant.helpers.entity import (ToggleEntity, Entity)
-from homeassistant.helpers.icon import icon_for_battery_level
+from openpeerpower.helpers.entity_component import EntityComponent
+from openpeerpower.helpers.entity import (ToggleEntity, Entity)
+from openpeerpower.helpers.icon import icon_for_battery_level
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -80,17 +80,17 @@ SUPPORT_STATE = 4096
 SUPPORT_START = 8192
 
 
-@bind_hass
-def is_on(hass, entity_id=None):
+@bind_opp
+def is_on(opp, entity_id=None):
     """Return if the vacuum is on based on the statemachine."""
     entity_id = entity_id or ENTITY_ID_ALL_VACUUMS
-    return hass.states.is_state(entity_id, STATE_ON)
+    return opp.states.is_state(entity_id, STATE_ON)
 
 
-async def async_setup(hass, config):
+async def async_setup(opp, config):
     """Set up the vacuum component."""
-    component = hass.data[DOMAIN] = EntityComponent(
-        _LOGGER, DOMAIN, hass, SCAN_INTERVAL, GROUP_NAME_ALL_VACUUMS)
+    component = opp.data[DOMAIN] = EntityComponent(
+        _LOGGER, DOMAIN, opp, SCAN_INTERVAL, GROUP_NAME_ALL_VACUUMS)
 
     await component.async_setup(config)
 
@@ -146,14 +146,14 @@ async def async_setup(hass, config):
     return True
 
 
-async def async_setup_entry(hass, entry):
+async def async_setup_entry(opp, entry):
     """Set up a config entry."""
-    return await hass.data[DOMAIN].async_setup_entry(entry)
+    return await opp.data[DOMAIN].async_setup_entry(entry)
 
 
-async def async_unload_entry(hass, entry):
+async def async_unload_entry(opp, entry):
     """Unload a config entry."""
-    return await hass.data[DOMAIN].async_unload_entry(entry)
+    return await opp.data[DOMAIN].async_unload_entry(entry)
 
 
 class _BaseVacuum(Entity):
@@ -191,7 +191,7 @@ class _BaseVacuum(Entity):
 
         This method must be run in the event loop.
         """
-        await self.hass.async_add_executor_job(partial(self.stop, **kwargs))
+        await self.opp.async_add_executor_job(partial(self.stop, **kwargs))
 
     def return_to_base(self, **kwargs):
         """Set the vacuum cleaner to return to the dock."""
@@ -202,7 +202,7 @@ class _BaseVacuum(Entity):
 
         This method must be run in the event loop.
         """
-        await self.hass.async_add_executor_job(
+        await self.opp.async_add_executor_job(
             partial(self.return_to_base, **kwargs))
 
     def clean_spot(self, **kwargs):
@@ -214,7 +214,7 @@ class _BaseVacuum(Entity):
 
         This method must be run in the event loop.
         """
-        await self.hass.async_add_executor_job(
+        await self.opp.async_add_executor_job(
             partial(self.clean_spot, **kwargs))
 
     def locate(self, **kwargs):
@@ -226,7 +226,7 @@ class _BaseVacuum(Entity):
 
         This method must be run in the event loop.
         """
-        await self.hass.async_add_executor_job(partial(self.locate, **kwargs))
+        await self.opp.async_add_executor_job(partial(self.locate, **kwargs))
 
     def set_fan_speed(self, fan_speed, **kwargs):
         """Set fan speed."""
@@ -237,7 +237,7 @@ class _BaseVacuum(Entity):
 
         This method must be run in the event loop.
         """
-        await self.hass.async_add_executor_job(
+        await self.opp.async_add_executor_job(
             partial(self.set_fan_speed, fan_speed, **kwargs))
 
     def send_command(self, command, params=None, **kwargs):
@@ -249,7 +249,7 @@ class _BaseVacuum(Entity):
 
         This method must be run in the event loop.
         """
-        await self.hass.async_add_executor_job(
+        await self.opp.async_add_executor_job(
             partial(self.send_command, command, params=params, **kwargs))
 
 
@@ -297,7 +297,7 @@ class VacuumDevice(_BaseVacuum, ToggleEntity):
 
         This method must be run in the event loop.
         """
-        await self.hass.async_add_executor_job(
+        await self.opp.async_add_executor_job(
             partial(self.turn_on, **kwargs))
 
     def turn_off(self, **kwargs):
@@ -309,7 +309,7 @@ class VacuumDevice(_BaseVacuum, ToggleEntity):
 
         This method must be run in the event loop.
         """
-        await self.hass.async_add_executor_job(
+        await self.opp.async_add_executor_job(
             partial(self.turn_off, **kwargs))
 
     def start_pause(self, **kwargs):
@@ -321,7 +321,7 @@ class VacuumDevice(_BaseVacuum, ToggleEntity):
 
         This method must be run in the event loop.
         """
-        await self.hass.async_add_executor_job(
+        await self.opp.async_add_executor_job(
             partial(self.start_pause, **kwargs))
 
 
@@ -365,7 +365,7 @@ class StateVacuumDevice(_BaseVacuum):
 
         This method must be run in the event loop.
         """
-        await self.hass.async_add_executor_job(self.start)
+        await self.opp.async_add_executor_job(self.start)
 
     def pause(self):
         """Pause the cleaning task."""
@@ -376,4 +376,4 @@ class StateVacuumDevice(_BaseVacuum):
 
         This method must be run in the event loop.
         """
-        await self.hass.async_add_executor_job(self.pause)
+        await self.opp.async_add_executor_job(self.pause)

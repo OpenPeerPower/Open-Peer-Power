@@ -4,9 +4,9 @@ from typing import Any, Callable, Dict, Optional
 
 import attr
 
-from homeassistant.components import mqtt
-from homeassistant.helpers.typing import OpenPeerPowerType
-from homeassistant.loader import bind_hass
+from openpeerpower.components import mqtt
+from openpeerpower.helpers.typing import OpenPeerPowerType
+from openpeerpower.loader import bind_opp
 
 from . import DEFAULT_QOS, MessageCallbackType
 
@@ -23,7 +23,7 @@ class EntitySubscription:
     qos = attr.ib(type=int, default=0)
     encoding = attr.ib(type=str, default='utf-8')
 
-    async def resubscribe_if_necessary(self, hass, other):
+    async def resubscribe_if_necessary(self, opp, other):
         """Re-subscribe to the new topic if necessary."""
         if not self._should_resubscribe(other):
             return
@@ -36,7 +36,7 @@ class EntitySubscription:
             return
 
         self.unsubscribe_callback = await mqtt.async_subscribe(
-            hass, self.topic, self.message_callback,
+            opp, self.topic, self.message_callback,
             self.qos, self.encoding
         )
 
@@ -49,8 +49,8 @@ class EntitySubscription:
             (other.topic, other.qos, other.encoding)
 
 
-@bind_hass
-async def async_subscribe_topics(hass: OpenPeerPowerType,
+@bind_opp
+async def async_subscribe_topics(opp: OpenPeerPowerType,
                                  new_state: Optional[Dict[str,
                                                           EntitySubscription]],
                                  topics: Dict[str, Any]):
@@ -76,7 +76,7 @@ async def async_subscribe_topics(hass: OpenPeerPowerType,
         )
         # Get the current subscription state
         current = current_subscriptions.pop(key, None)
-        await requested.resubscribe_if_necessary(hass, current)
+        await requested.resubscribe_if_necessary(opp, current)
         new_state[key] = requested
 
     # Go through all remaining subscriptions and unsubscribe them
@@ -87,7 +87,7 @@ async def async_subscribe_topics(hass: OpenPeerPowerType,
     return new_state
 
 
-@bind_hass
-async def async_unsubscribe_topics(hass: OpenPeerPowerType, sub_state: dict):
+@bind_opp
+async def async_unsubscribe_topics(opp: OpenPeerPowerType, sub_state: dict):
     """Unsubscribe from all MQTT topics managed by async_subscribe_topics."""
-    return await async_subscribe_topics(hass, sub_state, {})
+    return await async_subscribe_topics(opp, sub_state, {})

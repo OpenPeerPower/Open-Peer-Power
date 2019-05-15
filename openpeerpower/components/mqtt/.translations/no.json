@@ -18,11 +18,11 @@
                 "description": "Vennligst oppgi tilkoblingsinformasjonen for din MQTT megler.",
                 "title": "MQTT"
             },
-            "hassio_confirm": {
+            "oppio_confirm": {
                 "data": {
                     "discovery": "Aktiver oppdagelse"
                 },
-                "description": "Vil du konfigurere Home Assistant til \u00e5 koble til MQTT megler gitt av hass.io tillegget {addon}?",
+                "description": "Vil du konfigurere Home Assistant til \u00e5 koble til MQTT megler gitt av opp.io tillegget {addon}?",
                 "title": "MQTT megler via Hass.io tillegg"
             }
         },

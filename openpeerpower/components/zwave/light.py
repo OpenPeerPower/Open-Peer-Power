@@ -2,14 +2,14 @@
 import logging
 
 from threading import Timer
-from homeassistant.core import callback
-from homeassistant.components.light import (
+from openpeerpower.core import callback
+from openpeerpower.components.light import (
     ATTR_WHITE_VALUE, ATTR_BRIGHTNESS, ATTR_COLOR_TEMP, ATTR_HS_COLOR,
     ATTR_TRANSITION, SUPPORT_BRIGHTNESS, SUPPORT_COLOR_TEMP, SUPPORT_COLOR,
     SUPPORT_TRANSITION, SUPPORT_WHITE_VALUE, DOMAIN, Light)
-from homeassistant.const import STATE_OFF, STATE_ON
-from homeassistant.helpers.dispatcher import async_dispatcher_connect
-import homeassistant.util.color as color_util
+from openpeerpower.const import STATE_OFF, STATE_ON
+from openpeerpower.helpers.dispatcher import async_dispatcher_connect
+import openpeerpower.util.color as color_util
 from . import (
     CONF_REFRESH_VALUE,
     CONF_REFRESH_DELAY,
@@ -56,19 +56,19 @@ TEMP_COLD_HASS = (TEMP_COLOR_MAX - TEMP_COLOR_MIN) / 3 + TEMP_COLOR_MIN
 
 
 async def async_setup_platform(
-        hass, config, async_add_entities, discovery_info=None):
+        opp, config, async_add_entities, discovery_info=None):
     """Old method of setting up Z-Wave lights."""
     pass
 
 
-async def async_setup_entry(hass, config_entry, async_add_entities):
+async def async_setup_entry(opp, config_entry, async_add_entities):
     """Set up Z-Wave Light from Config Entry."""
     @callback
     def async_add_light(light):
         """Add Z-Wave Light."""
         async_add_entities([light])
 
-    async_dispatcher_connect(hass, 'zwave_new_light', async_add_light)
+    async_dispatcher_connect(opp, 'zwave_new_light', async_add_light)
 
 
 def get_device(node, values, node_config, **kwargs):

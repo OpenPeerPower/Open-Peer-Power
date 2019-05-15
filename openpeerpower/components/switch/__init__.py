@@ -4,16 +4,16 @@ import logging
 
 import voluptuous as vol
 
-from homeassistant.loader import bind_hass
-from homeassistant.helpers.entity_component import EntityComponent
-from homeassistant.helpers.entity import ToggleEntity
-from homeassistant.helpers.config_validation import (  # noqa
+from openpeerpower.loader import bind_opp
+from openpeerpower.helpers.entity_component import EntityComponent
+from openpeerpower.helpers.entity import ToggleEntity
+from openpeerpower.helpers.config_validation import (  # noqa
     PLATFORM_SCHEMA, PLATFORM_SCHEMA_BASE)
-import homeassistant.helpers.config_validation as cv
-from homeassistant.const import (
+import openpeerpower.helpers.config_validation as cv
+from openpeerpower.const import (
     STATE_ON, SERVICE_TURN_ON, SERVICE_TURN_OFF, SERVICE_TOGGLE,
     ATTR_ENTITY_ID)
-from homeassistant.components import group
+from openpeerpower.components import group
 
 DOMAIN = 'switch'
 SCAN_INTERVAL = timedelta(seconds=30)
@@ -50,20 +50,20 @@ SWITCH_SERVICE_SCHEMA = vol.Schema({
 _LOGGER = logging.getLogger(__name__)
 
 
-@bind_hass
-def is_on(hass, entity_id=None):
+@bind_opp
+def is_on(opp, entity_id=None):
     """Return if the switch is on based on the statemachine.
 
     Async friendly.
     """
     entity_id = entity_id or ENTITY_ID_ALL_SWITCHES
-    return hass.states.is_state(entity_id, STATE_ON)
+    return opp.states.is_state(entity_id, STATE_ON)
 
 
-async def async_setup(hass, config):
+async def async_setup(opp, config):
     """Track states and offer events for switches."""
-    component = hass.data[DOMAIN] = EntityComponent(
-        _LOGGER, DOMAIN, hass, SCAN_INTERVAL, GROUP_NAME_ALL_SWITCHES)
+    component = opp.data[DOMAIN] = EntityComponent(
+        _LOGGER, DOMAIN, opp, SCAN_INTERVAL, GROUP_NAME_ALL_SWITCHES)
     await component.async_setup(config)
 
     component.async_register_entity_service(
@@ -84,14 +84,14 @@ async def async_setup(hass, config):
     return True
 
 
-async def async_setup_entry(hass, entry):
+async def async_setup_entry(opp, entry):
     """Set up a config entry."""
-    return await hass.data[DOMAIN].async_setup_entry(entry)
+    return await opp.data[DOMAIN].async_setup_entry(entry)
 
 
-async def async_unload_entry(hass, entry):
+async def async_unload_entry(opp, entry):
     """Unload a config entry."""
-    return await hass.data[DOMAIN].async_unload_entry(entry)
+    return await opp.data[DOMAIN].async_unload_entry(entry)
 
 
 class SwitchDevice(ToggleEntity):

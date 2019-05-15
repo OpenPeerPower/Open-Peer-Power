@@ -4,8 +4,8 @@ import queue
 
 import voluptuous as vol
 
-from homeassistant import config_entries
-from homeassistant.const import (
+from openpeerpower import config_entries
+from openpeerpower.const import (
     CONF_HOST, CONF_PASSWORD, CONF_PORT, CONF_PROTOCOL, CONF_USERNAME)
 
 from .const import CONF_BROKER, CONF_DISCOVERY, DEFAULT_DISCOVERY
@@ -18,7 +18,7 @@ class FlowHandler(config_entries.ConfigFlow):
     VERSION = 1
     CONNECTION_CLASS = config_entries.CONN_CLASS_LOCAL_PUSH
 
-    _hassio_discovery = None
+    _oppio_discovery = None
 
     async def async_step_user(self, user_input=None):
         """Handle a flow initialized by the user."""
@@ -32,7 +32,7 @@ class FlowHandler(config_entries.ConfigFlow):
         errors = {}
 
         if user_input is not None:
-            can_connect = await self.hass.async_add_executor_job(
+            can_connect = await self.opp.async_add_executor_job(
                 try_connection, user_input[CONF_BROKER], user_input[CONF_PORT],
                 user_input.get(CONF_USERNAME), user_input.get(CONF_PASSWORD))
 
@@ -63,22 +63,22 @@ class FlowHandler(config_entries.ConfigFlow):
 
         return self.async_create_entry(title='configuration.yaml', data={})
 
-    async def async_step_hassio(self, user_input=None):
+    async def async_step_oppio(self, user_input=None):
         """Receive a Hass.io discovery."""
         if self._async_current_entries():
             return self.async_abort(reason='single_instance_allowed')
 
-        self._hassio_discovery = user_input
+        self._oppio_discovery = user_input
 
-        return await self.async_step_hassio_confirm()
+        return await self.async_step_oppio_confirm()
 
-    async def async_step_hassio_confirm(self, user_input=None):
+    async def async_step_oppio_confirm(self, user_input=None):
         """Confirm a Hass.io discovery."""
         errors = {}
 
         if user_input is not None:
-            data = self._hassio_discovery
-            can_connect = await self.hass.async_add_executor_job(
+            data = self._oppio_discovery
+            can_connect = await self.opp.async_add_executor_job(
                 try_connection,
                 data[CONF_HOST],
                 data[CONF_PORT],
@@ -101,9 +101,9 @@ class FlowHandler(config_entries.ConfigFlow):
             errors['base'] = 'cannot_connect'
 
         return self.async_show_form(
-            step_id='hassio_confirm',
+            step_id='oppio_confirm',
             description_placeholders={
-                'addon': self._hassio_discovery['addon']
+                'addon': self._oppio_discovery['addon']
             },
             data_schema=vol.Schema({
                 vol.Optional(CONF_DISCOVERY, default=DEFAULT_DISCOVERY): bool

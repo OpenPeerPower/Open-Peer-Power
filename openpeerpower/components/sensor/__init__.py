@@ -5,13 +5,13 @@ import logging
 
 import voluptuous as vol
 
-from homeassistant.const import (
+from openpeerpower.const import (
     DEVICE_CLASS_BATTERY, DEVICE_CLASS_HUMIDITY, DEVICE_CLASS_ILLUMINANCE,
     DEVICE_CLASS_POWER, DEVICE_CLASS_PRESSURE, DEVICE_CLASS_SIGNAL_STRENGTH,
     DEVICE_CLASS_TEMPERATURE, DEVICE_CLASS_TIMESTAMP)
-from homeassistant.helpers.config_validation import (  # noqa
+from openpeerpower.helpers.config_validation import (  # noqa
     PLATFORM_SCHEMA, PLATFORM_SCHEMA_BASE)
-from homeassistant.helpers.entity_component import EntityComponent
+from openpeerpower.helpers.entity_component import EntityComponent
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -34,20 +34,20 @@ DEVICE_CLASSES = [
 DEVICE_CLASSES_SCHEMA = vol.All(vol.Lower, vol.In(DEVICE_CLASSES))
 
 
-async def async_setup(hass, config):
+async def async_setup(opp, config):
     """Track states and offer events for sensors."""
-    component = hass.data[DOMAIN] = EntityComponent(
-        _LOGGER, DOMAIN, hass, SCAN_INTERVAL)
+    component = opp.data[DOMAIN] = EntityComponent(
+        _LOGGER, DOMAIN, opp, SCAN_INTERVAL)
 
     await component.async_setup(config)
     return True
 
 
-async def async_setup_entry(hass, entry):
+async def async_setup_entry(opp, entry):
     """Set up a config entry."""
-    return await hass.data[DOMAIN].async_setup_entry(entry)
+    return await opp.data[DOMAIN].async_setup_entry(entry)
 
 
-async def async_unload_entry(hass, entry):
+async def async_unload_entry(opp, entry):
     """Unload a config entry."""
-    return await hass.data[DOMAIN].async_unload_entry(entry)
+    return await opp.data[DOMAIN].async_unload_entry(entry)

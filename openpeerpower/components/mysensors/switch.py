@@ -1,10 +1,10 @@
 """Support for MySensors switches."""
 import voluptuous as vol
 
-import homeassistant.helpers.config_validation as cv
-from homeassistant.components import mysensors
-from homeassistant.components.switch import DOMAIN, SwitchDevice
-from homeassistant.const import ATTR_ENTITY_ID, STATE_OFF, STATE_ON
+import openpeerpower.helpers.config_validation as cv
+from openpeerpower.components import mysensors
+from openpeerpower.components.switch import DOMAIN, SwitchDevice
+from openpeerpower.const import ATTR_ENTITY_ID, STATE_OFF, STATE_ON
 
 ATTR_IR_CODE = 'V_IR_SEND'
 SERVICE_SEND_IR_CODE = 'mysensors_send_ir_code'
@@ -16,7 +16,7 @@ SEND_IR_CODE_SERVICE_SCHEMA = vol.Schema({
 
 
 async def async_setup_platform(
-        hass, config, async_add_entities, discovery_info=None):
+        opp, config, async_add_entities, discovery_info=None):
     """Set up the mysensors platform for switches."""
     device_class_map = {
         'S_DOOR': MySensorsSwitch,
@@ -34,14 +34,14 @@ async def async_setup_platform(
         'S_WATER_QUALITY': MySensorsSwitch,
     }
     mysensors.setup_mysensors_platform(
-        hass, DOMAIN, discovery_info, device_class_map,
+        opp, DOMAIN, discovery_info, device_class_map,
         async_add_entities=async_add_entities)
 
     async def async_send_ir_code_service(service):
         """Set IR code as device state attribute."""
         entity_ids = service.data.get(ATTR_ENTITY_ID)
         ir_code = service.data.get(ATTR_IR_CODE)
-        devices = mysensors.get_mysensors_devices(hass, DOMAIN)
+        devices = mysensors.get_mysensors_devices(opp, DOMAIN)
 
         if entity_ids:
             _devices = [device for device in devices.values()
@@ -55,7 +55,7 @@ async def async_setup_platform(
         for device in _devices:
             await device.async_turn_on(**kwargs)
 
-    hass.services.async_register(
+    opp.services.async_register(
         DOMAIN, SERVICE_SEND_IR_CODE, async_send_ir_code_service,
         schema=SEND_IR_CODE_SERVICE_SCHEMA)
 

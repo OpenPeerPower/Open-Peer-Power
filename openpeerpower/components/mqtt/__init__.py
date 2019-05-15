@@ -16,23 +16,23 @@ import attr
 import requests.certs
 import voluptuous as vol
 
-from homeassistant import config_entries
-from homeassistant.components import websocket_api
-from homeassistant.const import (
+from openpeerpower import config_entries
+from openpeerpower.components import websocket_api
+from openpeerpower.const import (
     CONF_DEVICE, CONF_NAME, CONF_PASSWORD, CONF_PAYLOAD, CONF_PORT,
     CONF_PROTOCOL, CONF_USERNAME, CONF_VALUE_TEMPLATE,
     EVENT_HOMEASSISTANT_STOP)
-from homeassistant.core import Event, ServiceCall, callback
-from homeassistant.exceptions import (
+from openpeerpower.core import Event, ServiceCall, callback
+from openpeerpower.exceptions import (
     OpenPeerPowerError, Unauthorized, ConfigEntryNotReady)
-from homeassistant.helpers import config_validation as cv, template
-from homeassistant.helpers.entity import Entity
-from homeassistant.helpers.typing import (
+from openpeerpower.helpers import config_validation as cv, template
+from openpeerpower.helpers.entity import Entity
+from openpeerpower.helpers.typing import (
     ConfigType, OpenPeerPowerType, ServiceDataType)
-from homeassistant.loader import bind_hass
-from homeassistant.util.async_ import (
+from openpeerpower.loader import bind_opp
+from openpeerpower.util.async_ import (
     run_callback_threadsafe, run_coroutine_threadsafe)
-from homeassistant.util.logging import catch_log_exception
+from openpeerpower.util.logging import catch_log_exception
 
 # Loading the config flow file will register the flow
 from . import config_flow, discovery, server  # noqa pylint: disable=unused-import
@@ -46,7 +46,7 @@ DOMAIN = 'mqtt'
 
 DATA_MQTT = 'mqtt'
 DATA_MQTT_CONFIG = 'mqtt_config'
-DATA_MQTT_HASS_CONFIG = 'mqtt_hass_config'
+DATA_MQTT_HASS_CONFIG = 'mqtt_opp_config'
 
 SERVICE_PUBLISH = 'publish'
 
@@ -89,7 +89,7 @@ DEFAULT_KEEPALIVE = 60
 DEFAULT_QOS = 0
 DEFAULT_RETAIN = False
 DEFAULT_PROTOCOL = PROTOCOL_311
-DEFAULT_DISCOVERY_PREFIX = 'homeassistant'
+DEFAULT_DISCOVERY_PREFIX = 'openpeerpower'
 DEFAULT_TLS_PROTOCOL = 'auto'
 DEFAULT_PAYLOAD_AVAILABLE = 'online'
 DEFAULT_PAYLOAD_NOT_AVAILABLE = 'offline'
@@ -182,7 +182,7 @@ def embedded_broker_deprecated(value):
     _LOGGER.warning(
         "The embedded MQTT broker has been deprecated and will stop working"
         "after June 5th, 2019. Use an external broker instead. For"
-        "instructions, see https://www.home-assistant.io/docs/mqtt/broker")
+        "instructions, see https://www.open-peer-power.io/docs/mqtt/broker")
     return value
 
 
@@ -300,31 +300,31 @@ def _build_publish_data(topic: Any, qos: int, retain: bool) -> ServiceDataType:
     return data
 
 
-@bind_hass
-def publish(hass: OpenPeerPowerType, topic, payload, qos=None,
+@bind_opp
+def publish(opp: OpenPeerPowerType, topic, payload, qos=None,
             retain=None) -> None:
     """Publish message to an MQTT topic."""
-    hass.add_job(async_publish, hass, topic, payload, qos, retain)
+    opp.add_job(async_publish, opp, topic, payload, qos, retain)
 
 
 @callback
-@bind_hass
-def async_publish(hass: OpenPeerPowerType, topic: Any, payload, qos=None,
+@bind_opp
+def async_publish(opp: OpenPeerPowerType, topic: Any, payload, qos=None,
                   retain=None) -> None:
     """Publish message to an MQTT topic."""
     data = _build_publish_data(topic, qos, retain)
     data[ATTR_PAYLOAD] = payload
-    hass.async_create_task(
-        hass.services.async_call(DOMAIN, SERVICE_PUBLISH, data))
+    opp.async_create_task(
+        opp.services.async_call(DOMAIN, SERVICE_PUBLISH, data))
 
 
-@bind_hass
-def publish_template(hass: OpenPeerPowerType, topic, payload_template,
+@bind_opp
+def publish_template(opp: OpenPeerPowerType, topic, payload_template,
                      qos=None, retain=None) -> None:
     """Publish message to an MQTT topic using a template payload."""
     data = _build_publish_data(topic, qos, retain)
     data[ATTR_PAYLOAD_TEMPLATE] = payload_template
-    hass.services.call(DOMAIN, SERVICE_PUBLISH, data)
+    opp.services.call(DOMAIN, SERVICE_PUBLISH, data)
 
 
 def wrap_msg_callback(
@@ -351,8 +351,8 @@ def wrap_msg_callback(
     return wrapper_func
 
 
-@bind_hass
-async def async_subscribe(hass: OpenPeerPowerType, topic: str,
+@bind_opp
+async def async_subscribe(opp: OpenPeerPowerType, topic: str,
                           msg_callback: MessageCallbackType,
                           qos: int = DEFAULT_QOS,
                           encoding: str = 'utf-8'):
@@ -374,7 +374,7 @@ async def async_subscribe(hass: OpenPeerPowerType, topic: str,
             inspect.getmodule(msg_callback).__name__, msg_callback.__name__)
         wrapped_msg_callback = wrap_msg_callback(msg_callback)
 
-    async_remove = await hass.data[DATA_MQTT].async_subscribe(
+    async_remove = await opp.data[DATA_MQTT].async_subscribe(
         topic, catch_log_exception(
             wrapped_msg_callback, lambda msg:
             "Exception in {} when handling msg on '{}': '{}'".format(
@@ -383,23 +383,23 @@ async def async_subscribe(hass: OpenPeerPowerType, topic: str,
     return async_remove
 
 
-@bind_hass
-def subscribe(hass: OpenPeerPowerType, topic: str,
+@bind_opp
+def subscribe(opp: OpenPeerPowerType, topic: str,
               msg_callback: MessageCallbackType, qos: int = DEFAULT_QOS,
               encoding: str = 'utf-8') -> Callable[[], None]:
     """Subscribe to an MQTT topic."""
     async_remove = run_coroutine_threadsafe(
-        async_subscribe(hass, topic, msg_callback, qos, encoding), hass.loop
+        async_subscribe(opp, topic, msg_callback, qos, encoding), opp.loop
     ).result()
 
     def remove():
         """Remove listener convert."""
-        run_callback_threadsafe(hass.loop, async_remove).result()
+        run_callback_threadsafe(opp.loop, async_remove).result()
 
     return remove
 
 
-async def _async_setup_server(hass: OpenPeerPowerType, config: ConfigType):
+async def _async_setup_server(opp: OpenPeerPowerType, config: ConfigType):
     """Try to start embedded MQTT broker.
 
     This method is a coroutine.
@@ -408,7 +408,7 @@ async def _async_setup_server(hass: OpenPeerPowerType, config: ConfigType):
 
     success, broker_config = \
         await server.async_start(
-            hass, conf.get(CONF_PASSWORD), conf.get(CONF_EMBEDDED))
+            opp, conf.get(CONF_PASSWORD), conf.get(CONF_EMBEDDED))
 
     if not success:
         return None
@@ -416,8 +416,8 @@ async def _async_setup_server(hass: OpenPeerPowerType, config: ConfigType):
     return broker_config
 
 
-async def _async_setup_discovery(hass: OpenPeerPowerType, conf: ConfigType,
-                                 hass_config: ConfigType,
+async def _async_setup_discovery(opp: OpenPeerPowerType, conf: ConfigType,
+                                 opp_config: ConfigType,
                                  config_entry) -> bool:
     """Try to start the discovery of MQTT devices.
 
@@ -428,33 +428,33 @@ async def _async_setup_discovery(hass: OpenPeerPowerType, conf: ConfigType,
         return False
 
     success = await discovery.async_start(
-        hass, conf[CONF_DISCOVERY_PREFIX], hass_config,
+        opp, conf[CONF_DISCOVERY_PREFIX], opp_config,
         config_entry)  # type: bool
 
     return success
 
 
-async def async_setup(hass: OpenPeerPowerType, config: ConfigType) -> bool:
+async def async_setup(opp: OpenPeerPowerType, config: ConfigType) -> bool:
     """Start the MQTT protocol service."""
     conf = config.get(DOMAIN)  # type: Optional[ConfigType]
 
     # We need this because discovery can cause components to be set up and
     # otherwise it will not load the users config.
     # This needs a better solution.
-    hass.data[DATA_MQTT_HASS_CONFIG] = config
+    opp.data[DATA_MQTT_HASS_CONFIG] = config
 
-    websocket_api.async_register_command(hass, websocket_subscribe)
+    websocket_api.async_register_command(opp, websocket_subscribe)
 
     if conf is None:
         # If we have a config entry, setup is done by that config entry.
         # If there is no config entry, this should fail.
-        return bool(hass.config_entries.async_entries(DOMAIN))
+        return bool(opp.config_entries.async_entries(DOMAIN))
 
     conf = dict(conf)
 
     if CONF_EMBEDDED in conf or CONF_BROKER not in conf:
 
-        broker_config = await _async_setup_server(hass, config)
+        broker_config = await _async_setup_server(opp, config)
 
         if broker_config is None:
             _LOGGER.error("Unable to start embedded MQTT broker")
@@ -472,11 +472,11 @@ async def async_setup(hass: OpenPeerPowerType, config: ConfigType) -> bool:
             CONF_TLS_INSECURE: None,
         })
 
-    hass.data[DATA_MQTT_CONFIG] = conf
+    opp.data[DATA_MQTT_CONFIG] = conf
 
     # Only import if we haven't before.
-    if not hass.config_entries.async_entries(DOMAIN):
-        hass.async_create_task(hass.config_entries.flow.async_init(
+    if not opp.config_entries.async_entries(DOMAIN):
+        opp.async_create_task(opp.config_entries.flow.async_init(
             DOMAIN, context={'source': config_entries.SOURCE_IMPORT},
             data={}
         ))
@@ -484,15 +484,15 @@ async def async_setup(hass: OpenPeerPowerType, config: ConfigType) -> bool:
     return True
 
 
-async def async_setup_entry(hass, entry):
+async def async_setup_entry(opp, entry):
     """Load a config entry."""
-    conf = hass.data.get(DATA_MQTT_CONFIG)
+    conf = opp.data.get(DATA_MQTT_CONFIG)
 
     # Config entry was created because user had configuration.yaml entry
     # They removed that, so remove entry.
     if conf is None and entry.source == config_entries.SOURCE_IMPORT:
-        hass.async_create_task(
-            hass.config_entries.async_remove(entry.entry_id))
+        opp.async_create_task(
+            opp.config_entries.async_remove(entry.entry_id))
         return False
 
     # If user didn't have configuration.yaml config, generate defaults
@@ -555,8 +555,8 @@ async def async_setup_entry(hass, entry):
         else:
             tls_version = ssl.PROTOCOL_TLSv1
 
-    hass.data[DATA_MQTT] = MQTT(
-        hass,
+    opp.data[DATA_MQTT] = MQTT(
+        opp,
         broker=broker,
         port=port,
         client_id=client_id,
@@ -573,7 +573,7 @@ async def async_setup_entry(hass, entry):
         tls_version=tls_version,
     )
 
-    result = await hass.data[DATA_MQTT].async_connect()  # type: str
+    result = await opp.data[DATA_MQTT].async_connect()  # type: str
 
     if result == CONNECTION_FAILED:
         return False
@@ -583,9 +583,9 @@ async def async_setup_entry(hass, entry):
 
     async def async_stop_mqtt(event: Event):
         """Stop MQTT component."""
-        await hass.data[DATA_MQTT].async_disconnect()
+        await opp.data[DATA_MQTT].async_disconnect()
 
-    hass.bus.async_listen_once(EVENT_HOMEASSISTANT_STOP, async_stop_mqtt)
+    opp.bus.async_listen_once(EVENT_HOMEASSISTANT_STOP, async_stop_mqtt)
 
     async def async_publish_service(call: ServiceCall):
         """Handle MQTT publish service calls."""
@@ -597,7 +597,7 @@ async def async_setup_entry(hass, entry):
         if payload_template is not None:
             try:
                 payload = \
-                    template.Template(payload_template, hass).async_render()
+                    template.Template(payload_template, opp).async_render()
             except template.jinja2.TemplateError as exc:
                 _LOGGER.error(
                     "Unable to publish to %s: rendering payload template of "
@@ -605,16 +605,16 @@ async def async_setup_entry(hass, entry):
                     msg_topic, payload_template, exc)
                 return
 
-        await hass.data[DATA_MQTT].async_publish(
+        await opp.data[DATA_MQTT].async_publish(
             msg_topic, payload, qos, retain)
 
-    hass.services.async_register(
+    opp.services.async_register(
         DOMAIN, SERVICE_PUBLISH, async_publish_service,
         schema=MQTT_PUBLISH_SCHEMA)
 
     if conf.get(CONF_DISCOVERY):
         await _async_setup_discovery(
-            hass, conf, hass.data[DATA_MQTT_HASS_CONFIG], entry)
+            opp, conf, opp.data[DATA_MQTT_HASS_CONFIG], entry)
 
     return True
 
@@ -632,7 +632,7 @@ class Subscription:
 class MQTT:
     """Home Assistant MQTT client."""
 
-    def __init__(self, hass: OpenPeerPowerType, broker: str, port: int,
+    def __init__(self, opp: OpenPeerPowerType, broker: str, port: int,
                  client_id: Optional[str], keepalive: Optional[int],
                  username: Optional[str], password: Optional[str],
                  certificate: Optional[str], client_key: Optional[str],
@@ -643,7 +643,7 @@ class MQTT:
         """Initialize Home Assistant MQTT client."""
         import paho.mqtt.client as mqtt
 
-        self.hass = hass
+        self.opp = opp
         self.broker = broker
         self.port = port
         self.keepalive = keepalive
@@ -651,7 +651,7 @@ class MQTT:
         self.birth_message = birth_message
         self.connected = False
         self._mqttc = None  # type: mqtt.Client
-        self._paho_lock = asyncio.Lock(loop=hass.loop)
+        self._paho_lock = asyncio.Lock(loop=opp.loop)
 
         if protocol == PROTOCOL_31:
             proto = mqtt.MQTTv31  # type: int
@@ -689,7 +689,7 @@ class MQTT:
         """
         async with self._paho_lock:
             _LOGGER.debug("Transmitting message on %s: %s", topic, payload)
-            await self.hass.async_add_job(
+            await self.opp.async_add_job(
                 self._mqttc.publish, topic, payload, qos, retain)
 
     async def async_connect(self) -> str:
@@ -699,7 +699,7 @@ class MQTT:
         """
         result = None  # type: int
         try:
-            result = await self.hass.async_add_job(
+            result = await self.opp.async_add_job(
                 self._mqttc.connect, self.broker, self.port, self.keepalive)
         except OSError as err:
             _LOGGER.error("Failed to connect due to exception: %s", err)
@@ -724,7 +724,7 @@ class MQTT:
             self._mqttc.disconnect()
             self._mqttc.loop_stop()
 
-        return self.hass.async_add_job(stop)
+        return self.opp.async_add_job(stop)
 
     async def async_subscribe(self, topic: str,
                               msg_callback: MessageCallbackType,
@@ -754,7 +754,7 @@ class MQTT:
 
             # Only unsubscribe if currently connected.
             if self.connected:
-                self.hass.async_create_task(self._async_unsubscribe(topic))
+                self.opp.async_create_task(self._async_unsubscribe(topic))
 
         return async_remove
 
@@ -765,7 +765,7 @@ class MQTT:
         """
         async with self._paho_lock:
             result = None  # type: int
-            result, _ = await self.hass.async_add_job(
+            result, _ = await self.opp.async_add_job(
                 self._mqttc.unsubscribe, topic)
             _raise_on_error(result)
 
@@ -775,7 +775,7 @@ class MQTT:
 
         async with self._paho_lock:
             result = None  # type: int
-            result, _ = await self.hass.async_add_job(
+            result, _ = await self.opp.async_add_job(
                 self._mqttc.subscribe, topic, qos)
             _raise_on_error(result)
 
@@ -802,15 +802,15 @@ class MQTT:
                                    keyfunc):
             # Re-subscribe with the highest requested qos
             max_qos = max(subscription.qos for subscription in subs)
-            self.hass.add_job(self._async_perform_subscription, topic, max_qos)
+            self.opp.add_job(self._async_perform_subscription, topic, max_qos)
 
         if self.birth_message:
-            self.hass.add_job(
+            self.opp.add_job(
                 self.async_publish(*attr.astuple(self.birth_message)))
 
     def _mqtt_on_message(self, _mqttc, _userdata, msg) -> None:
         """Message received callback."""
-        self.hass.add_job(self._mqtt_handle_message, msg)
+        self.opp.add_job(self._mqtt_handle_message, msg)
 
     @callback
     def _mqtt_handle_message(self, msg) -> None:
@@ -831,7 +831,7 @@ class MQTT:
                         msg.payload, msg.topic, subscription.encoding)
                     continue
 
-            self.hass.async_run_job(
+            self.opp.async_run_job(
                 subscription.callback, Message(msg.topic, payload, msg.qos,
                                                msg.retain))
 
@@ -893,12 +893,12 @@ class MqttAttributes(Entity):
         self._attributes_sub_state = None
         self._attributes_config = config
 
-    async def async_added_to_hass(self) -> None:
+    async def async_added_to_opp(self) -> None:
         """Subscribe MQTT events.
 
         This method must be run in the event loop and returns a coroutine.
         """
-        await super().async_added_to_hass()
+        await super().async_added_to_opp()
         await self._attributes_subscribe_topics()
 
     async def attributes_discovery_update(self, config: dict):
@@ -912,7 +912,7 @@ class MqttAttributes(Entity):
 
         attr_tpl = self._attributes_config.get(CONF_JSON_ATTRS_TEMPLATE)
         if attr_tpl is not None:
-            attr_tpl.hass = self.hass
+            attr_tpl.opp = self.opp
 
         @callback
         def attributes_message_received(msg: Message) -> None:
@@ -933,17 +933,17 @@ class MqttAttributes(Entity):
                 self._attributes = None
 
         self._attributes_sub_state = await async_subscribe_topics(
-            self.hass, self._attributes_sub_state,
+            self.opp, self._attributes_sub_state,
             {CONF_JSON_ATTRS_TOPIC: {
                 'topic': self._attributes_config.get(CONF_JSON_ATTRS_TOPIC),
                 'msg_callback': attributes_message_received,
                 'qos': self._attributes_config.get(CONF_QOS)}})
 
-    async def async_will_remove_from_hass(self):
+    async def async_will_remove_from_opp(self):
         """Unsubscribe when removed."""
         from .subscription import async_unsubscribe_topics
         self._attributes_sub_state = await async_unsubscribe_topics(
-            self.hass, self._attributes_sub_state)
+            self.opp, self._attributes_sub_state)
 
     @property
     def device_state_attributes(self):
@@ -961,12 +961,12 @@ class MqttAvailability(Entity):
 
         self._avail_config = config
 
-    async def async_added_to_hass(self) -> None:
+    async def async_added_to_opp(self) -> None:
         """Subscribe MQTT events.
 
         This method must be run in the event loop and returns a coroutine.
         """
-        await super().async_added_to_hass()
+        await super().async_added_to_opp()
         await self._availability_subscribe_topics()
 
     async def availability_discovery_update(self, config: dict):
@@ -989,17 +989,17 @@ class MqttAvailability(Entity):
             self.async_write_ha_state()
 
         self._availability_sub_state = await async_subscribe_topics(
-            self.hass, self._availability_sub_state,
+            self.opp, self._availability_sub_state,
             {'availability_topic': {
                 'topic': self._avail_config.get(CONF_AVAILABILITY_TOPIC),
                 'msg_callback': availability_message_received,
                 'qos': self._avail_config[CONF_QOS]}})
 
-    async def async_will_remove_from_hass(self):
+    async def async_will_remove_from_opp(self):
         """Unsubscribe when removed."""
         from .subscription import async_unsubscribe_topics
         self._availability_sub_state = await async_unsubscribe_topics(
-            self.hass, self._availability_sub_state)
+            self.opp, self._availability_sub_state)
 
     @property
     def available(self) -> bool:
@@ -1017,11 +1017,11 @@ class MqttDiscoveryUpdate(Entity):
         self._discovery_update = discovery_update
         self._remove_signal = None
 
-    async def async_added_to_hass(self) -> None:
+    async def async_added_to_opp(self) -> None:
         """Subscribe to discovery updates."""
-        await super().async_added_to_hass()
+        await super().async_added_to_opp()
 
-        from homeassistant.helpers.dispatcher import async_dispatcher_connect
+        from openpeerpower.helpers.dispatcher import async_dispatcher_connect
         from .discovery import (
             MQTT_DISCOVERY_UPDATED, clear_discovery_hash)
 
@@ -1033,18 +1033,18 @@ class MqttDiscoveryUpdate(Entity):
             if not payload:
                 # Empty payload: Remove component
                 _LOGGER.info("Removing component: %s", self.entity_id)
-                self.hass.async_create_task(self.async_remove())
-                clear_discovery_hash(self.hass, self._discovery_hash)
+                self.opp.async_create_task(self.async_remove())
+                clear_discovery_hash(self.opp, self._discovery_hash)
                 self._remove_signal()
             elif self._discovery_update:
                 # Non-empty payload: Notify component
                 _LOGGER.info("Updating component: %s", self.entity_id)
                 payload.pop(ATTR_DISCOVERY_HASH)
-                self.hass.async_create_task(self._discovery_update(payload))
+                self.opp.async_create_task(self._discovery_update(payload))
 
         if self._discovery_hash:
             self._remove_signal = async_dispatcher_connect(
-                self.hass,
+                self.opp,
                 MQTT_DISCOVERY_UPDATED.format(self._discovery_hash),
                 discovery_callback)
 
@@ -1062,7 +1062,7 @@ class MqttEntityDeviceInfo(Entity):
         """Handle updated discovery message."""
         self._device_config = config.get(CONF_DEVICE)
         device_registry = await \
-            self.hass.helpers.device_registry.async_get_registry()
+            self.opp.helpers.device_registry.async_get_registry()
         config_entry_id = self._config_entry.entry_id
         device_info = self.device_info
 
@@ -1109,7 +1109,7 @@ class MqttEntityDeviceInfo(Entity):
     vol.Required('type'): 'mqtt/subscribe',
     vol.Required('topic'): valid_subscribe_topic,
 })
-async def websocket_subscribe(hass, connection, msg):
+async def websocket_subscribe(opp, connection, msg):
     """Subscribe to a MQTT topic."""
     if not connection.user.is_admin:
         raise Unauthorized
@@ -1124,6 +1124,6 @@ async def websocket_subscribe(hass, connection, msg):
         }))
 
     connection.subscriptions[msg['id']] = await async_subscribe(
-        hass, msg['topic'], forward_messages)
+        opp, msg['topic'], forward_messages)
 
     connection.send_message(websocket_api.result_message(msg['id']))

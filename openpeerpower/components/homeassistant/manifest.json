@@ -1,10 +1,10 @@
 {
-  "domain": "homeassistant",
+  "domain": "openpeerpower",
   "name": "Home Assistant Core Integration",
-  "documentation": "https://www.home-assistant.io/components/homeassistant",
+  "documentation": "https://www.open-peer-power.io/components/openpeerpower",
   "requirements": [],
   "dependencies": [],
   "codeowners": [
-    "@home-assistant/core"
+    "@open-peer-power/core"
   ]
 }

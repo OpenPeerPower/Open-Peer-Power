@@ -1,5 +1,5 @@
 """WebSocket API related errors."""
-from homeassistant.exceptions import OpenPeerPowerError
+from openpeerpower.exceptions import OpenPeerPowerError
 
 
 class Disconnect(OpenPeerPowerError):

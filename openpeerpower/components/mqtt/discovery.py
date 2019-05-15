@@ -4,11 +4,11 @@ import json
 import logging
 import re
 
-from homeassistant.components import mqtt
-from homeassistant.const import CONF_DEVICE, CONF_PLATFORM
-from homeassistant.helpers.discovery import async_load_platform
-from homeassistant.helpers.dispatcher import async_dispatcher_send
-from homeassistant.helpers.typing import OpenPeerPowerType
+from openpeerpower.components import mqtt
+from openpeerpower.const import CONF_DEVICE, CONF_PLATFORM
+from openpeerpower.helpers.discovery import async_load_platform
+from openpeerpower.helpers.dispatcher import async_dispatcher_send
+from openpeerpower.helpers.typing import OpenPeerPowerType
 
 from .const import ATTR_DISCOVERY_HASH, CONF_STATE_TOPIC
 
@@ -207,9 +207,9 @@ DEVICE_ABBREVIATIONS = {
 }
 
 
-def clear_discovery_hash(hass, discovery_hash):
+def clear_discovery_hash(opp, discovery_hash):
     """Clear entry in ALREADY_DISCOVERED list."""
-    del hass.data[ALREADY_DISCOVERED][discovery_hash]
+    del opp.data[ALREADY_DISCOVERED][discovery_hash]
 
 
 class MQTTConfig(dict):
@@ -218,7 +218,7 @@ class MQTTConfig(dict):
     pass
 
 
-async def async_start(hass: OpenPeerPowerType, discovery_topic, hass_config,
+async def async_start(opp: OpenPeerPowerType, discovery_topic, opp_config,
                       config_entry=None) -> bool:
     """Initialize of MQTT Discovery."""
     async def async_device_message_received(msg):
@@ -300,39 +300,39 @@ async def async_start(hass: OpenPeerPowerType, discovery_topic, hass_config,
 
             payload[ATTR_DISCOVERY_HASH] = discovery_hash
 
-        if ALREADY_DISCOVERED not in hass.data:
-            hass.data[ALREADY_DISCOVERED] = {}
-        if discovery_hash in hass.data[ALREADY_DISCOVERED]:
+        if ALREADY_DISCOVERED not in opp.data:
+            opp.data[ALREADY_DISCOVERED] = {}
+        if discovery_hash in opp.data[ALREADY_DISCOVERED]:
             # Dispatch update
             _LOGGER.info(
                 "Component has already been discovered: %s %s, sending update",
                 component, discovery_id)
             async_dispatcher_send(
-                hass, MQTT_DISCOVERY_UPDATED.format(discovery_hash), payload)
+                opp, MQTT_DISCOVERY_UPDATED.format(discovery_hash), payload)
         elif payload:
             # Add component
             _LOGGER.info("Found new component: %s %s", component, discovery_id)
-            hass.data[ALREADY_DISCOVERED][discovery_hash] = None
+            opp.data[ALREADY_DISCOVERED][discovery_hash] = None
 
             if component not in CONFIG_ENTRY_COMPONENTS:
                 await async_load_platform(
-                    hass, component, 'mqtt', payload, hass_config)
+                    opp, component, 'mqtt', payload, opp_config)
                 return
 
             config_entries_key = '{}.{}'.format(component, 'mqtt')
-            async with hass.data[DATA_CONFIG_ENTRY_LOCK]:
-                if config_entries_key not in hass.data[CONFIG_ENTRY_IS_SETUP]:
-                    await hass.config_entries.async_forward_entry_setup(
+            async with opp.data[DATA_CONFIG_ENTRY_LOCK]:
+                if config_entries_key not in opp.data[CONFIG_ENTRY_IS_SETUP]:
+                    await opp.config_entries.async_forward_entry_setup(
                         config_entry, component)
-                    hass.data[CONFIG_ENTRY_IS_SETUP].add(config_entries_key)
+                    opp.data[CONFIG_ENTRY_IS_SETUP].add(config_entries_key)
 
-            async_dispatcher_send(hass, MQTT_DISCOVERY_NEW.format(
+            async_dispatcher_send(opp, MQTT_DISCOVERY_NEW.format(
                 component, 'mqtt'), payload)
 
-    hass.data[DATA_CONFIG_ENTRY_LOCK] = asyncio.Lock()
-    hass.data[CONFIG_ENTRY_IS_SETUP] = set()
+    opp.data[DATA_CONFIG_ENTRY_LOCK] = asyncio.Lock()
+    opp.data[CONFIG_ENTRY_IS_SETUP] = set()
 
     await mqtt.async_subscribe(
-        hass, discovery_topic + '/#', async_device_message_received, 0)
+        opp, discovery_topic + '/#', async_device_message_received, 0)
 
     return True

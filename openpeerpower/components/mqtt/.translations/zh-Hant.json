@@ -18,7 +18,7 @@
                 "description": "\u8acb\u8f38\u5165 MQTT Broker \u9023\u7dda\u8cc7\u8a0a\u3002",
                 "title": "MQTT"
             },
-            "hassio_confirm": {
+            "oppio_confirm": {
                 "data": {
                     "discovery": "\u958b\u555f\u641c\u5c0b"
                 },

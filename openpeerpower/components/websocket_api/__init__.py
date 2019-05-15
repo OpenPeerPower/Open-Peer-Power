@@ -1,6 +1,6 @@
 """WebSocket based API for Home Assistant."""
-from homeassistant.core import callback
-from homeassistant.loader import bind_hass
+from openpeerpower.core import callback
+from openpeerpower.loader import bind_opp
 
 from . import commands, connection, const, decorators, http, messages
 
@@ -22,9 +22,9 @@ websocket_command = decorators.websocket_command
 # pylint: enable=invalid-name
 
 
-@bind_hass
+@bind_opp
 @callback
-def async_register_command(hass, command_or_handler, handler=None,
+def async_register_command(opp, command_or_handler, handler=None,
                            schema=None):
     """Register a websocket command."""
     # pylint: disable=protected-access
@@ -34,14 +34,14 @@ def async_register_command(hass, command_or_handler, handler=None,
         schema = handler._ws_schema
     else:
         command = command_or_handler
-    handlers = hass.data.get(DOMAIN)
+    handlers = opp.data.get(DOMAIN)
     if handlers is None:
-        handlers = hass.data[DOMAIN] = {}
+        handlers = opp.data[DOMAIN] = {}
     handlers[command] = (handler, schema)
 
 
-async def async_setup(hass, config):
+async def async_setup(opp, config):
     """Initialize the websocket API."""
-    hass.http.register_view(http.WebsocketAPIView)
-    commands.async_register_commands(hass, async_register_command)
+    opp.http.register_view(http.WebsocketAPIView)
+    commands.async_register_commands(opp, async_register_command)
     return True

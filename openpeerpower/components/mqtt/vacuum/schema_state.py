@@ -4,18 +4,18 @@ import json
 
 import voluptuous as vol
 
-from homeassistant.components import mqtt
-from homeassistant.components.vacuum import (
+from openpeerpower.components import mqtt
+from openpeerpower.components.vacuum import (
     SUPPORT_BATTERY, SUPPORT_CLEAN_SPOT, SUPPORT_FAN_SPEED, SUPPORT_START,
     SUPPORT_LOCATE, SUPPORT_PAUSE, SUPPORT_RETURN_HOME, SUPPORT_SEND_COMMAND,
     SUPPORT_STATUS, SUPPORT_STOP, STATE_CLEANING, STATE_DOCKED, STATE_PAUSED,
     STATE_IDLE, STATE_RETURNING, STATE_ERROR, StateVacuumDevice)
-from homeassistant.const import (
+from openpeerpower.const import (
     ATTR_SUPPORTED_FEATURES, CONF_DEVICE, CONF_NAME, CONF_VALUE_TEMPLATE)
-from homeassistant.core import callback
-import homeassistant.helpers.config_validation as cv
+from openpeerpower.core import callback
+import openpeerpower.helpers.config_validation as cv
 
-from homeassistant.components.mqtt import (
+from openpeerpower.components.mqtt import (
     CONF_UNIQUE_ID, MqttAttributes, MqttAvailability,
     MqttDiscoveryUpdate, MqttEntityDeviceInfo, subscription,
     CONF_COMMAND_TOPIC, CONF_RETAIN, CONF_STATE_TOPIC, CONF_QOS)
@@ -176,22 +176,22 @@ class MqttStateVacuum(MqttAttributes, MqttAvailability, MqttDiscoveryUpdate,
         await self._subscribe_topics()
         self.async_write_ha_state()
 
-    async def async_added_to_hass(self):
+    async def async_added_to_opp(self):
         """Subscribe MQTT events."""
-        await super().async_added_to_hass()
+        await super().async_added_to_opp()
         await self._subscribe_topics()
 
-    async def async_will_remove_from_hass(self):
+    async def async_will_remove_from_opp(self):
         """Unsubscribe when removed."""
-        await subscription.async_unsubscribe_topics(self.hass, self._sub_state)
-        await MqttAttributes.async_will_remove_from_hass(self)
-        await MqttAvailability.async_will_remove_from_hass(self)
+        await subscription.async_unsubscribe_topics(self.opp, self._sub_state)
+        await MqttAttributes.async_will_remove_from_opp(self)
+        await MqttAvailability.async_will_remove_from_opp(self)
 
     async def _subscribe_topics(self):
         """(Re)Subscribe to topics."""
         template = self._config.get(CONF_VALUE_TEMPLATE)
         if template is not None:
-            template.hass = self.hass
+            template.opp = self.opp
         topics = {}
 
         @callback
@@ -215,7 +215,7 @@ class MqttStateVacuum(MqttAttributes, MqttAvailability, MqttDiscoveryUpdate,
                 'msg_callback': state_message_received,
                 'qos': self._config[CONF_QOS]}
         self._sub_state = await subscription.async_subscribe_topics(
-            self.hass, self._sub_state, topics)
+            self.opp, self._sub_state, topics)
 
     @property
     def name(self):
@@ -263,7 +263,7 @@ class MqttStateVacuum(MqttAttributes, MqttAvailability, MqttDiscoveryUpdate,
         """Start the vacuum."""
         if self.supported_features & SUPPORT_START == 0:
             return None
-        mqtt.async_publish(self.hass, self._command_topic,
+        mqtt.async_publish(self.opp, self._command_topic,
                            self._config[CONF_PAYLOAD_START],
                            self._config[CONF_QOS],
                            self._config[CONF_RETAIN])
@@ -272,7 +272,7 @@ class MqttStateVacuum(MqttAttributes, MqttAvailability, MqttDiscoveryUpdate,
         """Pause the vacuum."""
         if self.supported_features & SUPPORT_PAUSE == 0:
             return None
-        mqtt.async_publish(self.hass, self._command_topic,
+        mqtt.async_publish(self.opp, self._command_topic,
                            self._config[CONF_PAYLOAD_PAUSE],
                            self._config[CONF_QOS],
                            self._config[CONF_RETAIN])
@@ -281,7 +281,7 @@ class MqttStateVacuum(MqttAttributes, MqttAvailability, MqttDiscoveryUpdate,
         """Stop the vacuum."""
         if self.supported_features & SUPPORT_STOP == 0:
             return None
-        mqtt.async_publish(self.hass, self._command_topic,
+        mqtt.async_publish(self.opp, self._command_topic,
                            self._config[CONF_PAYLOAD_STOP],
                            self._config[CONF_QOS],
                            self._config[CONF_RETAIN])
@@ -291,7 +291,7 @@ class MqttStateVacuum(MqttAttributes, MqttAvailability, MqttDiscoveryUpdate,
         if ((self.supported_features & SUPPORT_FAN_SPEED == 0) or
                 (fan_speed not in self._fan_speed_list)):
             return None
-        mqtt.async_publish(self.hass, self._set_fan_speed_topic,
+        mqtt.async_publish(self.opp, self._set_fan_speed_topic,
                            fan_speed,
                            self._config[CONF_QOS],
                            self._config[CONF_RETAIN])
@@ -300,7 +300,7 @@ class MqttStateVacuum(MqttAttributes, MqttAvailability, MqttDiscoveryUpdate,
         """Tell the vacuum to return to its dock."""
         if self.supported_features & SUPPORT_RETURN_HOME == 0:
             return None
-        mqtt.async_publish(self.hass, self._command_topic,
+        mqtt.async_publish(self.opp, self._command_topic,
                            self._config[CONF_PAYLOAD_RETURN_TO_BASE],
                            self._config[CONF_QOS],
                            self._config[CONF_RETAIN])
@@ -309,7 +309,7 @@ class MqttStateVacuum(MqttAttributes, MqttAvailability, MqttDiscoveryUpdate,
         """Perform a spot clean-up."""
         if self.supported_features & SUPPORT_CLEAN_SPOT == 0:
             return None
-        mqtt.async_publish(self.hass, self._command_topic,
+        mqtt.async_publish(self.opp, self._command_topic,
                            self._config[CONF_PAYLOAD_CLEAN_SPOT],
                            self._config[CONF_QOS],
                            self._config[CONF_RETAIN])
@@ -318,7 +318,7 @@ class MqttStateVacuum(MqttAttributes, MqttAvailability, MqttDiscoveryUpdate,
         """Locate the vacuum (usually by playing a song)."""
         if self.supported_features & SUPPORT_LOCATE == 0:
             return None
-        mqtt.async_publish(self.hass, self._command_topic,
+        mqtt.async_publish(self.opp, self._command_topic,
                            self._config[CONF_PAYLOAD_LOCATE],
                            self._config[CONF_QOS],
                            self._config[CONF_RETAIN])
@@ -333,7 +333,7 @@ class MqttStateVacuum(MqttAttributes, MqttAvailability, MqttDiscoveryUpdate,
             message = json.dumps(message)
         else:
             message = command
-        mqtt.async_publish(self.hass, self._send_command_topic,
+        mqtt.async_publish(self.opp, self._send_command_topic,
                            message,
                            self._config[CONF_QOS],
                            self._config[CONF_RETAIN])

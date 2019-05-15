@@ -1,9 +1,9 @@
 """Support for Z-Wave switches."""
 import logging
 import time
-from homeassistant.core import callback
-from homeassistant.components.switch import DOMAIN, SwitchDevice
-from homeassistant.helpers.dispatcher import async_dispatcher_connect
+from openpeerpower.core import callback
+from openpeerpower.components.switch import DOMAIN, SwitchDevice
+from openpeerpower.helpers.dispatcher import async_dispatcher_connect
 from . import (
     ZWaveDeviceEntity,
     workaround,
@@ -12,20 +12,20 @@ from . import (
 _LOGGER = logging.getLogger(__name__)
 
 
-async def async_setup_platform(hass, config, async_add_entities,
+async def async_setup_platform(opp, config, async_add_entities,
                                discovery_info=None):
     """Old method of setting up Z-Wave switches."""
     pass
 
 
-async def async_setup_entry(hass, config_entry, async_add_entities):
+async def async_setup_entry(opp, config_entry, async_add_entities):
     """Set up Z-Wave Switch from Config Entry."""
     @callback
     def async_add_switch(switch):
         """Add Z-Wave Switch."""
         async_add_entities([switch])
 
-    async_dispatcher_connect(hass, 'zwave_new_switch', async_add_switch)
+    async_dispatcher_connect(opp, 'zwave_new_switch', async_add_switch)
 
 
 def get_device(values, **kwargs):

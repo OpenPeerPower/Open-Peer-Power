@@ -5,12 +5,12 @@ from functools import partial
 
 import voluptuous as vol
 
-from homeassistant.setup import async_prepare_setup_platform
-from homeassistant.exceptions import OpenPeerPowerError
-import homeassistant.helpers.config_validation as cv
-from homeassistant.const import CONF_NAME, CONF_PLATFORM
-from homeassistant.helpers import config_per_platform, discovery
-from homeassistant.util import slugify
+from openpeerpower.setup import async_prepare_setup_platform
+from openpeerpower.exceptions import OpenPeerPowerError
+import openpeerpower.helpers.config_validation as cv
+from openpeerpower.const import CONF_NAME, CONF_PLATFORM
+from openpeerpower.helpers import config_per_platform, discovery
+from openpeerpower.util import slugify
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -44,7 +44,7 @@ NOTIFY_SERVICE_SCHEMA = vol.Schema({
 })
 
 
-async def async_setup(hass, config):
+async def async_setup(opp, config):
     """Set up the notify services."""
     targets = {}
 
@@ -54,7 +54,7 @@ async def async_setup(hass, config):
             p_config = {}
 
         platform = await async_prepare_setup_platform(
-            hass, config, DOMAIN, p_type)
+            opp, config, DOMAIN, p_type)
 
         if platform is None:
             _LOGGER.error("Unknown notification service specified")
@@ -65,10 +65,10 @@ async def async_setup(hass, config):
         try:
             if hasattr(platform, 'async_get_service'):
                 notify_service = await \
-                    platform.async_get_service(hass, p_config, discovery_info)
+                    platform.async_get_service(opp, p_config, discovery_info)
             elif hasattr(platform, 'get_service'):
-                notify_service = await hass.async_add_job(
-                    platform.get_service, hass, p_config, discovery_info)
+                notify_service = await opp.async_add_job(
+                    platform.get_service, opp, p_config, discovery_info)
             else:
                 raise OpenPeerPowerError("Invalid notify platform.")
 
@@ -85,7 +85,7 @@ async def async_setup(hass, config):
             _LOGGER.exception('Error setting up platform %s', p_type)
             return
 
-        notify_service.hass = hass
+        notify_service.opp = opp
 
         if discovery_info is None:
             discovery_info = {}
@@ -97,7 +97,7 @@ async def async_setup(hass, config):
             title = service.data.get(ATTR_TITLE)
 
             if title:
-                title.hass = hass
+                title.opp = opp
                 kwargs[ATTR_TITLE] = title.async_render()
 
             if targets.get(service.service) is not None:
@@ -105,7 +105,7 @@ async def async_setup(hass, config):
             elif service.data.get(ATTR_TARGET) is not None:
                 kwargs[ATTR_TARGET] = service.data.get(ATTR_TARGET)
 
-            message.hass = hass
+            message.opp = opp
             kwargs[ATTR_MESSAGE] = message.async_render()
             kwargs[ATTR_DATA] = service.data.get(ATTR_DATA)
 
@@ -118,7 +118,7 @@ async def async_setup(hass, config):
             for name, target in notify_service.targets.items():
                 target_name = slugify('{}_{}'.format(platform_name, name))
                 targets[target_name] = target
-                hass.services.async_register(
+                opp.services.async_register(
                     DOMAIN, target_name, async_notify_message,
                     schema=NOTIFY_SERVICE_SCHEMA)
 
@@ -127,11 +127,11 @@ async def async_setup(hass, config):
             SERVICE_NOTIFY)
         platform_name_slug = slugify(platform_name)
 
-        hass.services.async_register(
+        opp.services.async_register(
             DOMAIN, platform_name_slug, async_notify_message,
             schema=NOTIFY_SERVICE_SCHEMA)
 
-        hass.config.components.add('{}.{}'.format(DOMAIN, p_type))
+        opp.config.components.add('{}.{}'.format(DOMAIN, p_type))
 
         return True
 
@@ -139,13 +139,13 @@ async def async_setup(hass, config):
                    in config_per_platform(config, DOMAIN)]
 
     if setup_tasks:
-        await asyncio.wait(setup_tasks, loop=hass.loop)
+        await asyncio.wait(setup_tasks, loop=opp.loop)
 
     async def async_platform_discovered(platform, info):
         """Handle for discovered platform."""
         await async_setup_platform(platform, discovery_info=info)
 
-    discovery.async_listen_platform(hass, DOMAIN, async_platform_discovered)
+    discovery.async_listen_platform(opp, DOMAIN, async_platform_discovered)
 
     return True
 
@@ -153,7 +153,7 @@ async def async_setup(hass, config):
 class BaseNotificationService:
     """An abstract class for notification services."""
 
-    hass = None
+    opp = None
 
     def send_message(self, message, **kwargs):
         """Send a message.
@@ -168,5 +168,5 @@ class BaseNotificationService:
         kwargs can contain ATTR_TITLE to specify a title.
         This method must be run in the event loop and returns a coroutine.
         """
-        return self.hass.async_add_job(
+        return self.opp.async_add_job(
             partial(self.send_message, message, **kwargs))

@@ -13,26 +13,26 @@ from aiohttp import web
 import async_timeout
 import voluptuous as vol
 
-from homeassistant.core import callback
-from homeassistant.const import ATTR_ENTITY_ID, SERVICE_TURN_OFF, \
+from openpeerpower.core import callback
+from openpeerpower.const import ATTR_ENTITY_ID, SERVICE_TURN_OFF, \
     SERVICE_TURN_ON, CONF_FILENAME
-from homeassistant.exceptions import OpenPeerPowerError
-from homeassistant.loader import bind_hass
-from homeassistant.helpers.entity import Entity
-from homeassistant.helpers.entity_component import EntityComponent
-from homeassistant.helpers.config_validation import (  # noqa
+from openpeerpower.exceptions import OpenPeerPowerError
+from openpeerpower.loader import bind_opp
+from openpeerpower.helpers.entity import Entity
+from openpeerpower.helpers.entity_component import EntityComponent
+from openpeerpower.helpers.config_validation import (  # noqa
     PLATFORM_SCHEMA, PLATFORM_SCHEMA_BASE)
-from homeassistant.components.http import OpenPeerPowerView, KEY_AUTHENTICATED
-from homeassistant.components.media_player.const import (
+from openpeerpower.components.http import OpenPeerPowerView, KEY_AUTHENTICATED
+from openpeerpower.components.media_player.const import (
     ATTR_MEDIA_CONTENT_ID, ATTR_MEDIA_CONTENT_TYPE,
     SERVICE_PLAY_MEDIA, DOMAIN as DOMAIN_MP)
-from homeassistant.components.stream import request_stream
-from homeassistant.components.stream.const import (
+from openpeerpower.components.stream import request_stream
+from openpeerpower.components.stream.const import (
     OUTPUT_FORMATS, FORMAT_CONTENT_TYPE, CONF_STREAM_SOURCE, CONF_LOOKBACK,
     CONF_DURATION, SERVICE_RECORD, DOMAIN as DOMAIN_STREAM)
-from homeassistant.components import websocket_api
-import homeassistant.helpers.config_validation as cv
-from homeassistant.setup import async_when_setup
+from openpeerpower.components import websocket_api
+import openpeerpower.helpers.config_validation as cv
+from openpeerpower.setup import async_when_setup
 
 from .const import DOMAIN, DATA_CAMERA_PREFS
 from .prefs import CameraPreferences
@@ -101,27 +101,27 @@ class Image:
     content = attr.ib(type=bytes)
 
 
-@bind_hass
-async def async_request_stream(hass, entity_id, fmt):
+@bind_opp
+async def async_request_stream(opp, entity_id, fmt):
     """Request a stream for a camera entity."""
-    camera = _get_camera_from_entity_id(hass, entity_id)
-    camera_prefs = hass.data[DATA_CAMERA_PREFS].get(entity_id)
+    camera = _get_camera_from_entity_id(opp, entity_id)
+    camera_prefs = opp.data[DATA_CAMERA_PREFS].get(entity_id)
 
     if not camera.stream_source:
         raise OpenPeerPowerError("{} does not support play stream service"
                                  .format(camera.entity_id))
 
-    return request_stream(hass, camera.stream_source, fmt=fmt,
+    return request_stream(opp, camera.stream_source, fmt=fmt,
                           keepalive=camera_prefs.preload_stream)
 
 
-@bind_hass
-async def async_get_image(hass, entity_id, timeout=10):
+@bind_opp
+async def async_get_image(opp, entity_id, timeout=10):
     """Fetch an image from a camera entity."""
-    camera = _get_camera_from_entity_id(hass, entity_id)
+    camera = _get_camera_from_entity_id(opp, entity_id)
 
     with suppress(asyncio.CancelledError, asyncio.TimeoutError):
-        with async_timeout.timeout(timeout, loop=hass.loop):
+        with async_timeout.timeout(timeout, loop=opp.loop):
             image = await camera.async_camera_image()
 
             if image:
@@ -130,10 +130,10 @@ async def async_get_image(hass, entity_id, timeout=10):
     raise OpenPeerPowerError('Unable to get image')
 
 
-@bind_hass
-async def async_get_mjpeg_stream(hass, request, entity_id):
+@bind_opp
+async def async_get_mjpeg_stream(opp, request, entity_id):
     """Fetch an mjpeg stream from a camera entity."""
-    camera = _get_camera_from_entity_id(hass, entity_id)
+    camera = _get_camera_from_entity_id(opp, entity_id)
 
     return await camera.handle_async_mjpeg_stream(request)
 
@@ -178,9 +178,9 @@ async def async_get_still_stream(request, image_cb, content_type, interval):
     return response
 
 
-def _get_camera_from_entity_id(hass, entity_id):
+def _get_camera_from_entity_id(opp, entity_id):
     """Get camera component from entity_id."""
-    component = hass.data.get(DOMAIN)
+    component = opp.data.get(DOMAIN)
 
     if component is None:
         raise OpenPeerPowerError('Camera component not set up')
@@ -196,44 +196,44 @@ def _get_camera_from_entity_id(hass, entity_id):
     return camera
 
 
-async def async_setup(hass, config):
+async def async_setup(opp, config):
     """Set up the camera component."""
-    component = hass.data[DOMAIN] = \
-        EntityComponent(_LOGGER, DOMAIN, hass, SCAN_INTERVAL)
+    component = opp.data[DOMAIN] = \
+        EntityComponent(_LOGGER, DOMAIN, opp, SCAN_INTERVAL)
 
-    prefs = CameraPreferences(hass)
+    prefs = CameraPreferences(opp)
     await prefs.async_initialize()
-    hass.data[DATA_CAMERA_PREFS] = prefs
+    opp.data[DATA_CAMERA_PREFS] = prefs
 
-    hass.http.register_view(CameraImageView(component))
-    hass.http.register_view(CameraMjpegStream(component))
-    hass.components.websocket_api.async_register_command(
+    opp.http.register_view(CameraImageView(component))
+    opp.http.register_view(CameraMjpegStream(component))
+    opp.components.websocket_api.async_register_command(
         WS_TYPE_CAMERA_THUMBNAIL, websocket_camera_thumbnail,
         SCHEMA_WS_CAMERA_THUMBNAIL
     )
-    hass.components.websocket_api.async_register_command(ws_camera_stream)
-    hass.components.websocket_api.async_register_command(websocket_get_prefs)
-    hass.components.websocket_api.async_register_command(
+    opp.components.websocket_api.async_register_command(ws_camera_stream)
+    opp.components.websocket_api.async_register_command(websocket_get_prefs)
+    opp.components.websocket_api.async_register_command(
         websocket_update_prefs)
 
     await component.async_setup(config)
 
-    async def preload_stream(hass, _):
+    async def preload_stream(opp, _):
         for camera in component.entities:
             camera_prefs = prefs.get(camera.entity_id)
             if camera.stream_source and camera_prefs.preload_stream:
-                request_stream(hass, camera.stream_source, keepalive=True)
+                request_stream(opp, camera.stream_source, keepalive=True)
 
-    async_when_setup(hass, DOMAIN_STREAM, preload_stream)
+    async_when_setup(opp, DOMAIN_STREAM, preload_stream)
 
     @callback
     def update_tokens(time):
         """Update tokens of the entities."""
         for entity in component.entities:
             entity.async_update_token()
-            hass.async_create_task(entity.async_update_ha_state())
+            opp.async_create_task(entity.async_update_ha_state())
 
-    hass.helpers.event.async_track_time_interval(
+    opp.helpers.event.async_track_time_interval(
         update_tokens, TOKEN_CHANGE_INTERVAL)
 
     component.async_register_entity_service(
@@ -268,14 +268,14 @@ async def async_setup(hass, config):
     return True
 
 
-async def async_setup_entry(hass, entry):
+async def async_setup_entry(opp, entry):
     """Set up a config entry."""
-    return await hass.data[DOMAIN].async_setup_entry(entry)
+    return await opp.data[DOMAIN].async_setup_entry(entry)
 
 
-async def async_unload_entry(hass, entry):
+async def async_unload_entry(opp, entry):
     """Unload a config entry."""
-    return await hass.data[DOMAIN].async_unload_entry(entry)
+    return await opp.data[DOMAIN].async_unload_entry(entry)
 
 
 class Camera(Entity):
@@ -343,7 +343,7 @@ class Camera(Entity):
 
         This method must be run in the event loop and returns a coroutine.
         """
-        return self.hass.async_add_job(self.camera_image)
+        return self.opp.async_add_job(self.camera_image)
 
     async def handle_async_still_stream(self, request, interval):
         """Generate an HTTP MJPEG stream from camera images.
@@ -384,7 +384,7 @@ class Camera(Entity):
     @callback
     def async_turn_off(self):
         """Turn off camera."""
-        return self.hass.async_add_job(self.turn_off)
+        return self.opp.async_add_job(self.turn_off)
 
     def turn_on(self):
         """Turn off camera."""
@@ -393,7 +393,7 @@ class Camera(Entity):
     @callback
     def async_turn_on(self):
         """Turn off camera."""
-        return self.hass.async_add_job(self.turn_on)
+        return self.opp.async_add_job(self.turn_on)
 
     def enable_motion_detection(self):
         """Enable motion detection in the camera."""
@@ -402,7 +402,7 @@ class Camera(Entity):
     @callback
     def async_enable_motion_detection(self):
         """Call the job and enable motion detection."""
-        return self.hass.async_add_job(self.enable_motion_detection)
+        return self.opp.async_add_job(self.enable_motion_detection)
 
     def disable_motion_detection(self):
         """Disable motion detection in camera."""
@@ -411,7 +411,7 @@ class Camera(Entity):
     @callback
     def async_disable_motion_detection(self):
         """Call the job and disable motion detection."""
-        return self.hass.async_add_job(self.disable_motion_detection)
+        return self.opp.async_add_job(self.disable_motion_detection)
 
     @property
     def state_attributes(self):
@@ -481,7 +481,7 @@ class CameraImageView(CameraView):
     async def handle(self, request, camera):
         """Serve camera image."""
         with suppress(asyncio.CancelledError, asyncio.TimeoutError):
-            with async_timeout.timeout(10, loop=request.app['hass'].loop):
+            with async_timeout.timeout(10, loop=request.app['opp'].loop):
                 image = await camera.async_camera_image()
 
             if image:
@@ -515,13 +515,13 @@ class CameraMjpegStream(CameraView):
 
 
 @websocket_api.async_response
-async def websocket_camera_thumbnail(hass, connection, msg):
+async def websocket_camera_thumbnail(opp, connection, msg):
     """Handle get camera thumbnail websocket command.
 
     Async friendly.
     """
     try:
-        image = await async_get_image(hass, msg['entity_id'])
+        image = await async_get_image(opp, msg['entity_id'])
         connection.send_message(websocket_api.result_message(
             msg['id'], {
                 'content_type': image.content_type,
@@ -539,22 +539,22 @@ async def websocket_camera_thumbnail(hass, connection, msg):
     vol.Required('entity_id'): cv.entity_id,
     vol.Optional('format', default='hls'): vol.In(OUTPUT_FORMATS),
 })
-async def ws_camera_stream(hass, connection, msg):
+async def ws_camera_stream(opp, connection, msg):
     """Handle get camera stream websocket command.
 
     Async friendly.
     """
     try:
         entity_id = msg['entity_id']
-        camera = _get_camera_from_entity_id(hass, entity_id)
-        camera_prefs = hass.data[DATA_CAMERA_PREFS].get(entity_id)
+        camera = _get_camera_from_entity_id(opp, entity_id)
+        camera_prefs = opp.data[DATA_CAMERA_PREFS].get(entity_id)
 
         if not camera.stream_source:
             raise OpenPeerPowerError("{} does not support play stream service"
                                      .format(camera.entity_id))
 
         fmt = msg['format']
-        url = request_stream(hass, camera.stream_source, fmt=fmt,
+        url = request_stream(opp, camera.stream_source, fmt=fmt,
                              keepalive=camera_prefs.preload_stream)
         connection.send_result(msg['id'], {'url': url})
     except OpenPeerPowerError as ex:
@@ -568,9 +568,9 @@ async def ws_camera_stream(hass, connection, msg):
     vol.Required('type'): 'camera/get_prefs',
     vol.Required('entity_id'): cv.entity_id,
 })
-async def websocket_get_prefs(hass, connection, msg):
+async def websocket_get_prefs(opp, connection, msg):
     """Handle request for account info."""
-    prefs = hass.data[DATA_CAMERA_PREFS].get(msg['entity_id'])
+    prefs = opp.data[DATA_CAMERA_PREFS].get(msg['entity_id'])
     connection.send_result(msg['id'], prefs.as_dict())
 
 
@@ -580,9 +580,9 @@ async def websocket_get_prefs(hass, connection, msg):
     vol.Required('entity_id'): cv.entity_id,
     vol.Optional('preload_stream'): bool,
 })
-async def websocket_update_prefs(hass, connection, msg):
+async def websocket_update_prefs(opp, connection, msg):
     """Handle request for account info."""
-    prefs = hass.data[DATA_CAMERA_PREFS]
+    prefs = opp.data[DATA_CAMERA_PREFS]
 
     changes = dict(msg)
     changes.pop('id')
@@ -595,15 +595,15 @@ async def websocket_update_prefs(hass, connection, msg):
 
 async def async_handle_snapshot_service(camera, service):
     """Handle snapshot services calls."""
-    hass = camera.hass
+    opp = camera.opp
     filename = service.data[ATTR_FILENAME]
-    filename.hass = hass
+    filename.opp = opp
 
     snapshot_file = filename.async_render(
         variables={ATTR_ENTITY_ID: camera})
 
     # check if we allow to access to that file
-    if not hass.config.is_allowed_path(snapshot_file):
+    if not opp.config.is_allowed_path(snapshot_file):
         _LOGGER.error(
             "Can't write %s, no access to path!", snapshot_file)
         return
@@ -616,7 +616,7 @@ async def async_handle_snapshot_service(camera, service):
             img_file.write(image_data)
 
     try:
-        await hass.async_add_executor_job(
+        await opp.async_add_executor_job(
             _write_image, snapshot_file, image)
     except OSError as err:
         _LOGGER.error("Can't write image to file: %s", err)
@@ -628,20 +628,20 @@ async def async_handle_play_stream_service(camera, service_call):
         raise OpenPeerPowerError("{} does not support play stream service"
                                  .format(camera.entity_id))
 
-    hass = camera.hass
-    camera_prefs = hass.data[DATA_CAMERA_PREFS].get(camera.entity_id)
+    opp = camera.opp
+    camera_prefs = opp.data[DATA_CAMERA_PREFS].get(camera.entity_id)
     fmt = service_call.data[ATTR_FORMAT]
     entity_ids = service_call.data[ATTR_MEDIA_PLAYER]
 
-    url = request_stream(hass, camera.stream_source, fmt=fmt,
+    url = request_stream(opp, camera.stream_source, fmt=fmt,
                          keepalive=camera_prefs.preload_stream)
     data = {
         ATTR_ENTITY_ID: entity_ids,
-        ATTR_MEDIA_CONTENT_ID: "{}{}".format(hass.config.api.base_url, url),
+        ATTR_MEDIA_CONTENT_ID: "{}{}".format(opp.config.api.base_url, url),
         ATTR_MEDIA_CONTENT_TYPE: FORMAT_CONTENT_TYPE[fmt]
     }
 
-    await hass.services.async_call(
+    await opp.services.async_call(
         DOMAIN_MP, SERVICE_PLAY_MEDIA, data,
         blocking=True, context=service_call.context)
 
@@ -652,9 +652,9 @@ async def async_handle_record_service(camera, call):
         raise OpenPeerPowerError("{} does not support record service"
                                  .format(camera.entity_id))
 
-    hass = camera.hass
+    opp = camera.opp
     filename = call.data[CONF_FILENAME]
-    filename.hass = hass
+    filename.opp = opp
     video_path = filename.async_render(
         variables={ATTR_ENTITY_ID: camera})
 
@@ -665,6 +665,6 @@ async def async_handle_record_service(camera, call):
         CONF_LOOKBACK: call.data[CONF_LOOKBACK],
     }
 
-    await hass.services.async_call(
+    await opp.services.async_call(
         DOMAIN_STREAM, SERVICE_RECORD, data,
         blocking=True, context=call.context)

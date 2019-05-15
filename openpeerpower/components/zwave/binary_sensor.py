@@ -1,11 +1,11 @@
 """Support for Z-Wave binary sensors."""
 import logging
 import datetime
-import homeassistant.util.dt as dt_util
-from homeassistant.core import callback
-from homeassistant.helpers.dispatcher import async_dispatcher_connect
-from homeassistant.helpers.event import track_point_in_time
-from homeassistant.components.binary_sensor import (
+import openpeerpower.util.dt as dt_util
+from openpeerpower.core import callback
+from openpeerpower.helpers.dispatcher import async_dispatcher_connect
+from openpeerpower.helpers.event import track_point_in_time
+from openpeerpower.components.binary_sensor import (
     DOMAIN,
     BinarySensorDevice)
 from . import (
@@ -18,12 +18,12 @@ _LOGGER = logging.getLogger(__name__)
 
 
 async def async_setup_platform(
-        hass, config, async_add_entities, discovery_info=None):
+        opp, config, async_add_entities, discovery_info=None):
     """Old method of setting up Z-Wave binary sensors."""
     pass
 
 
-async def async_setup_entry(hass, config_entry, async_add_entities):
+async def async_setup_entry(opp, config_entry, async_add_entities):
     """Set up Z-Wave binary sensors from Config Entry."""
     @callback
     def async_add_binary_sensor(binary_sensor):
@@ -31,7 +31,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
         async_add_entities([binary_sensor])
 
     async_dispatcher_connect(
-        hass, 'zwave_new_binary_sensor', async_add_binary_sensor)
+        opp, 'zwave_new_binary_sensor', async_add_binary_sensor)
 
 
 def get_device(values, **kwargs):
@@ -91,13 +91,13 @@ class ZWaveTriggerSensor(ZWaveBinarySensor):
             _LOGGER.debug('off_delay.data=%s', self.values.off_delay.data)
             self.re_arm_sec = self.values.off_delay.data * 8
         # only allow this value to be true for re_arm secs
-        if not self.hass:
+        if not self.opp:
             return
 
         self.invalidate_after = dt_util.utcnow() + datetime.timedelta(
             seconds=self.re_arm_sec)
         track_point_in_time(
-            self.hass, self.async_update_ha_state,
+            self.opp, self.async_update_ha_state,
             self.invalidate_after)
 
     @property

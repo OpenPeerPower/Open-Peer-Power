@@ -1,10 +1,10 @@
 """Support for Z-Wave covers."""
 import logging
-from homeassistant.core import callback
-from homeassistant.components.cover import (
+from openpeerpower.core import callback
+from openpeerpower.components.cover import (
     DOMAIN, SUPPORT_OPEN, SUPPORT_CLOSE, ATTR_POSITION)
-from homeassistant.components.cover import CoverDevice
-from homeassistant.helpers.dispatcher import async_dispatcher_connect
+from openpeerpower.components.cover import CoverDevice
+from openpeerpower.helpers.dispatcher import async_dispatcher_connect
 from . import (
     ZWaveDeviceEntity, CONF_INVERT_OPENCLOSE_BUTTONS, workaround)
 from .const import (
@@ -17,28 +17,28 @@ SUPPORT_GARAGE = SUPPORT_OPEN | SUPPORT_CLOSE
 
 
 async def async_setup_platform(
-        hass, config, async_add_entities, discovery_info=None):
+        opp, config, async_add_entities, discovery_info=None):
     """Old method of setting up Z-Wave covers."""
     pass
 
 
-async def async_setup_entry(hass, config_entry, async_add_entities):
+async def async_setup_entry(opp, config_entry, async_add_entities):
     """Set up Z-Wave Cover from Config Entry."""
     @callback
     def async_add_cover(cover):
         """Add Z-Wave Cover."""
         async_add_entities([cover])
 
-    async_dispatcher_connect(hass, 'zwave_new_cover', async_add_cover)
+    async_dispatcher_connect(opp, 'zwave_new_cover', async_add_cover)
 
 
-def get_device(hass, values, node_config, **kwargs):
+def get_device(opp, values, node_config, **kwargs):
     """Create Z-Wave entity device."""
     invert_buttons = node_config.get(CONF_INVERT_OPENCLOSE_BUTTONS)
     if (values.primary.command_class ==
             COMMAND_CLASS_SWITCH_MULTILEVEL
             and values.primary.index == 0):
-        return ZwaveRollershutter(hass, values, invert_buttons)
+        return ZwaveRollershutter(opp, values, invert_buttons)
     if values.primary.command_class == COMMAND_CLASS_SWITCH_BINARY:
         return ZwaveGarageDoorSwitch(values)
     if values.primary.command_class == \
@@ -50,10 +50,10 @@ def get_device(hass, values, node_config, **kwargs):
 class ZwaveRollershutter(ZWaveDeviceEntity, CoverDevice):
     """Representation of an Z-Wave cover."""
 
-    def __init__(self, hass, values, invert_buttons):
+    def __init__(self, opp, values, invert_buttons):
         """Initialize the Z-Wave rollershutter."""
         ZWaveDeviceEntity.__init__(self, values, DOMAIN)
-        self._network = hass.data[DATA_NETWORK]
+        self._network = opp.data[DATA_NETWORK]
         self._open_id = None
         self._close_id = None
         self._current_position = None

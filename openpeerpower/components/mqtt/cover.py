@@ -3,19 +3,19 @@ import logging
 
 import voluptuous as vol
 
-from homeassistant.components import cover, mqtt
-from homeassistant.components.cover import (
+from openpeerpower.components import cover, mqtt
+from openpeerpower.components.cover import (
     ATTR_POSITION, ATTR_TILT_POSITION, DEVICE_CLASSES_SCHEMA, SUPPORT_CLOSE,
     SUPPORT_CLOSE_TILT, SUPPORT_OPEN, SUPPORT_OPEN_TILT, SUPPORT_SET_POSITION,
     SUPPORT_SET_TILT_POSITION, SUPPORT_STOP, SUPPORT_STOP_TILT, CoverDevice)
-from homeassistant.const import (
+from openpeerpower.const import (
     CONF_DEVICE, CONF_DEVICE_CLASS, CONF_NAME, CONF_OPTIMISTIC,
     CONF_VALUE_TEMPLATE, STATE_CLOSED, STATE_OPEN, STATE_UNKNOWN)
-from homeassistant.core import callback
-from homeassistant.exceptions import TemplateError
-import homeassistant.helpers.config_validation as cv
-from homeassistant.helpers.dispatcher import async_dispatcher_connect
-from homeassistant.helpers.typing import ConfigType, OpenPeerPowerType
+from openpeerpower.core import callback
+from openpeerpower.exceptions import TemplateError
+import openpeerpower.helpers.config_validation as cv
+from openpeerpower.helpers.dispatcher import async_dispatcher_connect
+from openpeerpower.helpers.typing import ConfigType, OpenPeerPowerType
 
 from . import (
     ATTR_DISCOVERY_HASH, CONF_COMMAND_TOPIC, CONF_QOS, CONF_RETAIN,
@@ -116,13 +116,13 @@ PLATFORM_SCHEMA = vol.All(mqtt.MQTT_BASE_PLATFORM_SCHEMA.extend({
     mqtt.MQTT_JSON_ATTRS_SCHEMA.schema), validate_options)
 
 
-async def async_setup_platform(hass: OpenPeerPowerType, config: ConfigType,
+async def async_setup_platform(opp: OpenPeerPowerType, config: ConfigType,
                                async_add_entities, discovery_info=None):
     """Set up MQTT cover through configuration.yaml."""
     await _async_setup_entity(config, async_add_entities)
 
 
-async def async_setup_entry(hass, config_entry, async_add_entities):
+async def async_setup_entry(opp, config_entry, async_add_entities):
     """Set up MQTT cover dynamically through MQTT discovery."""
     async def async_discover(discovery_payload):
         """Discover and add an MQTT cover."""
@@ -133,11 +133,11 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
                                       discovery_hash)
         except Exception:
             if discovery_hash:
-                clear_discovery_hash(hass, discovery_hash)
+                clear_discovery_hash(opp, discovery_hash)
             raise
 
     async_dispatcher_connect(
-        hass, MQTT_DISCOVERY_NEW.format(cover.DOMAIN, 'mqtt'),
+        opp, MQTT_DISCOVERY_NEW.format(cover.DOMAIN, 'mqtt'),
         async_discover)
 
 
@@ -173,9 +173,9 @@ class MqttCover(MqttAttributes, MqttAvailability, MqttDiscoveryUpdate,
             self, discovery_hash, self.discovery_update)
         MqttEntityDeviceInfo.__init__(self, device_config, config_entry)
 
-    async def async_added_to_hass(self):
+    async def async_added_to_opp(self):
         """Subscribe MQTT events."""
-        await super().async_added_to_hass()
+        await super().async_added_to_opp()
         await self._subscribe_topics()
 
     async def discovery_update(self, discovery_payload):
@@ -199,10 +199,10 @@ class MqttCover(MqttAttributes, MqttAvailability, MqttDiscoveryUpdate,
         """(Re)Subscribe to topics."""
         template = self._config.get(CONF_VALUE_TEMPLATE)
         if template is not None:
-            template.hass = self.hass
+            template.opp = self.opp
         set_position_template = self._config.get(CONF_SET_POSITION_TEMPLATE)
         if set_position_template is not None:
-            set_position_template.hass = self.hass
+            set_position_template.opp = self.opp
 
         topics = {}
 
@@ -279,15 +279,15 @@ class MqttCover(MqttAttributes, MqttAvailability, MqttDiscoveryUpdate,
                 'qos': self._config[CONF_QOS]}
 
         self._sub_state = await subscription.async_subscribe_topics(
-            self.hass, self._sub_state,
+            self.opp, self._sub_state,
             topics)
 
-    async def async_will_remove_from_hass(self):
+    async def async_will_remove_from_opp(self):
         """Unsubscribe when removed."""
         self._sub_state = await subscription.async_unsubscribe_topics(
-            self.hass, self._sub_state)
-        await MqttAttributes.async_will_remove_from_hass(self)
-        await MqttAvailability.async_will_remove_from_hass(self)
+            self.opp, self._sub_state)
+        await MqttAttributes.async_will_remove_from_opp(self)
+        await MqttAvailability.async_will_remove_from_opp(self)
 
     @property
     def should_poll(self):
@@ -348,7 +348,7 @@ class MqttCover(MqttAttributes, MqttAvailability, MqttDiscoveryUpdate,
         This method is a coroutine.
         """
         mqtt.async_publish(
-            self.hass, self._config.get(CONF_COMMAND_TOPIC),
+            self.opp, self._config.get(CONF_COMMAND_TOPIC),
             self._config[CONF_PAYLOAD_OPEN], self._config[CONF_QOS],
             self._config[CONF_RETAIN])
         if self._optimistic:
@@ -365,7 +365,7 @@ class MqttCover(MqttAttributes, MqttAvailability, MqttDiscoveryUpdate,
         This method is a coroutine.
         """
         mqtt.async_publish(
-            self.hass, self._config.get(CONF_COMMAND_TOPIC),
+            self.opp, self._config.get(CONF_COMMAND_TOPIC),
             self._config[CONF_PAYLOAD_CLOSE], self._config[CONF_QOS],
             self._config[CONF_RETAIN])
         if self._optimistic:
@@ -382,13 +382,13 @@ class MqttCover(MqttAttributes, MqttAvailability, MqttDiscoveryUpdate,
         This method is a coroutine.
         """
         mqtt.async_publish(
-            self.hass, self._config.get(CONF_COMMAND_TOPIC),
+            self.opp, self._config.get(CONF_COMMAND_TOPIC),
             self._config[CONF_PAYLOAD_STOP], self._config[CONF_QOS],
             self._config[CONF_RETAIN])
 
     async def async_open_cover_tilt(self, **kwargs):
         """Tilt the cover open."""
-        mqtt.async_publish(self.hass,
+        mqtt.async_publish(self.opp,
                            self._config.get(CONF_TILT_COMMAND_TOPIC),
                            self._config[CONF_TILT_OPEN_POSITION],
                            self._config[CONF_QOS],
@@ -399,7 +399,7 @@ class MqttCover(MqttAttributes, MqttAvailability, MqttDiscoveryUpdate,
 
     async def async_close_cover_tilt(self, **kwargs):
         """Tilt the cover closed."""
-        mqtt.async_publish(self.hass,
+        mqtt.async_publish(self.opp,
                            self._config.get(CONF_TILT_COMMAND_TOPIC),
                            self._config[CONF_TILT_CLOSED_POSITION],
                            self._config[CONF_QOS],
@@ -418,7 +418,7 @@ class MqttCover(MqttAttributes, MqttAvailability, MqttDiscoveryUpdate,
         # The position needs to be between min and max
         level = self.find_in_range_from_percent(position)
 
-        mqtt.async_publish(self.hass,
+        mqtt.async_publish(self.opp,
                            self._config.get(CONF_TILT_COMMAND_TOPIC),
                            level,
                            self._config[CONF_QOS],
@@ -442,7 +442,7 @@ class MqttCover(MqttAttributes, MqttAvailability, MqttDiscoveryUpdate,
                 position = self.find_in_range_from_percent(
                     position, COVER_PAYLOAD)
 
-            mqtt.async_publish(self.hass,
+            mqtt.async_publish(self.opp,
                                self._config.get(CONF_SET_POSITION_TOPIC),
                                position,
                                self._config[CONF_QOS],

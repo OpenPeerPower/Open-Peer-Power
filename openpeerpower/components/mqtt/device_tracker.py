@@ -3,11 +3,11 @@ import logging
 
 import voluptuous as vol
 
-from homeassistant.components import mqtt
-from homeassistant.components.device_tracker import PLATFORM_SCHEMA
-from homeassistant.const import CONF_DEVICES
-from homeassistant.core import callback
-import homeassistant.helpers.config_validation as cv
+from openpeerpower.components import mqtt
+from openpeerpower.components.device_tracker import PLATFORM_SCHEMA
+from openpeerpower.const import CONF_DEVICES
+from openpeerpower.core import callback
+import openpeerpower.helpers.config_validation as cv
 
 from . import CONF_QOS
 
@@ -18,7 +18,7 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(mqtt.SCHEMA_BASE).extend({
 })
 
 
-async def async_setup_scanner(hass, config, async_see, discovery_info=None):
+async def async_setup_scanner(opp, config, async_see, discovery_info=None):
     """Set up the MQTT tracker."""
     devices = config[CONF_DEVICES]
     qos = config[CONF_QOS]
@@ -27,10 +27,10 @@ async def async_setup_scanner(hass, config, async_see, discovery_info=None):
         @callback
         def async_message_received(msg, dev_id=dev_id):
             """Handle received MQTT message."""
-            hass.async_create_task(
+            opp.async_create_task(
                 async_see(dev_id=dev_id, location_name=msg.payload))
 
         await mqtt.async_subscribe(
-            hass, topic, async_message_received, qos)
+            opp, topic, async_message_received, qos)
 
     return True

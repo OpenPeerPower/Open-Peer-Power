@@ -2,7 +2,7 @@
 import asyncio
 import logging
 
-import homeassistant.util.dt as dt_util
+import openpeerpower.util.dt as dt_util
 
 from . import const
 

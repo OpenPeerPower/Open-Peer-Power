@@ -1,9 +1,9 @@
 """Support for Z-Wave sensors."""
 import logging
-from homeassistant.core import callback
-from homeassistant.components.sensor import DOMAIN
-from homeassistant.const import TEMP_CELSIUS, TEMP_FAHRENHEIT
-from homeassistant.helpers.dispatcher import async_dispatcher_connect
+from openpeerpower.core import callback
+from openpeerpower.components.sensor import DOMAIN
+from openpeerpower.const import TEMP_CELSIUS, TEMP_FAHRENHEIT
+from openpeerpower.helpers.dispatcher import async_dispatcher_connect
 from . import (
     const,
     ZWaveDeviceEntity,
@@ -12,19 +12,19 @@ _LOGGER = logging.getLogger(__name__)
 
 
 async def async_setup_platform(
-        hass, config, async_add_entities, discovery_info=None):
+        opp, config, async_add_entities, discovery_info=None):
     """Old method of setting up Z-Wave sensors."""
     pass
 
 
-async def async_setup_entry(hass, config_entry, async_add_entities):
+async def async_setup_entry(opp, config_entry, async_add_entities):
     """Set up Z-Wave Sensor from Config Entry."""
     @callback
     def async_add_sensor(sensor):
         """Add Z-Wave Sensor."""
         async_add_entities([sensor])
 
-    async_dispatcher_connect(hass, 'zwave_new_sensor', async_add_sensor)
+    async_dispatcher_connect(opp, 'zwave_new_sensor', async_add_sensor)
 
 
 def get_device(node, values, **kwargs):

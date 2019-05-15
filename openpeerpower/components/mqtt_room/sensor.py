@@ -5,15 +5,15 @@ from datetime import timedelta
 
 import voluptuous as vol
 
-from homeassistant.components import mqtt
-import homeassistant.helpers.config_validation as cv
-from homeassistant.components.mqtt import CONF_STATE_TOPIC
-from homeassistant.components.sensor import PLATFORM_SCHEMA
-from homeassistant.const import (
+from openpeerpower.components import mqtt
+import openpeerpower.helpers.config_validation as cv
+from openpeerpower.components.mqtt import CONF_STATE_TOPIC
+from openpeerpower.components.sensor import PLATFORM_SCHEMA
+from openpeerpower.const import (
     CONF_NAME, CONF_TIMEOUT, STATE_NOT_HOME, ATTR_ID)
-from homeassistant.core import callback
-from homeassistant.helpers.entity import Entity
-from homeassistant.util import dt, slugify
+from openpeerpower.core import callback
+from openpeerpower.helpers.entity import Entity
+from openpeerpower.util import dt, slugify
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -43,7 +43,7 @@ MQTT_PAYLOAD = vol.Schema(vol.All(json.loads, vol.Schema({
 }, extra=vol.ALLOW_EXTRA)))
 
 
-async def async_setup_platform(hass, config, async_add_entities,
+async def async_setup_platform(opp, config, async_add_entities,
                                discovery_info=None):
     """Set up MQTT room Sensor."""
     async_add_entities([MQTTRoomSensor(
@@ -71,7 +71,7 @@ class MQTTRoomSensor(Entity):
         self._distance = None
         self._updated = None
 
-    async def async_added_to_hass(self):
+    async def async_added_to_opp(self):
         """Subscribe to MQTT events."""
         @callback
         def update_state(device_id, room, distance):
@@ -108,7 +108,7 @@ class MQTTRoomSensor(Entity):
                         update_state(**device)
 
         return await mqtt.async_subscribe(
-            self.hass, self._state_topic, message_received, 1)
+            self.opp, self._state_topic, message_received, 1)
 
     @property
     def name(self):

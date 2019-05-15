@@ -3,10 +3,10 @@ import logging
 
 import voluptuous as vol
 
-from homeassistant.core import callback
-from homeassistant.components.lock import DOMAIN, LockDevice
-from homeassistant.helpers.dispatcher import async_dispatcher_connect
-import homeassistant.helpers.config_validation as cv
+from openpeerpower.core import callback
+from openpeerpower.components.lock import DOMAIN, LockDevice
+from openpeerpower.helpers.dispatcher import async_dispatcher_connect
+import openpeerpower.helpers.config_validation as cv
 from . import ZWaveDeviceEntity, const
 
 _LOGGER = logging.getLogger(__name__)
@@ -154,22 +154,22 @@ CLEAR_USERCODE_SCHEMA = vol.Schema({
 })
 
 
-async def async_setup_platform(hass, config, async_add_entities,
+async def async_setup_platform(opp, config, async_add_entities,
                                discovery_info=None):
     """Old method of setting up Z-Wave locks."""
     pass
 
 
-async def async_setup_entry(hass, config_entry, async_add_entities):
+async def async_setup_entry(opp, config_entry, async_add_entities):
     """Set up Z-Wave Lock from Config Entry."""
     @callback
     def async_add_lock(lock):
         """Add Z-Wave Lock."""
         async_add_entities([lock])
 
-    async_dispatcher_connect(hass, 'zwave_new_lock', async_add_lock)
+    async_dispatcher_connect(opp, 'zwave_new_lock', async_add_lock)
 
-    network = hass.data[const.DATA_NETWORK]
+    network = opp.data[const.DATA_NETWORK]
 
     def set_usercode(service):
         """Set the usercode to index X on the lock."""
@@ -223,13 +223,13 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
             _LOGGER.info("Usercode at slot %s is cleared", value.index)
             break
 
-    hass.services.async_register(
+    opp.services.async_register(
         DOMAIN, SERVICE_SET_USERCODE, set_usercode,
         schema=SET_USERCODE_SCHEMA)
-    hass.services.async_register(
+    opp.services.async_register(
         DOMAIN, SERVICE_GET_USERCODE, get_usercode,
         schema=GET_USERCODE_SCHEMA)
-    hass.services.async_register(
+    opp.services.async_register(
         DOMAIN, SERVICE_CLEAR_USERCODE, clear_usercode,
         schema=CLEAR_USERCODE_SCHEMA)
 

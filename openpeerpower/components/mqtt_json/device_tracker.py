@@ -4,12 +4,12 @@ import logging
 
 import voluptuous as vol
 
-from homeassistant.components import mqtt
-from homeassistant.core import callback
-from homeassistant.components.mqtt import CONF_QOS
-from homeassistant.components.device_tracker import PLATFORM_SCHEMA
-import homeassistant.helpers.config_validation as cv
-from homeassistant.const import (
+from openpeerpower.components import mqtt
+from openpeerpower.core import callback
+from openpeerpower.components.mqtt import CONF_QOS
+from openpeerpower.components.device_tracker import PLATFORM_SCHEMA
+import openpeerpower.helpers.config_validation as cv
+from openpeerpower.const import (
     CONF_DEVICES, ATTR_GPS_ACCURACY, ATTR_LATITUDE,
     ATTR_LONGITUDE, ATTR_BATTERY_LEVEL)
 
@@ -27,7 +27,7 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(mqtt.SCHEMA_BASE).extend({
 })
 
 
-async def async_setup_scanner(hass, config, async_see, discovery_info=None):
+async def async_setup_scanner(opp, config, async_see, discovery_info=None):
     """Set up the MQTT JSON tracker."""
     devices = config[CONF_DEVICES]
     qos = config[CONF_QOS]
@@ -48,10 +48,10 @@ async def async_setup_scanner(hass, config, async_see, discovery_info=None):
                 return
 
             kwargs = _parse_see_args(dev_id, data)
-            hass.async_create_task(async_see(**kwargs))
+            opp.async_create_task(async_see(**kwargs))
 
         await mqtt.async_subscribe(
-            hass, topic, async_message_received, qos)
+            opp, topic, async_message_received, qos)
 
     return True
 

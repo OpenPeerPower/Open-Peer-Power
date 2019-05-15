@@ -13,7 +13,7 @@
                     "network_key": "Netzwerkschl\u00fcssel (leer lassen, um automatisch zu generieren)",
                     "usb_path": "USB-Pfad"
                 },
-                "description": "Informationen zu den Konfigurationsvariablen findest du unter https://www.home-assistant.io/docs/z-wave/installation/",
+                "description": "Informationen zu den Konfigurationsvariablen findest du unter https://www.open-peer-power.io/docs/z-wave/installation/",
                 "title": "Z-Wave einrichten"
             }
         },

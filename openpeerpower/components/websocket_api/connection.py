@@ -1,8 +1,8 @@
 """Connection session."""
 import voluptuous as vol
 
-from homeassistant.core import callback, Context
-from homeassistant.exceptions import Unauthorized
+from openpeerpower.core import callback, Context
+from openpeerpower.exceptions import Unauthorized
 
 from . import const, messages
 
@@ -10,10 +10,10 @@ from . import const, messages
 class ActiveConnection:
     """Handle an active websocket client connection."""
 
-    def __init__(self, logger, hass, send_message, user, refresh_token):
+    def __init__(self, logger, opp, send_message, user, refresh_token):
         """Initialize an active connection."""
         self.logger = logger
-        self.hass = hass
+        self.opp = opp
         self.send_message = send_message
         self.user = user
         if refresh_token:
@@ -44,7 +44,7 @@ class ActiveConnection:
     @callback
     def async_handle(self, msg):
         """Handle a single incoming message."""
-        handlers = self.hass.data[const.DOMAIN]
+        handlers = self.opp.data[const.DOMAIN]
 
         try:
             msg = messages.MINIMAL_MESSAGE_SCHEMA(msg)
@@ -73,7 +73,7 @@ class ActiveConnection:
         handler, schema = handlers[msg['type']]
 
         try:
-            handler(self.hass, self, schema(msg))
+            handler(self.opp, self, schema(msg))
         except Exception as err:  # pylint: disable=broad-except
             self.async_handle_exception(msg, err)
 

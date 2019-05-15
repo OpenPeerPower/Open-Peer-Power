@@ -13,7 +13,7 @@
                     "network_key": "Nettverksn\u00f8kkel (la v\u00e6re tom for automatisk generering)",
                     "usb_path": "USB bane"
                 },
-                "description": "Se [www.home-assistant.io/docs/z-wave/installation/](https://www.home-assistant.io/docs/z-wave/installation/) for informasjon om konfigurasjon variablene",
+                "description": "Se [www.open-peer-power.io/docs/z-wave/installation/](https://www.open-peer-power.io/docs/z-wave/installation/) for informasjon om konfigurasjon variablene",
                 "title": "Sett opp Z-Wave"
             }
         },

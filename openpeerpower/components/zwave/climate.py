@@ -1,15 +1,15 @@
 """Support for Z-Wave climate devices."""
 # Because we do not compile openzwave on CI
 import logging
-from homeassistant.core import callback
-from homeassistant.components.climate import ClimateDevice
-from homeassistant.components.climate.const import (
+from openpeerpower.core import callback
+from openpeerpower.components.climate import ClimateDevice
+from openpeerpower.components.climate.const import (
     DOMAIN, STATE_AUTO, STATE_COOL, STATE_HEAT,
     SUPPORT_TARGET_TEMPERATURE, SUPPORT_FAN_MODE,
     SUPPORT_OPERATION_MODE, SUPPORT_SWING_MODE)
-from homeassistant.const import (
+from openpeerpower.const import (
     STATE_OFF, TEMP_CELSIUS, TEMP_FAHRENHEIT, ATTR_TEMPERATURE)
-from homeassistant.helpers.dispatcher import async_dispatcher_connect
+from openpeerpower.helpers.dispatcher import async_dispatcher_connect
 from . import ZWaveDeviceEntity
 
 _LOGGER = logging.getLogger(__name__)
@@ -40,24 +40,24 @@ STATE_MAPPINGS = {
 
 
 async def async_setup_platform(
-        hass, config, async_add_entities, discovery_info=None):
+        opp, config, async_add_entities, discovery_info=None):
     """Old method of setting up Z-Wave climate devices."""
     pass
 
 
-async def async_setup_entry(hass, config_entry, async_add_entities):
+async def async_setup_entry(opp, config_entry, async_add_entities):
     """Set up Z-Wave Climate device from Config Entry."""
     @callback
     def async_add_climate(climate):
         """Add Z-Wave Climate Device."""
         async_add_entities([climate])
 
-    async_dispatcher_connect(hass, 'zwave_new_climate', async_add_climate)
+    async_dispatcher_connect(opp, 'zwave_new_climate', async_add_climate)
 
 
-def get_device(hass, values, **kwargs):
+def get_device(opp, values, **kwargs):
     """Create Z-Wave entity device."""
-    temp_unit = hass.config.units.temperature_unit
+    temp_unit = opp.config.units.temperature_unit
     return ZWaveClimate(values, temp_unit)
 
 

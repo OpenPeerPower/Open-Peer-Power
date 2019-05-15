@@ -6,28 +6,28 @@ from typing import Any, List, Sequence, Callable
 
 import voluptuous as vol
 
-from homeassistant.setup import async_prepare_setup_platform
-from homeassistant.core import callback
-from homeassistant.loader import bind_hass
-from homeassistant.components import group, zone
-from homeassistant.components.group import (
+from openpeerpower.setup import async_prepare_setup_platform
+from openpeerpower.core import callback
+from openpeerpower.loader import bind_opp
+from openpeerpower.components import group, zone
+from openpeerpower.components.group import (
     ATTR_ADD_ENTITIES, ATTR_ENTITIES, ATTR_OBJECT_ID, ATTR_VISIBLE,
     DOMAIN as DOMAIN_GROUP, SERVICE_SET)
-from homeassistant.components.zone.zone import async_active_zone
-from homeassistant.config import load_yaml_config_file, async_log_exception
-from homeassistant.exceptions import OpenPeerPowerError
-from homeassistant.helpers import config_per_platform, discovery
-import homeassistant.helpers.config_validation as cv
-from homeassistant.helpers.event import async_track_time_interval
-from homeassistant.helpers.restore_state import RestoreEntity
-from homeassistant.helpers.typing import GPSType, ConfigType, OpenPeerPowerType
-from homeassistant import util
-from homeassistant.util.async_ import run_coroutine_threadsafe
-import homeassistant.util.dt as dt_util
-from homeassistant.util.yaml import dump
+from openpeerpower.components.zone.zone import async_active_zone
+from openpeerpower.config import load_yaml_config_file, async_log_exception
+from openpeerpower.exceptions import OpenPeerPowerError
+from openpeerpower.helpers import config_per_platform, discovery
+import openpeerpower.helpers.config_validation as cv
+from openpeerpower.helpers.event import async_track_time_interval
+from openpeerpower.helpers.restore_state import RestoreEntity
+from openpeerpower.helpers.typing import GPSType, ConfigType, OpenPeerPowerType
+from openpeerpower import util
+from openpeerpower.util.async_ import run_coroutine_threadsafe
+import openpeerpower.util.dt as dt_util
+from openpeerpower.util.yaml import dump
 
-from homeassistant.helpers.event import async_track_utc_time_change
-from homeassistant.const import (
+from openpeerpower.helpers.event import async_track_utc_time_change
+from openpeerpower.const import (
     ATTR_ENTITY_ID, ATTR_GPS_ACCURACY, ATTR_ICON, ATTR_LATITUDE,
     ATTR_LONGITUDE, ATTR_NAME, CONF_ICON, CONF_MAC, CONF_NAME,
     DEVICE_DEFAULT_NAME, STATE_NOT_HOME, STATE_HOME)
@@ -108,15 +108,15 @@ SERVICE_SEE_PAYLOAD_SCHEMA = vol.Schema(vol.All(
     }))
 
 
-@bind_hass
-def is_on(hass: OpenPeerPowerType, entity_id: str = None):
+@bind_opp
+def is_on(opp: OpenPeerPowerType, entity_id: str = None):
     """Return the state if any or a specified device is home."""
     entity = entity_id or ENTITY_ID_ALL_DEVICES
 
-    return hass.states.is_state(entity, STATE_HOME)
+    return opp.states.is_state(entity, STATE_HOME)
 
 
-def see(hass: OpenPeerPowerType, mac: str = None, dev_id: str = None,
+def see(opp: OpenPeerPowerType, mac: str = None, dev_id: str = None,
         host_name: str = None, location_name: str = None,
         gps: GPSType = None, gps_accuracy=None,
         battery: int = None, attributes: dict = None):
@@ -131,12 +131,12 @@ def see(hass: OpenPeerPowerType, mac: str = None, dev_id: str = None,
              (ATTR_BATTERY, battery)) if value is not None}
     if attributes:
         data[ATTR_ATTRIBUTES] = attributes
-    hass.services.call(DOMAIN, SERVICE_SEE, data)
+    opp.services.call(DOMAIN, SERVICE_SEE, data)
 
 
-async def async_setup(hass: OpenPeerPowerType, config: ConfigType):
+async def async_setup(opp: OpenPeerPowerType, config: ConfigType):
     """Set up the device tracker."""
-    yaml_path = hass.config.path(YAML_DEVICES)
+    yaml_path = opp.config.path(YAML_DEVICES)
 
     conf = config.get(DOMAIN, [])
     conf = conf[0] if conf else {}
@@ -147,14 +147,14 @@ async def async_setup(hass: OpenPeerPowerType, config: ConfigType):
     if track_new is None:
         track_new = defaults.get(CONF_TRACK_NEW, DEFAULT_TRACK_NEW)
 
-    devices = await async_load_config(yaml_path, hass, consider_home)
+    devices = await async_load_config(yaml_path, opp, consider_home)
     tracker = DeviceTracker(
-        hass, consider_home, track_new, defaults, devices)
+        opp, consider_home, track_new, defaults, devices)
 
     async def async_setup_platform(p_type, p_config, disc_info=None):
         """Set up a device tracker platform."""
         platform = await async_prepare_setup_platform(
-            hass, config, DOMAIN, p_type)
+            opp, config, DOMAIN, p_type)
         if platform is None:
             return
 
@@ -164,26 +164,26 @@ async def async_setup(hass: OpenPeerPowerType, config: ConfigType):
             setup = None
             if hasattr(platform, 'async_get_scanner'):
                 scanner = await platform.async_get_scanner(
-                    hass, {DOMAIN: p_config})
+                    opp, {DOMAIN: p_config})
             elif hasattr(platform, 'get_scanner'):
-                scanner = await hass.async_add_job(
-                    platform.get_scanner, hass, {DOMAIN: p_config})
+                scanner = await opp.async_add_job(
+                    platform.get_scanner, opp, {DOMAIN: p_config})
             elif hasattr(platform, 'async_setup_scanner'):
                 setup = await platform.async_setup_scanner(
-                    hass, p_config, tracker.async_see, disc_info)
+                    opp, p_config, tracker.async_see, disc_info)
             elif hasattr(platform, 'setup_scanner'):
-                setup = await hass.async_add_job(
-                    platform.setup_scanner, hass, p_config, tracker.see,
+                setup = await opp.async_add_job(
+                    platform.setup_scanner, opp, p_config, tracker.see,
                     disc_info)
             elif hasattr(platform, 'async_setup_entry'):
                 setup = await platform.async_setup_entry(
-                    hass, p_config, tracker.async_see)
+                    opp, p_config, tracker.async_see)
             else:
                 raise OpenPeerPowerError("Invalid device_tracker platform.")
 
             if scanner:
                 async_setup_scanner_platform(
-                    hass, p_config, scanner, tracker.async_see, p_type)
+                    opp, p_config, scanner, tracker.async_see, p_type)
                 return
 
             if not setup:
@@ -193,12 +193,12 @@ async def async_setup(hass: OpenPeerPowerType, config: ConfigType):
         except Exception:  # pylint: disable=broad-except
             _LOGGER.exception("Error setting up platform %s", p_type)
 
-    hass.data[DOMAIN] = async_setup_platform
+    opp.data[DOMAIN] = async_setup_platform
 
     setup_tasks = [async_setup_platform(p_type, p_config) for p_type, p_config
                    in config_per_platform(config, DOMAIN)]
     if setup_tasks:
-        await asyncio.wait(setup_tasks, loop=hass.loop)
+        await asyncio.wait(setup_tasks, loop=opp.loop)
 
     tracker.async_setup_group()
 
@@ -206,11 +206,11 @@ async def async_setup(hass: OpenPeerPowerType, config: ConfigType):
         """Load a platform."""
         await async_setup_platform(platform, {}, disc_info=info)
 
-    discovery.async_listen_platform(hass, DOMAIN, async_platform_discovered)
+    discovery.async_listen_platform(opp, DOMAIN, async_platform_discovered)
 
     # Clean up stale devices
     async_track_utc_time_change(
-        hass, tracker.async_update_stale, second=range(0, 60, 5))
+        opp, tracker.async_update_stale, second=range(0, 60, 5))
 
     async def async_see_service(call):
         """Service to see a device."""
@@ -220,7 +220,7 @@ async def async_setup(hass: OpenPeerPowerType, config: ConfigType):
         data.pop('battery_status', None)
         await tracker.async_see(**data)
 
-    hass.services.async_register(
+    opp.services.async_register(
         DOMAIN, SERVICE_SEE, async_see_service, SERVICE_SEE_PAYLOAD_SCHEMA)
 
     # restore
@@ -228,20 +228,20 @@ async def async_setup(hass: OpenPeerPowerType, config: ConfigType):
     return True
 
 
-async def async_setup_entry(hass, entry):
+async def async_setup_entry(opp, entry):
     """Set up an entry."""
-    await hass.data[DOMAIN](entry.domain, entry)
+    await opp.data[DOMAIN](entry.domain, entry)
     return True
 
 
 class DeviceTracker:
     """Representation of a device tracker."""
 
-    def __init__(self, hass: OpenPeerPowerType, consider_home: timedelta,
+    def __init__(self, opp: OpenPeerPowerType, consider_home: timedelta,
                  track_new: bool, defaults: dict,
                  devices: Sequence) -> None:
         """Initialize a device tracker."""
-        self.hass = hass
+        self.opp = opp
         self.devices = {dev.dev_id: dev for dev in devices}
         self.mac_to_dev = {dev.mac: dev for dev in devices if dev.mac}
         self.consider_home = consider_home
@@ -249,7 +249,7 @@ class DeviceTracker:
             else defaults.get(CONF_TRACK_NEW, DEFAULT_TRACK_NEW)
         self.defaults = defaults
         self.group = None
-        self._is_updating = asyncio.Lock(loop=hass.loop)
+        self._is_updating = asyncio.Lock(loop=opp.loop)
 
         for dev in devices:
             if self.devices[dev.dev_id] is not dev:
@@ -265,7 +265,7 @@ class DeviceTracker:
             picture: str = None, icon: str = None,
             consider_home: timedelta = None):
         """Notify the device tracker that you see a device."""
-        self.hass.add_job(
+        self.opp.add_job(
             self.async_see(mac, dev_id, host_name, location_name, gps,
                            gps_accuracy, battery, attributes, source_type,
                            picture, icon, consider_home)
@@ -304,7 +304,7 @@ class DeviceTracker:
         # If no device can be found, create it
         dev_id = util.ensure_unique_string(dev_id, self.devices.keys())
         device = Device(
-            self.hass, consider_home or self.consider_home, self.track_new,
+            self.opp, consider_home or self.consider_home, self.track_new,
             dev_id, mac, (host_name or dev_id).replace('_', ' '),
             picture=picture, icon=icon,
             hide_if_away=self.defaults.get(CONF_AWAY_HIDE, DEFAULT_AWAY_HIDE))
@@ -321,24 +321,24 @@ class DeviceTracker:
 
         # During init, we ignore the group
         if self.group and self.track_new:
-            self.hass.async_create_task(
-                self.hass.async_call(
+            self.opp.async_create_task(
+                self.opp.async_call(
                     DOMAIN_GROUP, SERVICE_SET, {
                         ATTR_OBJECT_ID: util.slugify(GROUP_NAME_ALL_DEVICES),
                         ATTR_VISIBLE: False,
                         ATTR_NAME: GROUP_NAME_ALL_DEVICES,
                         ATTR_ADD_ENTITIES: [device.entity_id]}))
 
-        self.hass.bus.async_fire(EVENT_NEW_DEVICE, {
+        self.opp.bus.async_fire(EVENT_NEW_DEVICE, {
             ATTR_ENTITY_ID: device.entity_id,
             ATTR_HOST_NAME: device.host_name,
             ATTR_MAC: device.mac,
         })
 
         # update known_devices.yaml
-        self.hass.async_create_task(
+        self.opp.async_create_task(
             self.async_update_config(
-                self.hass.config.path(YAML_DEVICES), dev_id, device)
+                self.opp.config.path(YAML_DEVICES), dev_id, device)
         )
 
     async def async_update_config(self, path, dev_id, device):
@@ -347,8 +347,8 @@ class DeviceTracker:
         This method is a coroutine.
         """
         async with self._is_updating:
-            await self.hass.async_add_executor_job(
-                update_config, self.hass.config.path(YAML_DEVICES),
+            await self.opp.async_add_executor_job(
+                update_config, self.opp.config.path(YAML_DEVICES),
                 dev_id, device)
 
     @callback
@@ -360,8 +360,8 @@ class DeviceTracker:
         entity_ids = [dev.entity_id for dev in self.devices.values()
                       if dev.track]
 
-        self.hass.async_create_task(
-            self.hass.services.async_call(
+        self.opp.async_create_task(
+            self.opp.services.async_call(
                 DOMAIN_GROUP, SERVICE_SET, {
                     ATTR_OBJECT_ID: util.slugify(GROUP_NAME_ALL_DEVICES),
                     ATTR_VISIBLE: False,
@@ -377,7 +377,7 @@ class DeviceTracker:
         for device in self.devices.values():
             if (device.track and device.last_update_home) and \
                device.stale(now):
-                self.hass.async_create_task(device.async_update_ha_state(True))
+                self.opp.async_create_task(device.async_update_ha_state(True))
 
     async def async_setup_tracked_device(self):
         """Set up all not exists tracked devices.
@@ -386,17 +386,17 @@ class DeviceTracker:
         """
         async def async_init_single_device(dev):
             """Init a single device_tracker entity."""
-            await dev.async_added_to_hass()
+            await dev.async_added_to_opp()
             await dev.async_update_ha_state()
 
         tasks = []
         for device in self.devices.values():
             if device.track and not device.last_seen:
-                tasks.append(self.hass.async_create_task(
+                tasks.append(self.opp.async_create_task(
                     async_init_single_device(device)))
 
         if tasks:
-            await asyncio.wait(tasks, loop=self.hass.loop)
+            await asyncio.wait(tasks, loop=self.opp.loop)
 
 
 class Device(RestoreEntity):
@@ -416,12 +416,12 @@ class Device(RestoreEntity):
     last_update_home = False
     _state = STATE_NOT_HOME
 
-    def __init__(self, hass: OpenPeerPowerType, consider_home: timedelta,
+    def __init__(self, opp: OpenPeerPowerType, consider_home: timedelta,
                  track: bool, dev_id: str, mac: str, name: str = None,
                  picture: str = None, gravatar: str = None, icon: str = None,
                  hide_if_away: bool = False) -> None:
         """Initialize a device."""
-        self.hass = hass
+        self.opp = opp
         self.entity_id = ENTITY_ID_FORMAT.format(dev_id)
 
         # Timedelta object how long we consider a device home if it is not
@@ -552,7 +552,7 @@ class Device(RestoreEntity):
             self._state = self.location_name
         elif self.gps is not None and self.source_type == SOURCE_TYPE_GPS:
             zone_state = async_active_zone(
-                self.hass, self.gps[0], self.gps[1], self.gps_accuracy)
+                self.opp, self.gps[0], self.gps[1], self.gps_accuracy)
             if zone_state is None:
                 self._state = STATE_NOT_HOME
             elif zone_state.entity_id == zone.ENTITY_ID_HOME:
@@ -565,9 +565,9 @@ class Device(RestoreEntity):
             self._state = STATE_HOME
             self.last_update_home = True
 
-    async def async_added_to_hass(self):
+    async def async_added_to_opp(self):
         """Add an entity."""
-        await super().async_added_to_hass()
+        await super().async_added_to_opp()
         state = await self.async_get_last_state()
         if not state:
             return
@@ -591,7 +591,7 @@ class Device(RestoreEntity):
 class DeviceScanner:
     """Device scanner object."""
 
-    hass = None  # type: OpenPeerPowerType
+    opp = None  # type: OpenPeerPowerType
 
     def scan_devices(self) -> List[str]:
         """Scan for devices."""
@@ -602,7 +602,7 @@ class DeviceScanner:
 
         This method must be run in the event loop and returns a coroutine.
         """
-        return self.hass.async_add_job(self.scan_devices)
+        return self.opp.async_add_job(self.scan_devices)
 
     def get_device_name(self, device: str) -> str:
         """Get the name of a device."""
@@ -613,7 +613,7 @@ class DeviceScanner:
 
         This method must be run in the event loop and returns a coroutine.
         """
-        return self.hass.async_add_job(self.get_device_name, device)
+        return self.opp.async_add_job(self.get_device_name, device)
 
     def get_extra_attributes(self, device: str) -> dict:
         """Get the extra attributes of a device."""
@@ -624,16 +624,16 @@ class DeviceScanner:
 
         This method must be run in the event loop and returns a coroutine.
         """
-        return self.hass.async_add_job(self.get_extra_attributes, device)
+        return self.opp.async_add_job(self.get_extra_attributes, device)
 
 
-def load_config(path: str, hass: OpenPeerPowerType, consider_home: timedelta):
+def load_config(path: str, opp: OpenPeerPowerType, consider_home: timedelta):
     """Load devices from YAML configuration file."""
     return run_coroutine_threadsafe(
-        async_load_config(path, hass, consider_home), hass.loop).result()
+        async_load_config(path, opp, consider_home), opp.loop).result()
 
 
-async def async_load_config(path: str, hass: OpenPeerPowerType,
+async def async_load_config(path: str, opp: OpenPeerPowerType,
                             consider_home: timedelta):
     """Load devices from YAML configuration file.
 
@@ -654,7 +654,7 @@ async def async_load_config(path: str, hass: OpenPeerPowerType,
     try:
         result = []
         try:
-            devices = await hass.async_add_job(
+            devices = await opp.async_add_job(
                 load_yaml_config_file, path)
         except OpenPeerPowerError as err:
             _LOGGER.error("Unable to load %s: %s", path, str(err))
@@ -667,9 +667,9 @@ async def async_load_config(path: str, hass: OpenPeerPowerType,
                 device = dev_schema(device)
                 device['dev_id'] = cv.slugify(dev_id)
             except vol.Invalid as exp:
-                async_log_exception(exp, dev_id, devices, hass)
+                async_log_exception(exp, dev_id, devices, opp)
             else:
-                result.append(Device(hass, **device))
+                result.append(Device(opp, **device))
         return result
     except (OpenPeerPowerError, FileNotFoundError):
         # When YAML file could not be loaded/did not contain a dict
@@ -677,7 +677,7 @@ async def async_load_config(path: str, hass: OpenPeerPowerType,
 
 
 @callback
-def async_setup_scanner_platform(hass: OpenPeerPowerType, config: ConfigType,
+def async_setup_scanner_platform(opp: OpenPeerPowerType, config: ConfigType,
                                  scanner: Any, async_see_device: Callable,
                                  platform: str):
     """Set up the connect scanner-based platform to device tracker.
@@ -685,8 +685,8 @@ def async_setup_scanner_platform(hass: OpenPeerPowerType, config: ConfigType,
     This method must be run in the event loop.
     """
     interval = config.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL)
-    update_lock = asyncio.Lock(loop=hass.loop)
-    scanner.hass = hass
+    update_lock = asyncio.Lock(loop=opp.loop)
+    scanner.opp = opp
 
     # Initial scan of each mac we also tell about host name for config
     seen = set()  # type: Any
@@ -725,16 +725,16 @@ def async_setup_scanner_platform(hass: OpenPeerPowerType, config: ConfigType,
                 }
             }
 
-            zone_home = hass.states.get(zone.ENTITY_ID_HOME)
+            zone_home = opp.states.get(zone.ENTITY_ID_HOME)
             if zone_home:
                 kwargs['gps'] = [zone_home.attributes[ATTR_LATITUDE],
                                  zone_home.attributes[ATTR_LONGITUDE]]
                 kwargs['gps_accuracy'] = 0
 
-            hass.async_create_task(async_see_device(**kwargs))
+            opp.async_create_task(async_see_device(**kwargs))
 
-    async_track_time_interval(hass, async_device_tracker_scan, interval)
-    hass.async_create_task(async_device_tracker_scan(None))
+    async_track_time_interval(opp, async_device_tracker_scan, interval)
+    opp.async_create_task(async_device_tracker_scan(None))
 
 
 def update_config(path: str, dev_id: str, device: Device):

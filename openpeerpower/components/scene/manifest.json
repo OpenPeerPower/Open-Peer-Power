@@ -1,10 +1,10 @@
 {
   "domain": "scene",
   "name": "Scene",
-  "documentation": "https://www.home-assistant.io/components/scene",
+  "documentation": "https://www.open-peer-power.io/components/scene",
   "requirements": [],
   "dependencies": [],
   "codeowners": [
-    "@home-assistant/core"
+    "@open-peer-power/core"
   ]
 }

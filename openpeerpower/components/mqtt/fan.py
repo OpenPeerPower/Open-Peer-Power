@@ -3,17 +3,17 @@ import logging
 
 import voluptuous as vol
 
-from homeassistant.components import fan, mqtt
-from homeassistant.components.fan import (
+from openpeerpower.components import fan, mqtt
+from openpeerpower.components.fan import (
     ATTR_SPEED, SPEED_HIGH, SPEED_LOW, SPEED_MEDIUM, SPEED_OFF,
     SUPPORT_OSCILLATE, SUPPORT_SET_SPEED, FanEntity)
-from homeassistant.const import (
+from openpeerpower.const import (
     CONF_DEVICE, CONF_NAME, CONF_OPTIMISTIC, CONF_PAYLOAD_OFF, CONF_PAYLOAD_ON,
     CONF_STATE)
-from homeassistant.core import callback
-import homeassistant.helpers.config_validation as cv
-from homeassistant.helpers.dispatcher import async_dispatcher_connect
-from homeassistant.helpers.typing import ConfigType, OpenPeerPowerType
+from openpeerpower.core import callback
+import openpeerpower.helpers.config_validation as cv
+from openpeerpower.helpers.dispatcher import async_dispatcher_connect
+from openpeerpower.helpers.typing import ConfigType, OpenPeerPowerType
 
 from . import (
     ATTR_DISCOVERY_HASH, CONF_COMMAND_TOPIC, CONF_QOS, CONF_RETAIN,
@@ -77,13 +77,13 @@ PLATFORM_SCHEMA = mqtt.MQTT_RW_PLATFORM_SCHEMA.extend({
     mqtt.MQTT_JSON_ATTRS_SCHEMA.schema)
 
 
-async def async_setup_platform(hass: OpenPeerPowerType, config: ConfigType,
+async def async_setup_platform(opp: OpenPeerPowerType, config: ConfigType,
                                async_add_entities, discovery_info=None):
     """Set up MQTT fan through configuration.yaml."""
     await _async_setup_entity(config, async_add_entities)
 
 
-async def async_setup_entry(hass, config_entry, async_add_entities):
+async def async_setup_entry(opp, config_entry, async_add_entities):
     """Set up MQTT fan dynamically through MQTT discovery."""
     async def async_discover(discovery_payload):
         """Discover and add a MQTT fan."""
@@ -94,11 +94,11 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
                                       discovery_hash)
         except Exception:
             if discovery_hash:
-                clear_discovery_hash(hass, discovery_hash)
+                clear_discovery_hash(opp, discovery_hash)
             raise
 
     async_dispatcher_connect(
-        hass, MQTT_DISCOVERY_NEW.format(fan.DOMAIN, 'mqtt'),
+        opp, MQTT_DISCOVERY_NEW.format(fan.DOMAIN, 'mqtt'),
         async_discover)
 
 
@@ -140,9 +140,9 @@ class MqttFan(MqttAttributes, MqttAvailability, MqttDiscoveryUpdate,
                                      self.discovery_update)
         MqttEntityDeviceInfo.__init__(self, device_config, config_entry)
 
-    async def async_added_to_hass(self):
+    async def async_added_to_opp(self):
         """Subscribe to MQTT events."""
-        await super().async_added_to_hass()
+        await super().async_added_to_opp()
         await self._subscribe_topics()
 
     async def discovery_update(self, discovery_payload):
@@ -204,7 +204,7 @@ class MqttFan(MqttAttributes, MqttAvailability, MqttDiscoveryUpdate,
             if tpl is None:
                 templates[key] = lambda value: value
             else:
-                tpl.hass = self.hass
+                tpl.opp = self.opp
                 templates[key] = tpl.async_render_with_possible_json_value
 
         @callback
@@ -262,15 +262,15 @@ class MqttFan(MqttAttributes, MqttAvailability, MqttDiscoveryUpdate,
             self._oscillation = False
 
         self._sub_state = await subscription.async_subscribe_topics(
-            self.hass, self._sub_state,
+            self.opp, self._sub_state,
             topics)
 
-    async def async_will_remove_from_hass(self):
+    async def async_will_remove_from_opp(self):
         """Unsubscribe when removed."""
         self._sub_state = await subscription.async_unsubscribe_topics(
-            self.hass, self._sub_state)
-        await MqttAttributes.async_will_remove_from_hass(self)
-        await MqttAvailability.async_will_remove_from_hass(self)
+            self.opp, self._sub_state)
+        await MqttAttributes.async_will_remove_from_opp(self)
+        await MqttAvailability.async_will_remove_from_opp(self)
 
     @property
     def should_poll(self):
@@ -318,7 +318,7 @@ class MqttFan(MqttAttributes, MqttAvailability, MqttDiscoveryUpdate,
         This method is a coroutine.
         """
         mqtt.async_publish(
-            self.hass, self._topic[CONF_COMMAND_TOPIC],
+            self.opp, self._topic[CONF_COMMAND_TOPIC],
             self._payload['STATE_ON'], self._config[CONF_QOS],
             self._config[CONF_RETAIN])
         if speed:
@@ -333,7 +333,7 @@ class MqttFan(MqttAttributes, MqttAvailability, MqttDiscoveryUpdate,
         This method is a coroutine.
         """
         mqtt.async_publish(
-            self.hass, self._topic[CONF_COMMAND_TOPIC],
+            self.opp, self._topic[CONF_COMMAND_TOPIC],
             self._payload['STATE_OFF'], self._config[CONF_QOS],
             self._config[CONF_RETAIN])
         if self._optimistic:
@@ -360,7 +360,7 @@ class MqttFan(MqttAttributes, MqttAvailability, MqttDiscoveryUpdate,
             mqtt_payload = speed
 
         mqtt.async_publish(
-            self.hass, self._topic[CONF_SPEED_COMMAND_TOPIC],
+            self.opp, self._topic[CONF_SPEED_COMMAND_TOPIC],
             mqtt_payload, self._config[CONF_QOS],
             self._config[CONF_RETAIN])
 
@@ -382,7 +382,7 @@ class MqttFan(MqttAttributes, MqttAvailability, MqttDiscoveryUpdate,
             payload = self._payload['OSCILLATE_ON_PAYLOAD']
 
         mqtt.async_publish(
-            self.hass, self._topic[CONF_OSCILLATION_COMMAND_TOPIC],
+            self.opp, self._topic[CONF_OSCILLATION_COMMAND_TOPIC],
             payload, self._config[CONF_QOS], self._config[CONF_RETAIN])
 
         if self._optimistic_oscillation:

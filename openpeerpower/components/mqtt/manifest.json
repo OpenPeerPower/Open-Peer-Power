@@ -1,7 +1,7 @@
 {
   "domain": "mqtt",
   "name": "MQTT",
-  "documentation": "https://www.home-assistant.io/components/mqtt",
+  "documentation": "https://www.open-peer-power.io/components/mqtt",
   "requirements": [
     "hbmqtt==0.9.4",
     "paho-mqtt==1.4.0"
@@ -10,6 +10,6 @@
     "http"
   ],
   "codeowners": [
-    "@home-assistant/core"
+    "@open-peer-power/core"
   ]
 }

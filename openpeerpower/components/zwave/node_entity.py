@@ -1,9 +1,9 @@
 """Entity class that represents Z-Wave node."""
 import logging
 
-from homeassistant.core import callback
-from homeassistant.const import ATTR_BATTERY_LEVEL, ATTR_WAKEUP, ATTR_ENTITY_ID
-from homeassistant.helpers.entity import Entity
+from openpeerpower.core import callback
+from openpeerpower.const import ATTR_BATTERY_LEVEL, ATTR_WAKEUP, ATTR_ENTITY_ID
+from openpeerpower.helpers.entity import Entity
 
 from .const import (
     ATTR_NODE_ID, COMMAND_CLASS_WAKE_UP, ATTR_SCENE_ID, ATTR_SCENE_DATA,
@@ -47,8 +47,8 @@ class ZWaveBaseEntity(Entity):
         If value changed after device was created but before setup_platform
         was called - skip updating state.
         """
-        if self.hass and not self._update_scheduled:
-            self.hass.add_job(self._schedule_update)
+        if self.opp and not self._update_scheduled:
+            self.opp.add_job(self._schedule_update)
 
     @callback
     def _schedule_update(self):
@@ -59,11 +59,11 @@ class ZWaveBaseEntity(Entity):
         @callback
         def do_update():
             """Really update."""
-            self.hass.async_add_job(self.async_update_ha_state)
+            self.opp.async_add_job(self.async_update_ha_state)
             self._update_scheduled = False
 
         self._update_scheduled = True
-        self.hass.loop.call_later(0.1, do_update)
+        self.opp.loop.call_later(0.1, do_update)
 
     def try_remove_and_add(self):
         """Remove this entity and add it back."""
@@ -71,8 +71,8 @@ class ZWaveBaseEntity(Entity):
             await self.async_remove()
             self.entity_id = None
             await self.platform.async_add_entities([self])
-        if self.hass and self.platform:
-            self.hass.add_job(_async_remove_and_add)
+        if self.opp and self.platform:
+            self.opp.add_job(_async_remove_and_add)
 
 
 class ZWaveNodeEntity(ZWaveBaseEntity):
@@ -185,10 +185,10 @@ class ZWaveNodeEntity(ZWaveBaseEntity):
 
     def node_event(self, value):
         """Handle a node activated event for this node."""
-        if self.hass is None:
+        if self.opp is None:
             return
 
-        self.hass.bus.fire(EVENT_NODE_EVENT, {
+        self.opp.bus.fire(EVENT_NODE_EVENT, {
             ATTR_ENTITY_ID: self.entity_id,
             ATTR_NODE_ID: self.node.node_id,
             ATTR_BASIC_LEVEL: value
@@ -201,10 +201,10 @@ class ZWaveNodeEntity(ZWaveBaseEntity):
 
     def scene_activated(self, scene_id):
         """Handle an activated scene for this node."""
-        if self.hass is None:
+        if self.opp is None:
             return
 
-        self.hass.bus.fire(EVENT_SCENE_ACTIVATED, {
+        self.opp.bus.fire(EVENT_SCENE_ACTIVATED, {
             ATTR_ENTITY_ID: self.entity_id,
             ATTR_NODE_ID: self.node.node_id,
             ATTR_SCENE_ID: scene_id
@@ -212,10 +212,10 @@ class ZWaveNodeEntity(ZWaveBaseEntity):
 
     def central_scene_activated(self, scene_id, scene_data):
         """Handle an activated central scene for this node."""
-        if self.hass is None:
+        if self.opp is None:
             return
 
-        self.hass.bus.fire(EVENT_SCENE_ACTIVATED, {
+        self.opp.bus.fire(EVENT_SCENE_ACTIVATED, {
             ATTR_ENTITY_ID:   self.entity_id,
             ATTR_NODE_ID:     self.node_id,
             ATTR_SCENE_ID:    scene_id,

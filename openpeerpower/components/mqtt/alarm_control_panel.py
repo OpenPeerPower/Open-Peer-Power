@@ -4,16 +4,16 @@ import re
 
 import voluptuous as vol
 
-from homeassistant.components import mqtt
-import homeassistant.components.alarm_control_panel as alarm
-from homeassistant.const import (
+from openpeerpower.components import mqtt
+import openpeerpower.components.alarm_control_panel as alarm
+from openpeerpower.const import (
     CONF_CODE, CONF_DEVICE, CONF_NAME, CONF_VALUE_TEMPLATE,
     STATE_ALARM_ARMED_AWAY, STATE_ALARM_ARMED_HOME, STATE_ALARM_ARMED_NIGHT,
     STATE_ALARM_DISARMED, STATE_ALARM_PENDING, STATE_ALARM_TRIGGERED)
-from homeassistant.core import callback
-import homeassistant.helpers.config_validation as cv
-from homeassistant.helpers.dispatcher import async_dispatcher_connect
-from homeassistant.helpers.typing import ConfigType, OpenPeerPowerType
+from openpeerpower.core import callback
+import openpeerpower.helpers.config_validation as cv
+from openpeerpower.helpers.dispatcher import async_dispatcher_connect
+from openpeerpower.helpers.typing import ConfigType, OpenPeerPowerType
 
 from . import (
     ATTR_DISCOVERY_HASH, CONF_COMMAND_TOPIC, CONF_QOS, CONF_RETAIN,
@@ -58,13 +58,13 @@ PLATFORM_SCHEMA = mqtt.MQTT_BASE_PLATFORM_SCHEMA.extend({
     mqtt.MQTT_JSON_ATTRS_SCHEMA.schema)
 
 
-async def async_setup_platform(hass: OpenPeerPowerType, config: ConfigType,
+async def async_setup_platform(opp: OpenPeerPowerType, config: ConfigType,
                                async_add_entities, discovery_info=None):
     """Set up MQTT alarm control panel through configuration.yaml."""
     await _async_setup_entity(config, async_add_entities)
 
 
-async def async_setup_entry(hass, config_entry, async_add_entities):
+async def async_setup_entry(opp, config_entry, async_add_entities):
     """Set up MQTT alarm control panel dynamically through MQTT discovery."""
     async def async_discover(discovery_payload):
         """Discover and add an MQTT alarm control panel."""
@@ -75,11 +75,11 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
                                       discovery_hash)
         except Exception:
             if discovery_hash:
-                clear_discovery_hash(hass, discovery_hash)
+                clear_discovery_hash(opp, discovery_hash)
             raise
 
     async_dispatcher_connect(
-        hass, MQTT_DISCOVERY_NEW.format(alarm.DOMAIN, 'mqtt'),
+        opp, MQTT_DISCOVERY_NEW.format(alarm.DOMAIN, 'mqtt'),
         async_discover)
 
 
@@ -108,9 +108,9 @@ class MqttAlarm(MqttAttributes, MqttAvailability, MqttDiscoveryUpdate,
                                      self.discovery_update)
         MqttEntityDeviceInfo.__init__(self, device_config, config_entry)
 
-    async def async_added_to_hass(self):
+    async def async_added_to_opp(self):
         """Subscribe mqtt events."""
-        await super().async_added_to_hass()
+        await super().async_added_to_opp()
         await self._subscribe_topics()
 
     async def discovery_update(self, discovery_payload):
@@ -127,9 +127,9 @@ class MqttAlarm(MqttAttributes, MqttAvailability, MqttDiscoveryUpdate,
         """(Re)Subscribe to topics."""
         value_template = self._config.get(CONF_VALUE_TEMPLATE)
         if value_template is not None:
-            value_template.hass = self.hass
+            value_template.opp = self.opp
         command_template = self._config[CONF_COMMAND_TEMPLATE]
-        command_template.hass = self.hass
+        command_template.opp = self.opp
 
         @callback
         def message_received(msg):
@@ -150,17 +150,17 @@ class MqttAlarm(MqttAttributes, MqttAvailability, MqttDiscoveryUpdate,
             self.async_write_ha_state()
 
         self._sub_state = await subscription.async_subscribe_topics(
-            self.hass, self._sub_state,
+            self.opp, self._sub_state,
             {'state_topic': {'topic': self._config[CONF_STATE_TOPIC],
                              'msg_callback': message_received,
                              'qos': self._config[CONF_QOS]}})
 
-    async def async_will_remove_from_hass(self):
+    async def async_will_remove_from_opp(self):
         """Unsubscribe when removed."""
         self._sub_state = await subscription.async_unsubscribe_topics(
-            self.hass, self._sub_state)
-        await MqttAttributes.async_will_remove_from_hass(self)
-        await MqttAvailability.async_will_remove_from_hass(self)
+            self.opp, self._sub_state)
+        await MqttAttributes.async_will_remove_from_opp(self)
+        await MqttAvailability.async_will_remove_from_opp(self)
 
     @property
     def should_poll(self):
@@ -242,7 +242,7 @@ class MqttAlarm(MqttAttributes, MqttAvailability, MqttDiscoveryUpdate,
         values = {'action': action, 'code': code}
         payload = command_template.async_render(**values)
         mqtt.async_publish(
-            self.hass, self._config[CONF_COMMAND_TOPIC],
+            self.opp, self._config[CONF_COMMAND_TOPIC],
             payload,
             self._config[CONF_QOS],
             self._config[CONF_RETAIN])

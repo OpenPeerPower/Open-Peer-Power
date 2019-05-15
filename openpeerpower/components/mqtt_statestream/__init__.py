@@ -3,14 +3,14 @@ import json
 
 import voluptuous as vol
 
-from homeassistant.const import (CONF_DOMAINS, CONF_ENTITIES, CONF_EXCLUDE,
+from openpeerpower.const import (CONF_DOMAINS, CONF_ENTITIES, CONF_EXCLUDE,
                                  CONF_INCLUDE, MATCH_ALL)
-from homeassistant.core import callback
-from homeassistant.components.mqtt import valid_publish_topic
-from homeassistant.helpers.entityfilter import generate_filter
-from homeassistant.helpers.event import async_track_state_change
-from homeassistant.helpers.json import JSONEncoder
-import homeassistant.helpers.config_validation as cv
+from openpeerpower.core import callback
+from openpeerpower.components.mqtt import valid_publish_topic
+from openpeerpower.helpers.entityfilter import generate_filter
+from openpeerpower.helpers.event import async_track_state_change
+from openpeerpower.helpers.json import JSONEncoder
+import openpeerpower.helpers.config_validation as cv
 
 CONF_BASE_TOPIC = 'base_topic'
 CONF_PUBLISH_ATTRIBUTES = 'publish_attributes'
@@ -37,7 +37,7 @@ CONFIG_SCHEMA = vol.Schema({
 }, extra=vol.ALLOW_EXTRA)
 
 
-async def async_setup(hass, config):
+async def async_setup(opp, config):
     """Set up the MQTT state feed."""
     conf = config.get(DOMAIN, {})
     base_topic = conf.get(CONF_BASE_TOPIC)
@@ -63,17 +63,17 @@ async def async_setup(hass, config):
         payload = new_state.state
 
         mybase = base_topic + entity_id.replace('.', '/') + '/'
-        hass.components.mqtt.async_publish(mybase + 'state', payload, 1, True)
+        opp.components.mqtt.async_publish(mybase + 'state', payload, 1, True)
 
         if publish_timestamps:
             if new_state.last_updated:
-                hass.components.mqtt.async_publish(
+                opp.components.mqtt.async_publish(
                     mybase + 'last_updated',
                     new_state.last_updated.isoformat(),
                     1,
                     True)
             if new_state.last_changed:
-                hass.components.mqtt.async_publish(
+                opp.components.mqtt.async_publish(
                     mybase + 'last_changed',
                     new_state.last_changed.isoformat(),
                     1,
@@ -82,8 +82,8 @@ async def async_setup(hass, config):
         if publish_attributes:
             for key, val in new_state.attributes.items():
                 encoded_val = json.dumps(val, cls=JSONEncoder)
-                hass.components.mqtt.async_publish(mybase + key,
+                opp.components.mqtt.async_publish(mybase + key,
                                                    encoded_val, 1, True)
 
-    async_track_state_change(hass, MATCH_ALL, _state_publisher)
+    async_track_state_change(opp, MATCH_ALL, _state_publisher)
     return True

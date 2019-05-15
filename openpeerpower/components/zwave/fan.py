@@ -2,11 +2,11 @@
 import logging
 import math
 
-from homeassistant.core import callback
-from homeassistant.components.fan import (
+from openpeerpower.core import callback
+from openpeerpower.components.fan import (
     DOMAIN, FanEntity, SPEED_OFF, SPEED_LOW, SPEED_MEDIUM, SPEED_HIGH,
     SUPPORT_SET_SPEED)
-from homeassistant.helpers.dispatcher import async_dispatcher_connect
+from openpeerpower.helpers.dispatcher import async_dispatcher_connect
 from . import ZWaveDeviceEntity
 
 _LOGGER = logging.getLogger(__name__)
@@ -32,19 +32,19 @@ SPEED_TO_VALUE = {
 
 
 async def async_setup_platform(
-        hass, config, async_add_entities, discovery_info=None):
+        opp, config, async_add_entities, discovery_info=None):
     """Old method of setting up Z-Wave fans."""
     pass
 
 
-async def async_setup_entry(hass, config_entry, async_add_entities):
+async def async_setup_entry(opp, config_entry, async_add_entities):
     """Set up Z-Wave Fan from Config Entry."""
     @callback
     def async_add_fan(fan):
         """Add Z-Wave Fan."""
         async_add_entities([fan])
 
-    async_dispatcher_connect(hass, 'zwave_new_fan', async_add_fan)
+    async_dispatcher_connect(opp, 'zwave_new_fan', async_add_fan)
 
 
 def get_device(values, **kwargs):

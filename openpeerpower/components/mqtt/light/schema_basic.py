@@ -2,29 +2,29 @@
 Support for MQTT lights.
 
 For more details about this platform, please refer to the documentation at
-https://home-assistant.io/components/light.mqtt/
+https://open-peer-power.io/components/light.mqtt/
 """
 import logging
 
 import voluptuous as vol
 
-from homeassistant.core import callback
-from homeassistant.components import mqtt
-from homeassistant.components.light import (
+from openpeerpower.core import callback
+from openpeerpower.components import mqtt
+from openpeerpower.components.light import (
     ATTR_BRIGHTNESS, ATTR_COLOR_TEMP, ATTR_EFFECT, ATTR_HS_COLOR,
     ATTR_WHITE_VALUE, Light, SUPPORT_BRIGHTNESS, SUPPORT_COLOR_TEMP,
     SUPPORT_EFFECT, SUPPORT_COLOR, SUPPORT_WHITE_VALUE)
-from homeassistant.const import (
+from openpeerpower.const import (
     CONF_BRIGHTNESS, CONF_COLOR_TEMP, CONF_DEVICE, CONF_EFFECT, CONF_HS,
     CONF_NAME, CONF_OPTIMISTIC, CONF_PAYLOAD_OFF, CONF_PAYLOAD_ON, STATE_ON,
     CONF_RGB, CONF_STATE, CONF_VALUE_TEMPLATE, CONF_WHITE_VALUE, CONF_XY)
-from homeassistant.components.mqtt import (
+from openpeerpower.components.mqtt import (
     CONF_COMMAND_TOPIC, CONF_QOS, CONF_RETAIN, CONF_STATE_TOPIC,
     CONF_UNIQUE_ID, MqttAttributes, MqttAvailability, MqttDiscoveryUpdate,
     MqttEntityDeviceInfo, subscription)
-from homeassistant.helpers.restore_state import RestoreEntity
-import homeassistant.helpers.config_validation as cv
-import homeassistant.util.color as color_util
+from openpeerpower.helpers.restore_state import RestoreEntity
+import openpeerpower.helpers.config_validation as cv
+import openpeerpower.util.color as color_util
 
 from . import MQTT_LIGHT_SCHEMA_SCHEMA
 
@@ -159,9 +159,9 @@ class MqttLight(MqttAttributes, MqttAvailability, MqttDiscoveryUpdate,
                                      self.discovery_update)
         MqttEntityDeviceInfo.__init__(self, device_config, config_entry)
 
-    async def async_added_to_hass(self):
+    async def async_added_to_opp(self):
         """Subscribe to MQTT events."""
-        await super().async_added_to_hass()
+        await super().async_added_to_opp()
         await self._subscribe_topics()
 
     async def discovery_update(self, discovery_payload):
@@ -246,7 +246,7 @@ class MqttLight(MqttAttributes, MqttAvailability, MqttDiscoveryUpdate,
             if tpl is None:
                 templates[key] = lambda value: value
             else:
-                tpl.hass = self.hass
+                tpl.opp = self.opp
                 templates[key] = tpl.async_render_with_possible_json_value
 
         last_state = await self.async_get_last_state()
@@ -467,15 +467,15 @@ class MqttLight(MqttAttributes, MqttAvailability, MqttDiscoveryUpdate,
             self._hs = (0, 0)
 
         self._sub_state = await subscription.async_subscribe_topics(
-            self.hass, self._sub_state,
+            self.opp, self._sub_state,
             topics)
 
-    async def async_will_remove_from_hass(self):
+    async def async_will_remove_from_opp(self):
         """Unsubscribe when removed."""
         self._sub_state = await subscription.async_unsubscribe_topics(
-            self.hass, self._sub_state)
-        await MqttAttributes.async_will_remove_from_hass(self)
-        await MqttAvailability.async_will_remove_from_hass(self)
+            self.opp, self._sub_state)
+        await MqttAttributes.async_will_remove_from_opp(self)
+        await MqttAvailability.async_will_remove_from_opp(self)
 
     @property
     def brightness(self):
@@ -574,7 +574,7 @@ class MqttLight(MqttAttributes, MqttAvailability, MqttDiscoveryUpdate,
 
         if on_command_type == 'first':
             mqtt.async_publish(
-                self.hass, self._topic[CONF_COMMAND_TOPIC],
+                self.opp, self._topic[CONF_COMMAND_TOPIC],
                 self._payload['on'], self._config[CONF_QOS],
                 self._config[CONF_RETAIN])
             should_update = True
@@ -613,7 +613,7 @@ class MqttLight(MqttAttributes, MqttAvailability, MqttDiscoveryUpdate,
                 rgb_color_str = '{},{},{}'.format(*rgb)
 
             mqtt.async_publish(
-                self.hass, self._topic[CONF_RGB_COMMAND_TOPIC],
+                self.opp, self._topic[CONF_RGB_COMMAND_TOPIC],
                 rgb_color_str, self._config[CONF_QOS],
                 self._config[CONF_RETAIN])
 
@@ -626,7 +626,7 @@ class MqttLight(MqttAttributes, MqttAvailability, MqttDiscoveryUpdate,
 
             hs_color = kwargs[ATTR_HS_COLOR]
             mqtt.async_publish(
-                self.hass, self._topic[CONF_HS_COMMAND_TOPIC],
+                self.opp, self._topic[CONF_HS_COMMAND_TOPIC],
                 '{},{}'.format(*hs_color), self._config[CONF_QOS],
                 self._config[CONF_RETAIN])
 
@@ -639,7 +639,7 @@ class MqttLight(MqttAttributes, MqttAvailability, MqttDiscoveryUpdate,
 
             xy_color = color_util.color_hs_to_xy(*kwargs[ATTR_HS_COLOR])
             mqtt.async_publish(
-                self.hass, self._topic[CONF_XY_COMMAND_TOPIC],
+                self.opp, self._topic[CONF_XY_COMMAND_TOPIC],
                 '{},{}'.format(*xy_color), self._config[CONF_QOS],
                 self._config[CONF_RETAIN])
 
@@ -654,7 +654,7 @@ class MqttLight(MqttAttributes, MqttAvailability, MqttDiscoveryUpdate,
             device_brightness = \
                 min(round(percent_bright * brightness_scale), brightness_scale)
             mqtt.async_publish(
-                self.hass, self._topic[CONF_BRIGHTNESS_COMMAND_TOPIC],
+                self.opp, self._topic[CONF_BRIGHTNESS_COMMAND_TOPIC],
                 device_brightness, self._config[CONF_QOS],
                 self._config[CONF_RETAIN])
 
@@ -676,7 +676,7 @@ class MqttLight(MqttAttributes, MqttAvailability, MqttDiscoveryUpdate,
                 rgb_color_str = '{},{},{}'.format(*rgb)
 
             mqtt.async_publish(
-                self.hass, self._topic[CONF_RGB_COMMAND_TOPIC],
+                self.opp, self._topic[CONF_RGB_COMMAND_TOPIC],
                 rgb_color_str, self._config[CONF_QOS],
                 self._config[CONF_RETAIN])
 
@@ -695,7 +695,7 @@ class MqttLight(MqttAttributes, MqttAvailability, MqttDiscoveryUpdate,
                 })
 
             mqtt.async_publish(
-                self.hass, self._topic[CONF_COLOR_TEMP_COMMAND_TOPIC],
+                self.opp, self._topic[CONF_COLOR_TEMP_COMMAND_TOPIC],
                 color_temp, self._config[CONF_QOS],
                 self._config[CONF_RETAIN])
 
@@ -708,7 +708,7 @@ class MqttLight(MqttAttributes, MqttAvailability, MqttDiscoveryUpdate,
             effect = kwargs[ATTR_EFFECT]
             if effect in self._config.get(CONF_EFFECT_LIST):
                 mqtt.async_publish(
-                    self.hass, self._topic[CONF_EFFECT_COMMAND_TOPIC],
+                    self.opp, self._topic[CONF_EFFECT_COMMAND_TOPIC],
                     effect, self._config[CONF_QOS],
                     self._config[CONF_RETAIN])
 
@@ -723,7 +723,7 @@ class MqttLight(MqttAttributes, MqttAvailability, MqttDiscoveryUpdate,
             device_white_value = \
                 min(round(percent_white * white_scale), white_scale)
             mqtt.async_publish(
-                self.hass, self._topic[CONF_WHITE_VALUE_COMMAND_TOPIC],
+                self.opp, self._topic[CONF_WHITE_VALUE_COMMAND_TOPIC],
                 device_white_value, self._config[CONF_QOS],
                 self._config[CONF_RETAIN])
 
@@ -732,7 +732,7 @@ class MqttLight(MqttAttributes, MqttAvailability, MqttDiscoveryUpdate,
                 should_update = True
 
         if on_command_type == 'last':
-            mqtt.async_publish(self.hass, self._topic[CONF_COMMAND_TOPIC],
+            mqtt.async_publish(self.opp, self._topic[CONF_COMMAND_TOPIC],
                                self._payload['on'], self._config[CONF_QOS],
                                self._config[CONF_RETAIN])
             should_update = True
@@ -751,7 +751,7 @@ class MqttLight(MqttAttributes, MqttAvailability, MqttDiscoveryUpdate,
         This method is a coroutine.
         """
         mqtt.async_publish(
-            self.hass, self._topic[CONF_COMMAND_TOPIC], self._payload['off'],
+            self.opp, self._topic[CONF_COMMAND_TOPIC], self._payload['off'],
             self._config[CONF_QOS], self._config[CONF_RETAIN])
 
         if self._optimistic:

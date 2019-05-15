@@ -3,17 +3,17 @@ import logging
 
 import voluptuous as vol
 
-from homeassistant.components import binary_sensor, mqtt
-from homeassistant.components.binary_sensor import (
+from openpeerpower.components import binary_sensor, mqtt
+from openpeerpower.components.binary_sensor import (
     DEVICE_CLASSES_SCHEMA, BinarySensorDevice)
-from homeassistant.const import (
+from openpeerpower.const import (
     CONF_DEVICE, CONF_DEVICE_CLASS, CONF_FORCE_UPDATE, CONF_NAME,
     CONF_PAYLOAD_OFF, CONF_PAYLOAD_ON, CONF_VALUE_TEMPLATE)
-from homeassistant.core import callback
-import homeassistant.helpers.config_validation as cv
-from homeassistant.helpers.dispatcher import async_dispatcher_connect
-import homeassistant.helpers.event as evt
-from homeassistant.helpers.typing import ConfigType, OpenPeerPowerType
+from openpeerpower.core import callback
+import openpeerpower.helpers.config_validation as cv
+from openpeerpower.helpers.dispatcher import async_dispatcher_connect
+import openpeerpower.helpers.event as evt
+from openpeerpower.helpers.typing import ConfigType, OpenPeerPowerType
 
 from . import (
     ATTR_DISCOVERY_HASH, CONF_QOS, CONF_STATE_TOPIC, CONF_UNIQUE_ID,
@@ -43,13 +43,13 @@ PLATFORM_SCHEMA = mqtt.MQTT_RO_PLATFORM_SCHEMA.extend({
     mqtt.MQTT_JSON_ATTRS_SCHEMA.schema)
 
 
-async def async_setup_platform(hass: OpenPeerPowerType, config: ConfigType,
+async def async_setup_platform(opp: OpenPeerPowerType, config: ConfigType,
                                async_add_entities, discovery_info=None):
     """Set up MQTT binary sensor through configuration.yaml."""
     await _async_setup_entity(config, async_add_entities)
 
 
-async def async_setup_entry(hass, config_entry, async_add_entities):
+async def async_setup_entry(opp, config_entry, async_add_entities):
     """Set up MQTT binary sensor dynamically through MQTT discovery."""
     async def async_discover(discovery_payload):
         """Discover and add a MQTT binary sensor."""
@@ -60,11 +60,11 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
                                       discovery_hash)
         except Exception:
             if discovery_hash:
-                clear_discovery_hash(hass, discovery_hash)
+                clear_discovery_hash(opp, discovery_hash)
             raise
 
     async_dispatcher_connect(
-        hass, MQTT_DISCOVERY_NEW.format(binary_sensor.DOMAIN, 'mqtt'),
+        opp, MQTT_DISCOVERY_NEW.format(binary_sensor.DOMAIN, 'mqtt'),
         async_discover)
 
 
@@ -95,9 +95,9 @@ class MqttBinarySensor(MqttAttributes, MqttAvailability, MqttDiscoveryUpdate,
                                      self.discovery_update)
         MqttEntityDeviceInfo.__init__(self, device_config, config_entry)
 
-    async def async_added_to_hass(self):
+    async def async_added_to_opp(self):
         """Subscribe mqtt events."""
-        await super().async_added_to_hass()
+        await super().async_added_to_opp()
         await self._subscribe_topics()
 
     async def discovery_update(self, discovery_payload):
@@ -114,7 +114,7 @@ class MqttBinarySensor(MqttAttributes, MqttAvailability, MqttDiscoveryUpdate,
         """(Re)Subscribe to topics."""
         value_template = self._config.get(CONF_VALUE_TEMPLATE)
         if value_template is not None:
-            value_template.hass = self.hass
+            value_template.opp = self.opp
 
         @callback
         def off_delay_listener(now):
@@ -149,22 +149,22 @@ class MqttBinarySensor(MqttAttributes, MqttAvailability, MqttDiscoveryUpdate,
             off_delay = self._config.get(CONF_OFF_DELAY)
             if (self._state and off_delay is not None):
                 self._delay_listener = evt.async_call_later(
-                    self.hass, off_delay, off_delay_listener)
+                    self.opp, off_delay, off_delay_listener)
 
             self.async_write_ha_state()
 
         self._sub_state = await subscription.async_subscribe_topics(
-            self.hass, self._sub_state,
+            self.opp, self._sub_state,
             {'state_topic': {'topic': self._config[CONF_STATE_TOPIC],
                              'msg_callback': state_message_received,
                              'qos': self._config[CONF_QOS]}})
 
-    async def async_will_remove_from_hass(self):
+    async def async_will_remove_from_opp(self):
         """Unsubscribe when removed."""
         self._sub_state = await subscription.async_unsubscribe_topics(
-            self.hass, self._sub_state)
-        await MqttAttributes.async_will_remove_from_hass(self)
-        await MqttAvailability.async_will_remove_from_hass(self)
+            self.opp, self._sub_state)
+        await MqttAttributes.async_will_remove_from_opp(self)
+        await MqttAvailability.async_will_remove_from_opp(self)
 
     @property
     def should_poll(self):

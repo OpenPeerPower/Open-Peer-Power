@@ -4,15 +4,15 @@ import json
 
 import voluptuous as vol
 
-from homeassistant.core import callback
-from homeassistant.components.mqtt import (
+from openpeerpower.core import callback
+from openpeerpower.components.mqtt import (
     valid_publish_topic, valid_subscribe_topic)
-from homeassistant.const import (
+from openpeerpower.const import (
     ATTR_SERVICE_DATA, EVENT_CALL_SERVICE,
     EVENT_STATE_CHANGED, EVENT_TIME_CHANGED, MATCH_ALL)
-from homeassistant.core import EventOrigin, State
-import homeassistant.helpers.config_validation as cv
-from homeassistant.helpers.json import JSONEncoder
+from openpeerpower.core import EventOrigin, State
+import openpeerpower.helpers.config_validation as cv
+from openpeerpower.helpers.json import JSONEncoder
 
 DOMAIN = 'mqtt_eventstream'
 CONF_PUBLISH_TOPIC = 'publish_topic'
@@ -32,9 +32,9 @@ CONFIG_SCHEMA = vol.Schema({
 
 
 @asyncio.coroutine
-def async_setup(hass, config):
+def async_setup(opp, config):
     """Set up the MQTT eventstream component."""
-    mqtt = hass.components.mqtt
+    mqtt = opp.components.mqtt
     conf = config.get(DOMAIN, {})
     pub_topic = conf.get(CONF_PUBLISH_TOPIC)
     sub_topic = conf.get(CONF_SUBSCRIBE_TOPIC)
@@ -68,12 +68,12 @@ def async_setup(hass, config):
 
     # Only listen for local events if you are going to publish them.
     if pub_topic:
-        hass.bus.async_listen(MATCH_ALL, _event_publisher)
+        opp.bus.async_listen(MATCH_ALL, _event_publisher)
 
     # Process events from a remote server that are received on a queue.
     @callback
     def _event_receiver(msg):
-        """Receive events published by and fire them on this hass instance."""
+        """Receive events published by and fire them on this opp instance."""
         event = json.loads(msg.payload)
         event_type = event.get('event_type')
         event_data = event.get('event_data')
@@ -89,7 +89,7 @@ def async_setup(hass, config):
                 if state:
                     event_data[key] = state
 
-        hass.bus.async_fire(
+        opp.bus.async_fire(
             event_type,
             event_data=event_data,
             origin=EventOrigin.remote

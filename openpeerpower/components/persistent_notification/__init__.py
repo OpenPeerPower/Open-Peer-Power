@@ -5,14 +5,14 @@ from typing import Awaitable
 
 import voluptuous as vol
 
-from homeassistant.components import websocket_api
-from homeassistant.core import OpenPeerPower, callback
-from homeassistant.exceptions import TemplateError
-from homeassistant.helpers import config_validation as cv
-from homeassistant.helpers.entity import async_generate_entity_id
-from homeassistant.loader import bind_hass
-from homeassistant.util import slugify
-import homeassistant.util.dt as dt_util
+from openpeerpower.components import websocket_api
+from openpeerpower.core import OpenPeerPower, callback
+from openpeerpower.exceptions import TemplateError
+from openpeerpower.helpers import config_validation as cv
+from openpeerpower.helpers.entity import async_generate_entity_id
+from openpeerpower.loader import bind_opp
+from openpeerpower.util import slugify
+import openpeerpower.util.dt as dt_util
 
 ATTR_CREATED_AT = 'created_at'
 ATTR_MESSAGE = 'message'
@@ -57,21 +57,21 @@ SCHEMA_WS_GET = websocket_api.BASE_COMMAND_MESSAGE_SCHEMA.extend({
 })
 
 
-@bind_hass
-def create(hass, message, title=None, notification_id=None):
+@bind_opp
+def create(opp, message, title=None, notification_id=None):
     """Generate a notification."""
-    hass.add_job(async_create, hass, message, title, notification_id)
+    opp.add_job(async_create, opp, message, title, notification_id)
 
 
-@bind_hass
-def dismiss(hass, notification_id):
+@bind_opp
+def dismiss(opp, notification_id):
     """Remove a notification."""
-    hass.add_job(async_dismiss, hass, notification_id)
+    opp.add_job(async_dismiss, opp, notification_id)
 
 
 @callback
-@bind_hass
-def async_create(hass: OpenPeerPower, message: str, title: str = None,
+@bind_opp
+def async_create(opp: OpenPeerPower, message: str, title: str = None,
                  notification_id: str = None) -> None:
     """Generate a notification."""
     data = {
@@ -82,24 +82,24 @@ def async_create(hass: OpenPeerPower, message: str, title: str = None,
         ] if value is not None
     }
 
-    hass.async_create_task(
-        hass.services.async_call(DOMAIN, SERVICE_CREATE, data))
+    opp.async_create_task(
+        opp.services.async_call(DOMAIN, SERVICE_CREATE, data))
 
 
 @callback
-@bind_hass
-def async_dismiss(hass: OpenPeerPower, notification_id: str) -> None:
+@bind_opp
+def async_dismiss(opp: OpenPeerPower, notification_id: str) -> None:
     """Remove a notification."""
     data = {ATTR_NOTIFICATION_ID: notification_id}
 
-    hass.async_create_task(
-        hass.services.async_call(DOMAIN, SERVICE_DISMISS, data))
+    opp.async_create_task(
+        opp.services.async_call(DOMAIN, SERVICE_DISMISS, data))
 
 
-async def async_setup(hass: OpenPeerPower, config: dict) -> Awaitable[bool]:
+async def async_setup(opp: OpenPeerPower, config: dict) -> Awaitable[bool]:
     """Set up the persistent notification component."""
     persistent_notifications = OrderedDict()
-    hass.data[DOMAIN] = {'notifications': persistent_notifications}
+    opp.data[DOMAIN] = {'notifications': persistent_notifications}
 
     @callback
     def create_service(call):
@@ -112,13 +112,13 @@ async def async_setup(hass: OpenPeerPower, config: dict) -> Awaitable[bool]:
             entity_id = ENTITY_ID_FORMAT.format(slugify(notification_id))
         else:
             entity_id = async_generate_entity_id(
-                ENTITY_ID_FORMAT, DEFAULT_OBJECT_ID, hass=hass)
+                ENTITY_ID_FORMAT, DEFAULT_OBJECT_ID, opp=opp)
             notification_id = entity_id.split('.')[1]
 
         attr = {}
         if title is not None:
             try:
-                title.hass = hass
+                title.opp = opp
                 title = title.async_render()
             except TemplateError as ex:
                 _LOGGER.error('Error rendering title %s: %s', title, ex)
@@ -127,7 +127,7 @@ async def async_setup(hass: OpenPeerPower, config: dict) -> Awaitable[bool]:
             attr[ATTR_TITLE] = title
 
         try:
-            message.hass = hass
+            message.opp = opp
             message = message.async_render()
         except TemplateError as ex:
             _LOGGER.error('Error rendering message %s: %s', message, ex)
@@ -135,7 +135,7 @@ async def async_setup(hass: OpenPeerPower, config: dict) -> Awaitable[bool]:
 
         attr[ATTR_MESSAGE] = message
 
-        hass.states.async_set(entity_id, STATE, attr)
+        opp.states.async_set(entity_id, STATE, attr)
 
         # Store notification and fire event
         # This will eventually replace state machine storage
@@ -147,7 +147,7 @@ async def async_setup(hass: OpenPeerPower, config: dict) -> Awaitable[bool]:
             ATTR_CREATED_AT: dt_util.utcnow(),
         }
 
-        hass.bus.async_fire(EVENT_PERSISTENT_NOTIFICATIONS_UPDATED)
+        opp.bus.async_fire(EVENT_PERSISTENT_NOTIFICATIONS_UPDATED)
 
     @callback
     def dismiss_service(call):
@@ -158,10 +158,10 @@ async def async_setup(hass: OpenPeerPower, config: dict) -> Awaitable[bool]:
         if entity_id not in persistent_notifications:
             return
 
-        hass.states.async_remove(entity_id)
+        opp.states.async_remove(entity_id)
 
         del persistent_notifications[entity_id]
-        hass.bus.async_fire(EVENT_PERSISTENT_NOTIFICATIONS_UPDATED)
+        opp.bus.async_fire(EVENT_PERSISTENT_NOTIFICATIONS_UPDATED)
 
     @callback
     def mark_read_service(call):
@@ -175,18 +175,18 @@ async def async_setup(hass: OpenPeerPower, config: dict) -> Awaitable[bool]:
             return
 
         persistent_notifications[entity_id][ATTR_STATUS] = STATUS_READ
-        hass.bus.async_fire(EVENT_PERSISTENT_NOTIFICATIONS_UPDATED)
+        opp.bus.async_fire(EVENT_PERSISTENT_NOTIFICATIONS_UPDATED)
 
-    hass.services.async_register(DOMAIN, SERVICE_CREATE, create_service,
+    opp.services.async_register(DOMAIN, SERVICE_CREATE, create_service,
                                  SCHEMA_SERVICE_CREATE)
 
-    hass.services.async_register(DOMAIN, SERVICE_DISMISS, dismiss_service,
+    opp.services.async_register(DOMAIN, SERVICE_DISMISS, dismiss_service,
                                  SCHEMA_SERVICE_DISMISS)
 
-    hass.services.async_register(DOMAIN, SERVICE_MARK_READ, mark_read_service,
+    opp.services.async_register(DOMAIN, SERVICE_MARK_READ, mark_read_service,
                                  SCHEMA_SERVICE_MARK_READ)
 
-    hass.components.websocket_api.async_register_command(
+    opp.components.websocket_api.async_register_command(
         WS_TYPE_GET_NOTIFICATIONS, websocket_get_notifications,
         SCHEMA_WS_GET
     )
@@ -196,7 +196,7 @@ async def async_setup(hass: OpenPeerPower, config: dict) -> Awaitable[bool]:
 
 @callback
 def websocket_get_notifications(
-        hass: OpenPeerPower, connection: websocket_api.ActiveConnection, msg):
+        opp: OpenPeerPower, connection: websocket_api.ActiveConnection, msg):
     """Return a list of persistent_notifications."""
     connection.send_message(
         websocket_api.result_message(msg['id'], [
@@ -205,6 +205,6 @@ def websocket_get_notifications(
                                            ATTR_MESSAGE, ATTR_STATUS,
                                            ATTR_TITLE, ATTR_CREATED_AT)
             }
-            for data in hass.data[DOMAIN]['notifications'].values()
+            for data in opp.data[DOMAIN]['notifications'].values()
         ])
     )

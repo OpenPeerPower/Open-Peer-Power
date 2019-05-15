@@ -6,18 +6,18 @@ from typing import Optional
 
 import voluptuous as vol
 
-from homeassistant.components import mqtt, sensor
-from homeassistant.components.sensor import DEVICE_CLASSES_SCHEMA
-from homeassistant.const import (
+from openpeerpower.components import mqtt, sensor
+from openpeerpower.components.sensor import DEVICE_CLASSES_SCHEMA
+from openpeerpower.const import (
     CONF_DEVICE, CONF_DEVICE_CLASS, CONF_FORCE_UPDATE, CONF_ICON, CONF_NAME,
     CONF_UNIT_OF_MEASUREMENT, CONF_VALUE_TEMPLATE)
-from homeassistant.core import callback
-import homeassistant.helpers.config_validation as cv
-from homeassistant.helpers.dispatcher import async_dispatcher_connect
-from homeassistant.helpers.entity import Entity
-from homeassistant.helpers.event import async_track_point_in_utc_time
-from homeassistant.helpers.typing import ConfigType, OpenPeerPowerType
-from homeassistant.util import dt as dt_util
+from openpeerpower.core import callback
+import openpeerpower.helpers.config_validation as cv
+from openpeerpower.helpers.dispatcher import async_dispatcher_connect
+from openpeerpower.helpers.entity import Entity
+from openpeerpower.helpers.event import async_track_point_in_utc_time
+from openpeerpower.helpers.typing import ConfigType, OpenPeerPowerType
+from openpeerpower.util import dt as dt_util
 
 from . import (
     ATTR_DISCOVERY_HASH, CONF_QOS, CONF_STATE_TOPIC, CONF_UNIQUE_ID,
@@ -46,13 +46,13 @@ PLATFORM_SCHEMA = mqtt.MQTT_RO_PLATFORM_SCHEMA.extend({
     mqtt.MQTT_JSON_ATTRS_SCHEMA.schema)
 
 
-async def async_setup_platform(hass: OpenPeerPowerType, config: ConfigType,
+async def async_setup_platform(opp: OpenPeerPowerType, config: ConfigType,
                                async_add_entities, discovery_info=None):
     """Set up MQTT sensors through configuration.yaml."""
     await _async_setup_entity(config, async_add_entities)
 
 
-async def async_setup_entry(hass, config_entry, async_add_entities):
+async def async_setup_entry(opp, config_entry, async_add_entities):
     """Set up MQTT sensors dynamically through MQTT discovery."""
     async def async_discover_sensor(discovery_payload):
         """Discover and add a discovered MQTT sensor."""
@@ -63,10 +63,10 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
                                       discovery_hash)
         except Exception:
             if discovery_hash:
-                clear_discovery_hash(hass, discovery_hash)
+                clear_discovery_hash(opp, discovery_hash)
             raise
 
-    async_dispatcher_connect(hass,
+    async_dispatcher_connect(opp,
                              MQTT_DISCOVERY_NEW.format(sensor.DOMAIN, 'mqtt'),
                              async_discover_sensor)
 
@@ -102,9 +102,9 @@ class MqttSensor(MqttAttributes, MqttAvailability, MqttDiscoveryUpdate,
                                      self.discovery_update)
         MqttEntityDeviceInfo.__init__(self, device_config, config_entry)
 
-    async def async_added_to_hass(self):
+    async def async_added_to_opp(self):
         """Subscribe to MQTT events."""
-        await super().async_added_to_hass()
+        await super().async_added_to_opp()
         await self._subscribe_topics()
 
     async def discovery_update(self, discovery_payload):
@@ -121,7 +121,7 @@ class MqttSensor(MqttAttributes, MqttAvailability, MqttDiscoveryUpdate,
         """(Re)Subscribe to topics."""
         template = self._config.get(CONF_VALUE_TEMPLATE)
         if template is not None:
-            template.hass = self.hass
+            template.opp = self.opp
 
         @callback
         def message_received(msg):
@@ -140,7 +140,7 @@ class MqttSensor(MqttAttributes, MqttAvailability, MqttDiscoveryUpdate,
                     dt_util.utcnow() + timedelta(seconds=expire_after))
 
                 self._expiration_trigger = async_track_point_in_utc_time(
-                    self.hass, self.value_is_expired, expiration_at)
+                    self.opp, self.value_is_expired, expiration_at)
 
             json_attributes = set(self._config[CONF_JSON_ATTRS])
             if json_attributes:
@@ -164,17 +164,17 @@ class MqttSensor(MqttAttributes, MqttAvailability, MqttDiscoveryUpdate,
             self.async_write_ha_state()
 
         self._sub_state = await subscription.async_subscribe_topics(
-            self.hass, self._sub_state,
+            self.opp, self._sub_state,
             {'state_topic': {'topic': self._config[CONF_STATE_TOPIC],
                              'msg_callback': message_received,
                              'qos': self._config[CONF_QOS]}})
 
-    async def async_will_remove_from_hass(self):
+    async def async_will_remove_from_opp(self):
         """Unsubscribe when removed."""
         self._sub_state = await subscription.async_unsubscribe_topics(
-            self.hass, self._sub_state)
-        await MqttAttributes.async_will_remove_from_hass(self)
-        await MqttAvailability.async_will_remove_from_hass(self)
+            self.opp, self._sub_state)
+        await MqttAttributes.async_will_remove_from_opp(self)
+        await MqttAvailability.async_will_remove_from_opp(self)
 
     @callback
     def value_is_expired(self, *_):

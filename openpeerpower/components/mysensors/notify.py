@@ -1,16 +1,16 @@
 """MySensors notification service."""
-from homeassistant.components import mysensors
-from homeassistant.components.notify import (
+from openpeerpower.components import mysensors
+from openpeerpower.components.notify import (
     ATTR_TARGET, DOMAIN, BaseNotificationService)
 
 
-async def async_get_service(hass, config, discovery_info=None):
+async def async_get_service(opp, config, discovery_info=None):
     """Get the MySensors notification service."""
     new_devices = mysensors.setup_mysensors_platform(
-        hass, DOMAIN, discovery_info, MySensorsNotificationDevice)
+        opp, DOMAIN, discovery_info, MySensorsNotificationDevice)
     if not new_devices:
         return None
-    return MySensorsNotificationService(hass)
+    return MySensorsNotificationService(opp)
 
 
 class MySensorsNotificationDevice(mysensors.device.MySensorsDevice):
@@ -31,9 +31,9 @@ class MySensorsNotificationDevice(mysensors.device.MySensorsDevice):
 class MySensorsNotificationService(BaseNotificationService):
     """Implement a MySensors notification service."""
 
-    def __init__(self, hass):
+    def __init__(self, opp):
         """Initialize the service."""
-        self.devices = mysensors.get_mysensors_devices(hass, DOMAIN)
+        self.devices = mysensors.get_mysensors_devices(opp, DOMAIN)
 
     async def async_send_message(self, message="", **kwargs):
         """Send a message to a user."""

@@ -1,10 +1,10 @@
 {
   "domain": "notify",
   "name": "Notify",
-  "documentation": "https://www.home-assistant.io/components/notify",
+  "documentation": "https://www.open-peer-power.io/components/notify",
   "requirements": [],
   "dependencies": [],
   "codeowners": [
-    "@home-assistant/core"
+    "@open-peer-power/core"
   ]
 }

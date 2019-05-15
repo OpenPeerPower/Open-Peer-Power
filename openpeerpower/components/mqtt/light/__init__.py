@@ -2,18 +2,18 @@
 Support for MQTT lights.
 
 For more details about this platform, please refer to the documentation at
-https://home-assistant.io/components/light.mqtt/
+https://open-peer-power.io/components/light.mqtt/
 """
 import logging
 
 import voluptuous as vol
 
-from homeassistant.components import light
-from homeassistant.components.mqtt import ATTR_DISCOVERY_HASH
-from homeassistant.components.mqtt.discovery import (
+from openpeerpower.components import light
+from openpeerpower.components.mqtt import ATTR_DISCOVERY_HASH
+from openpeerpower.components.mqtt.discovery import (
     MQTT_DISCOVERY_NEW, clear_discovery_hash)
-from homeassistant.helpers.dispatcher import async_dispatcher_connect
-from homeassistant.helpers.typing import OpenPeerPowerType, ConfigType
+from openpeerpower.helpers.dispatcher import async_dispatcher_connect
+from openpeerpower.helpers.typing import OpenPeerPowerType, ConfigType
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -43,13 +43,13 @@ PLATFORM_SCHEMA = vol.All(MQTT_LIGHT_SCHEMA_SCHEMA.extend({
 }, extra=vol.ALLOW_EXTRA), validate_mqtt_light)
 
 
-async def async_setup_platform(hass: OpenPeerPowerType, config: ConfigType,
+async def async_setup_platform(opp: OpenPeerPowerType, config: ConfigType,
                                async_add_entities, discovery_info=None):
     """Set up MQTT light through configuration.yaml."""
     await _async_setup_entity(config, async_add_entities)
 
 
-async def async_setup_entry(hass, config_entry, async_add_entities):
+async def async_setup_entry(opp, config_entry, async_add_entities):
     """Set up MQTT light dynamically through MQTT discovery."""
     async def async_discover(discovery_payload):
         """Discover and add a MQTT light."""
@@ -60,11 +60,11 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
                                       discovery_hash)
         except Exception:
             if discovery_hash:
-                clear_discovery_hash(hass, discovery_hash)
+                clear_discovery_hash(opp, discovery_hash)
             raise
 
     async_dispatcher_connect(
-        hass, MQTT_DISCOVERY_NEW.format(light.DOMAIN, 'mqtt'),
+        opp, MQTT_DISCOVERY_NEW.format(light.DOMAIN, 'mqtt'),
         async_discover)
 
 

@@ -1,9 +1,9 @@
 """Zone entity and functionality."""
-from homeassistant.const import ATTR_HIDDEN, ATTR_LATITUDE, ATTR_LONGITUDE
-from homeassistant.helpers.entity import Entity
-from homeassistant.loader import bind_hass
-from homeassistant.util.async_ import run_callback_threadsafe
-from homeassistant.util.location import distance
+from openpeerpower.const import ATTR_HIDDEN, ATTR_LATITUDE, ATTR_LONGITUDE
+from openpeerpower.helpers.entity import Entity
+from openpeerpower.loader import bind_opp
+from openpeerpower.util.async_ import run_callback_threadsafe
+from openpeerpower.util.location import distance
 
 from .const import DOMAIN
 
@@ -13,23 +13,23 @@ ATTR_RADIUS = 'radius'
 STATE = 'zoning'
 
 
-@bind_hass
-def active_zone(hass, latitude, longitude, radius=0):
+@bind_opp
+def active_zone(opp, latitude, longitude, radius=0):
     """Find the active zone for given latitude, longitude."""
     return run_callback_threadsafe(
-        hass.loop, async_active_zone, hass, latitude, longitude, radius
+        opp.loop, async_active_zone, opp, latitude, longitude, radius
     ).result()
 
 
-@bind_hass
-def async_active_zone(hass, latitude, longitude, radius=0):
+@bind_opp
+def async_active_zone(opp, latitude, longitude, radius=0):
     """Find the active zone for given latitude, longitude.
 
     This method must be run in the event loop.
     """
     # Sort entity IDs so that we are deterministic if equal distance to 2 zones
-    zones = (hass.states.get(entity_id) for entity_id
-             in sorted(hass.states.async_entity_ids(DOMAIN)))
+    zones = (opp.states.get(entity_id) for entity_id
+             in sorted(opp.states.async_entity_ids(DOMAIN)))
 
     min_dist = None
     closest = None
@@ -70,9 +70,9 @@ def in_zone(zone, latitude, longitude, radius=0) -> bool:
 class Zone(Entity):
     """Representation of a Zone."""
 
-    def __init__(self, hass, name, latitude, longitude, radius, icon, passive):
+    def __init__(self, opp, name, latitude, longitude, radius, icon, passive):
         """Initialize the zone."""
-        self.hass = hass
+        self.opp = opp
         self._name = name
         self._latitude = latitude
         self._longitude = longitude

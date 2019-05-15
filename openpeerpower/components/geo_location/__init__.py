@@ -3,11 +3,11 @@ from datetime import timedelta
 import logging
 from typing import Optional
 
-from homeassistant.const import ATTR_LATITUDE, ATTR_LONGITUDE
-from homeassistant.helpers.config_validation import (  # noqa
+from openpeerpower.const import ATTR_LATITUDE, ATTR_LONGITUDE
+from openpeerpower.helpers.config_validation import (  # noqa
     PLATFORM_SCHEMA, PLATFORM_SCHEMA_BASE)
-from homeassistant.helpers.entity import Entity
-from homeassistant.helpers.entity_component import EntityComponent
+from openpeerpower.helpers.entity import Entity
+from openpeerpower.helpers.entity_component import EntityComponent
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -21,9 +21,9 @@ ENTITY_ID_FORMAT = DOMAIN + '.{}'
 SCAN_INTERVAL = timedelta(seconds=60)
 
 
-async def async_setup(hass, config):
+async def async_setup(opp, config):
     """Set up the Geolocation component."""
-    component = EntityComponent(_LOGGER, DOMAIN, hass, SCAN_INTERVAL)
+    component = EntityComponent(_LOGGER, DOMAIN, opp, SCAN_INTERVAL)
     await component.async_setup(config)
     return True
 

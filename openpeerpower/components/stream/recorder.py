@@ -2,13 +2,13 @@
 import threading
 from typing import List
 
-from homeassistant.core import callback
+from openpeerpower.core import callback
 
 from .core import Segment, StreamOutput, PROVIDERS
 
 
 @callback
-def async_setup_recorder(hass):
+def async_setup_recorder(opp):
     """Only here so Provider Registry works."""
 
 

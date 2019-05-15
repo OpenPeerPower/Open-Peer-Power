@@ -2,31 +2,31 @@
 Support for MQTT JSON lights.
 
 For more details about this platform, please refer to the documentation at
-https://home-assistant.io/components/light.mqtt_json/
+https://open-peer-power.io/components/light.mqtt_json/
 """
 import json
 import logging
 
 import voluptuous as vol
 
-from homeassistant.components import mqtt
-from homeassistant.components.light import (
+from openpeerpower.components import mqtt
+from openpeerpower.components.light import (
     ATTR_BRIGHTNESS, ATTR_COLOR_TEMP, ATTR_EFFECT, ATTR_FLASH, ATTR_HS_COLOR,
     ATTR_TRANSITION, ATTR_WHITE_VALUE, FLASH_LONG, FLASH_SHORT,
     SUPPORT_BRIGHTNESS, SUPPORT_COLOR, SUPPORT_COLOR_TEMP, SUPPORT_EFFECT,
     SUPPORT_FLASH, SUPPORT_TRANSITION, SUPPORT_WHITE_VALUE, Light)
-from homeassistant.components.mqtt import (
+from openpeerpower.components.mqtt import (
     CONF_COMMAND_TOPIC, CONF_QOS, CONF_RETAIN, CONF_STATE_TOPIC,
     CONF_UNIQUE_ID, MqttAttributes, MqttAvailability, MqttDiscoveryUpdate,
     MqttEntityDeviceInfo, subscription)
-from homeassistant.const import (
+from openpeerpower.const import (
     CONF_BRIGHTNESS, CONF_COLOR_TEMP, CONF_DEVICE, CONF_EFFECT, CONF_NAME,
     CONF_OPTIMISTIC, CONF_RGB, CONF_WHITE_VALUE, CONF_XY, STATE_ON)
-from homeassistant.core import callback
-import homeassistant.helpers.config_validation as cv
-from homeassistant.helpers.restore_state import RestoreEntity
-from homeassistant.helpers.typing import ConfigType
-import homeassistant.util.color as color_util
+from openpeerpower.core import callback
+import openpeerpower.helpers.config_validation as cv
+from openpeerpower.helpers.restore_state import RestoreEntity
+from openpeerpower.helpers.typing import ConfigType
+import openpeerpower.util.color as color_util
 
 from . import MQTT_LIGHT_SCHEMA_SCHEMA
 from .schema_basic import CONF_BRIGHTNESS_SCALE
@@ -120,9 +120,9 @@ class MqttLightJson(MqttAttributes, MqttAvailability, MqttDiscoveryUpdate,
                                      self.discovery_update)
         MqttEntityDeviceInfo.__init__(self, device_config, config_entry)
 
-    async def async_added_to_hass(self):
+    async def async_added_to_opp(self):
         """Subscribe to MQTT events."""
-        await super().async_added_to_hass()
+        await super().async_added_to_opp()
         await self._subscribe_topics()
 
     async def discovery_update(self, discovery_payload):
@@ -277,7 +277,7 @@ class MqttLightJson(MqttAttributes, MqttAvailability, MqttDiscoveryUpdate,
 
         if self._topic[CONF_STATE_TOPIC] is not None:
             self._sub_state = await subscription.async_subscribe_topics(
-                self.hass, self._sub_state,
+                self.opp, self._sub_state,
                 {'state_topic': {'topic': self._topic[CONF_STATE_TOPIC],
                                  'msg_callback': state_received,
                                  'qos': self._config[CONF_QOS]}})
@@ -295,12 +295,12 @@ class MqttLightJson(MqttAttributes, MqttAvailability, MqttDiscoveryUpdate,
             if last_state.attributes.get(ATTR_WHITE_VALUE):
                 self._white_value = last_state.attributes.get(ATTR_WHITE_VALUE)
 
-    async def async_will_remove_from_hass(self):
+    async def async_will_remove_from_opp(self):
         """Unsubscribe when removed."""
         self._sub_state = await subscription.async_unsubscribe_topics(
-            self.hass, self._sub_state)
-        await MqttAttributes.async_will_remove_from_hass(self)
-        await MqttAvailability.async_will_remove_from_hass(self)
+            self.opp, self._sub_state)
+        await MqttAttributes.async_will_remove_from_opp(self)
+        await MqttAvailability.async_will_remove_from_opp(self)
 
     @property
     def brightness(self):
@@ -444,7 +444,7 @@ class MqttLightJson(MqttAttributes, MqttAvailability, MqttDiscoveryUpdate,
                 should_update = True
 
         mqtt.async_publish(
-            self.hass, self._topic[CONF_COMMAND_TOPIC], json.dumps(message),
+            self.opp, self._topic[CONF_COMMAND_TOPIC], json.dumps(message),
             self._config[CONF_QOS], self._config[CONF_RETAIN])
 
         if self._optimistic:
@@ -466,7 +466,7 @@ class MqttLightJson(MqttAttributes, MqttAvailability, MqttDiscoveryUpdate,
             message['transition'] = int(kwargs[ATTR_TRANSITION])
 
         mqtt.async_publish(
-            self.hass, self._topic[CONF_COMMAND_TOPIC], json.dumps(message),
+            self.opp, self._topic[CONF_COMMAND_TOPIC], json.dumps(message),
             self._config[CONF_QOS], self._config[CONF_RETAIN])
 
         if self._optimistic:

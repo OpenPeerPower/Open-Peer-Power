@@ -5,8 +5,8 @@ import tempfile
 
 import voluptuous as vol
 
-from homeassistant.const import EVENT_HOMEASSISTANT_STOP
-import homeassistant.helpers.config_validation as cv
+from openpeerpower.const import EVENT_HOMEASSISTANT_STOP
+import openpeerpower.helpers.config_validation as cv
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -23,7 +23,7 @@ HBMQTT_CONFIG_SCHEMA = vol.Any(None, vol.Schema({
 
 
 @asyncio.coroutine
-def async_start(hass, password, server_config):
+def async_start(opp, password, server_config):
     """Initialize MQTT Server.
 
     This method is a coroutine.
@@ -32,13 +32,13 @@ def async_start(hass, password, server_config):
 
     passwd = tempfile.NamedTemporaryFile()
 
-    gen_server_config, client_config = generate_config(hass, passwd, password)
+    gen_server_config, client_config = generate_config(opp, passwd, password)
 
     try:
         if server_config is None:
             server_config = gen_server_config
 
-        broker = Broker(server_config, hass.loop)
+        broker = Broker(server_config, opp.loop)
         yield from broker.start()
     except BrokerException:
         _LOGGER.exception("Error initializing MQTT server")
@@ -51,13 +51,13 @@ def async_start(hass, password, server_config):
         """Shut down the MQTT server."""
         yield from broker.shutdown()
 
-    hass.bus.async_listen_once(
+    opp.bus.async_listen_once(
         EVENT_HOMEASSISTANT_STOP, async_shutdown_mqtt_server)
 
     return True, client_config
 
 
-def generate_config(hass, passwd, password):
+def generate_config(opp, passwd, password):
     """Generate a configuration based on current Home Assistant instance."""
     from . import PROTOCOL_311
 
@@ -84,13 +84,13 @@ def generate_config(hass, passwd, password):
     }
 
     if password:
-        username = 'homeassistant'
+        username = 'openpeerpower'
 
         # Encrypt with what hbmqtt uses to verify
         from passlib.apps import custom_app_context
 
         passwd.write(
-            'homeassistant:{}\n'.format(
+            'openpeerpower:{}\n'.format(
                 custom_app_context.encrypt(password)).encode('utf-8'))
         passwd.flush()
 

@@ -4,12 +4,12 @@ import threading
 
 import voluptuous as vol
 
-from homeassistant.auth.util import generate_secret
-import homeassistant.helpers.config_validation as cv
-from homeassistant.const import EVENT_HOMEASSISTANT_STOP, CONF_FILENAME
-from homeassistant.core import callback
-from homeassistant.exceptions import OpenPeerPowerError
-from homeassistant.loader import bind_hass
+from openpeerpower.auth.util import generate_secret
+import openpeerpower.helpers.config_validation as cv
+from openpeerpower.const import EVENT_HOMEASSISTANT_STOP, CONF_FILENAME
+from openpeerpower.core import callback
+from openpeerpower.exceptions import OpenPeerPowerError
+from openpeerpower.loader import bind_opp
 
 from .const import (
     DOMAIN, ATTR_STREAMS, ATTR_ENDPOINTS, CONF_STREAM_SOURCE,
@@ -39,11 +39,11 @@ SERVICE_RECORD_SCHEMA = STREAM_SERVICE_SCHEMA.extend({
 logging.getLogger('libav').setLevel(logging.ERROR)
 
 
-@bind_hass
-def request_stream(hass, stream_source, *, fmt='hls',
+@bind_opp
+def request_stream(opp, stream_source, *, fmt='hls',
                    keepalive=False, options=None):
     """Set up stream with token."""
-    if DOMAIN not in hass.config.components:
+    if DOMAIN not in opp.config.components:
         raise OpenPeerPowerError("Stream component is not set up.")
 
     if options is None:
@@ -56,10 +56,10 @@ def request_stream(hass, stream_source, *, fmt='hls',
         options['stimeout'] = '5000000'
 
     try:
-        streams = hass.data[DOMAIN][ATTR_STREAMS]
+        streams = opp.data[DOMAIN][ATTR_STREAMS]
         stream = streams.get(stream_source)
         if not stream:
-            stream = Stream(hass, stream_source,
+            stream = Stream(opp, stream_source,
                             options=options, keepalive=keepalive)
             streams[stream_source] = stream
         else:
@@ -72,40 +72,40 @@ def request_stream(hass, stream_source, *, fmt='hls',
         if not stream.access_token:
             stream.access_token = generate_secret()
             stream.start()
-        return hass.data[DOMAIN][ATTR_ENDPOINTS][fmt].format(
+        return opp.data[DOMAIN][ATTR_ENDPOINTS][fmt].format(
             stream.access_token)
     except Exception:
         raise OpenPeerPowerError('Unable to get stream')
 
 
-async def async_setup(hass, config):
+async def async_setup(opp, config):
     """Set up stream."""
-    hass.data[DOMAIN] = {}
-    hass.data[DOMAIN][ATTR_ENDPOINTS] = {}
-    hass.data[DOMAIN][ATTR_STREAMS] = {}
+    opp.data[DOMAIN] = {}
+    opp.data[DOMAIN][ATTR_ENDPOINTS] = {}
+    opp.data[DOMAIN][ATTR_STREAMS] = {}
 
     # Setup HLS
-    hls_endpoint = async_setup_hls(hass)
-    hass.data[DOMAIN][ATTR_ENDPOINTS]['hls'] = hls_endpoint
+    hls_endpoint = async_setup_hls(opp)
+    opp.data[DOMAIN][ATTR_ENDPOINTS]['hls'] = hls_endpoint
 
     # Setup Recorder
-    async_setup_recorder(hass)
+    async_setup_recorder(opp)
 
     @callback
     def shutdown(event):
         """Stop all stream workers."""
-        for stream in hass.data[DOMAIN][ATTR_STREAMS].values():
+        for stream in opp.data[DOMAIN][ATTR_STREAMS].values():
             stream.keepalive = False
             stream.stop()
         _LOGGER.info("Stopped stream workers.")
 
-    hass.bus.async_listen_once(EVENT_HOMEASSISTANT_STOP, shutdown)
+    opp.bus.async_listen_once(EVENT_HOMEASSISTANT_STOP, shutdown)
 
     async def async_record(call):
         """Call record stream service handler."""
-        await async_handle_record_service(hass, call)
+        await async_handle_record_service(opp, call)
 
-    hass.services.async_register(DOMAIN, SERVICE_RECORD,
+    opp.services.async_register(DOMAIN, SERVICE_RECORD,
                                  async_record, schema=SERVICE_RECORD_SCHEMA)
 
     return True
@@ -114,9 +114,9 @@ async def async_setup(hass, config):
 class Stream:
     """Represents a single stream."""
 
-    def __init__(self, hass, source, options=None, keepalive=False):
+    def __init__(self, opp, source, options=None, keepalive=False):
         """Initialize a stream."""
-        self.hass = hass
+        self.opp = opp
         self.source = source
         self.options = options
         self.keepalive = keepalive
@@ -162,7 +162,7 @@ class Stream:
                 name='stream_worker',
                 target=stream_worker,
                 args=(
-                    self.hass, self, self._thread_quit))
+                    self.opp, self, self._thread_quit))
             self._thread.start()
             _LOGGER.info("Started stream: %s", self.source)
 
@@ -183,7 +183,7 @@ class Stream:
             _LOGGER.info("Stopped stream: %s", self.source)
 
 
-async def async_handle_record_service(hass, call):
+async def async_handle_record_service(opp, call):
     """Handle save video service calls."""
     stream_source = call.data[CONF_STREAM_SOURCE]
     video_path = call.data[CONF_FILENAME]
@@ -191,15 +191,15 @@ async def async_handle_record_service(hass, call):
     lookback = call.data[CONF_LOOKBACK]
 
     # Check for file access
-    if not hass.config.is_allowed_path(video_path):
+    if not opp.config.is_allowed_path(video_path):
         raise OpenPeerPowerError("Can't write {}, no access to path!"
                                  .format(video_path))
 
     # Check for active stream
-    streams = hass.data[DOMAIN][ATTR_STREAMS]
+    streams = opp.data[DOMAIN][ATTR_STREAMS]
     stream = streams.get(stream_source)
     if not stream:
-        stream = Stream(hass, stream_source)
+        stream = Stream(opp, stream_source)
         streams[stream_source] = stream
 
     # Add recorder

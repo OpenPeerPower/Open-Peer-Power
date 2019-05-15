@@ -1,7 +1,7 @@
 {
   "domain": "switch",
   "name": "Switch",
-  "documentation": "https://www.home-assistant.io/components/switch",
+  "documentation": "https://www.open-peer-power.io/components/switch",
   "requirements": [],
   "dependencies": [
     "group"

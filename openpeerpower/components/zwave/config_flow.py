@@ -4,7 +4,7 @@ import logging
 
 import voluptuous as vol
 
-from homeassistant import config_entries
+from openpeerpower import config_entries
 
 from .const import (
     CONF_USB_STICK_PATH, CONF_NETWORK_KEY,
@@ -44,10 +44,10 @@ class ZwaveFlowHandler(config_entries.ConfigFlow):
             try:
                 from functools import partial
                 # pylint: disable=unused-variable
-                option = await self.hass.async_add_executor_job(  # noqa: F841
+                option = await self.opp.async_add_executor_job(  # noqa: F841
                     partial(ZWaveOption,
                             user_input[CONF_USB_STICK_PATH],
-                            user_path=self.hass.config.config_dir)
+                            user_path=self.opp.config.config_dir)
                 )
             except ZWaveException:
                 errors['base'] = 'option_error'

@@ -1,12 +1,12 @@
 {
   "domain": "cover",
   "name": "Cover",
-  "documentation": "https://www.home-assistant.io/components/cover",
+  "documentation": "https://www.open-peer-power.io/components/cover",
   "requirements": [],
   "dependencies": [
     "group"
   ],
   "codeowners": [
-    "@home-assistant/core"
+    "@open-peer-power/core"
   ]
 }

@@ -1,18 +1,18 @@
 """Provide functionality to stream HLS."""
 from aiohttp import web
 
-from homeassistant.core import callback
-from homeassistant.util.dt import utcnow
+from openpeerpower.core import callback
+from openpeerpower.util.dt import utcnow
 
 from .const import FORMAT_CONTENT_TYPE
 from .core import StreamView, StreamOutput, PROVIDERS
 
 
 @callback
-def async_setup_hls(hass):
+def async_setup_hls(opp):
     """Set up api endpoints."""
-    hass.http.register_view(HlsPlaylistView())
-    hass.http.register_view(HlsSegmentView())
+    opp.http.register_view(HlsPlaylistView())
+    opp.http.register_view(HlsSegmentView())
     return '/api/hls/{}/playlist.m3u8'
 
 

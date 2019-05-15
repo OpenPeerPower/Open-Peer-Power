@@ -7,10 +7,10 @@ from typing import List, Any
 import attr
 from aiohttp import web
 
-from homeassistant.core import callback
-from homeassistant.components.http import OpenPeerPowerView
-from homeassistant.helpers.event import async_call_later
-from homeassistant.util.decorator import Registry
+from openpeerpower.core import callback
+from openpeerpower.components.http import OpenPeerPowerView
+from openpeerpower.helpers.event import async_call_later
+from openpeerpower.util.decorator import Registry
 
 from .const import DOMAIN, ATTR_STREAMS
 
@@ -89,7 +89,7 @@ class StreamOutput:
         if self._unsub is not None:
             self._unsub()
         self._unsub = async_call_later(
-            self._stream.hass, self.timeout, self._timeout)
+            self._stream.opp, self.timeout, self._timeout)
 
         if not sequence:
             return self._segments
@@ -118,7 +118,7 @@ class StreamOutput:
         # Start idle timeout when we start recieving data
         if self._unsub is None:
             self._unsub = async_call_later(
-                self._stream.hass, self.timeout, self._timeout)
+                self._stream.opp, self.timeout, self._timeout)
 
         if segment is None:
             self._event.set()
@@ -161,10 +161,10 @@ class StreamView(OpenPeerPowerView):
 
     async def get(self, request, token, sequence=None):
         """Start a GET request."""
-        hass = request.app['hass']
+        opp = request.app['opp']
 
         stream = next((
-            s for s in hass.data[DOMAIN][ATTR_STREAMS].values()
+            s for s in opp.data[DOMAIN][ATTR_STREAMS].values()
             if s.access_token == token), None)
 
         if not stream:

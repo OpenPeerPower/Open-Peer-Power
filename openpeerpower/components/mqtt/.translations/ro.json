@@ -18,7 +18,7 @@
                 "description": "Introduce\u021bi informa\u021biile de conectare ale brokerului dvs. MQTT.",
                 "title": "MQTT"
             },
-            "hassio_confirm": {
+            "oppio_confirm": {
                 "data": {
                     "discovery": "Activa\u021bi descoperirea"
                 },

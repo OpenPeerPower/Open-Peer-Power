@@ -18,7 +18,7 @@
                 "description": "Inserisci le informazioni di connessione del tuo broker MQTT.",
                 "title": "MQTT"
             },
-            "hassio_confirm": {
+            "oppio_confirm": {
                 "data": {
                     "discovery": "Attiva l'individuazione"
                 },

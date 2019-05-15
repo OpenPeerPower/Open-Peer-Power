@@ -5,10 +5,10 @@ import logging
 
 import voluptuous as vol
 
-from homeassistant.helpers.entity_component import EntityComponent
-from homeassistant.helpers.entity import Entity
-from homeassistant.const import (STATE_ON, STATE_OFF)
-from homeassistant.helpers.config_validation import (  # noqa
+from openpeerpower.helpers.entity_component import EntityComponent
+from openpeerpower.helpers.entity import Entity
+from openpeerpower.const import (STATE_ON, STATE_OFF)
+from openpeerpower.helpers.config_validation import (  # noqa
     PLATFORM_SCHEMA, PLATFORM_SCHEMA_BASE)
 
 DOMAIN = 'binary_sensor'
@@ -114,23 +114,23 @@ DEVICE_CLASSES = [
 DEVICE_CLASSES_SCHEMA = vol.All(vol.Lower, vol.In(DEVICE_CLASSES))
 
 
-async def async_setup(hass, config):
+async def async_setup(opp, config):
     """Track states and offer events for binary sensors."""
-    component = hass.data[DOMAIN] = EntityComponent(
-        logging.getLogger(__name__), DOMAIN, hass, SCAN_INTERVAL)
+    component = opp.data[DOMAIN] = EntityComponent(
+        logging.getLogger(__name__), DOMAIN, opp, SCAN_INTERVAL)
 
     await component.async_setup(config)
     return True
 
 
-async def async_setup_entry(hass, entry):
+async def async_setup_entry(opp, entry):
     """Set up a config entry."""
-    return await hass.data[DOMAIN].async_setup_entry(entry)
+    return await opp.data[DOMAIN].async_setup_entry(entry)
 
 
-async def async_unload_entry(hass, entry):
+async def async_unload_entry(opp, entry):
     """Unload a config entry."""
-    return await hass.data[DOMAIN].async_unload_entry(entry)
+    return await opp.data[DOMAIN].async_unload_entry(entry)
 
 
 class BinarySensorDevice(Entity):

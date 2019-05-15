@@ -2,8 +2,8 @@
 from functools import wraps
 import logging
 
-from homeassistant.core import callback
-from homeassistant.exceptions import Unauthorized
+from openpeerpower.core import callback
+from openpeerpower.exceptions import Unauthorized
 
 from . import messages
 
@@ -11,10 +11,10 @@ from . import messages
 _LOGGER = logging.getLogger(__name__)
 
 
-async def _handle_async_response(func, hass, connection, msg):
+async def _handle_async_response(func, opp, connection, msg):
     """Create a response and handle exception."""
     try:
-        await func(hass, connection, msg)
+        await func(opp, connection, msg)
     except Exception as err:  # pylint: disable=broad-except
         connection.async_handle_exception(msg, err)
 
@@ -23,10 +23,10 @@ def async_response(func):
     """Decorate an async function to handle WebSocket API messages."""
     @callback
     @wraps(func)
-    def schedule_handler(hass, connection, msg):
+    def schedule_handler(opp, connection, msg):
         """Schedule the handler."""
-        hass.async_create_task(
-            _handle_async_response(func, hass, connection, msg))
+        opp.async_create_task(
+            _handle_async_response(func, opp, connection, msg))
 
     return schedule_handler
 
@@ -34,14 +34,14 @@ def async_response(func):
 def require_admin(func):
     """Websocket decorator to require user to be an admin."""
     @wraps(func)
-    def with_admin(hass, connection, msg):
+    def with_admin(opp, connection, msg):
         """Check admin and call function."""
         user = connection.user
 
         if user is None or not user.is_admin:
             raise Unauthorized()
 
-        func(hass, connection, msg)
+        func(opp, connection, msg)
 
     return with_admin
 
@@ -56,7 +56,7 @@ def ws_require_user(
     def validator(func):
         """Decorate func."""
         @wraps(func)
-        def check_current_user(hass, connection, msg):
+        def check_current_user(opp, connection, msg):
             """Check current user."""
             def output_error(message_id, message):
                 """Output error message."""
@@ -93,7 +93,7 @@ def ws_require_user(
                              'Not allowed as active user')
                 return
 
-            return func(hass, connection, msg)
+            return func(opp, connection, msg)
 
         return check_current_user
 

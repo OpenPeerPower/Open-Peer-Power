@@ -2,17 +2,17 @@
 Support for MQTT vacuums.
 
 For more details about this platform, please refer to the documentation at
-https://www.home-assistant.io/components/vacuum.mqtt/
+https://www.open-peer-power.io/components/vacuum.mqtt/
 """
 import logging
 
 import voluptuous as vol
 
-from homeassistant.components.vacuum import DOMAIN
-from homeassistant.components.mqtt import ATTR_DISCOVERY_HASH
-from homeassistant.components.mqtt.discovery import (
+from openpeerpower.components.vacuum import DOMAIN
+from openpeerpower.components.mqtt import ATTR_DISCOVERY_HASH
+from openpeerpower.components.mqtt.discovery import (
     MQTT_DISCOVERY_NEW, clear_discovery_hash)
-from homeassistant.helpers.dispatcher import async_dispatcher_connect
+from openpeerpower.helpers.dispatcher import async_dispatcher_connect
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -59,14 +59,14 @@ PLATFORM_SCHEMA = vol.All(MQTT_VACUUM_SCHEMA.extend({
 }, extra=vol.ALLOW_EXTRA), validate_mqtt_vacuum)
 
 
-async def async_setup_platform(hass, config, async_add_entities,
+async def async_setup_platform(opp, config, async_add_entities,
                                discovery_info=None):
     """Set up MQTT vacuum through configuration.yaml."""
     await _async_setup_entity(config, async_add_entities,
                               discovery_info)
 
 
-async def async_setup_entry(hass, config_entry, async_add_entities):
+async def async_setup_entry(opp, config_entry, async_add_entities):
     """Set up MQTT vacuum dynamically through MQTT discovery."""
     async def async_discover(discovery_payload):
         """Discover and add a MQTT vacuum."""
@@ -77,11 +77,11 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
                                       discovery_hash)
         except Exception:
             if discovery_hash:
-                clear_discovery_hash(hass, discovery_hash)
+                clear_discovery_hash(opp, discovery_hash)
             raise
 
     async_dispatcher_connect(
-        hass, MQTT_DISCOVERY_NEW.format(DOMAIN, 'mqtt'), async_discover)
+        opp, MQTT_DISCOVERY_NEW.format(DOMAIN, 'mqtt'), async_discover)
 
 
 async def _async_setup_entity(config, async_add_entities, config_entry,

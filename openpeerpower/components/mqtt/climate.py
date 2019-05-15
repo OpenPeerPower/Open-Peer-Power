@@ -3,10 +3,10 @@ import logging
 
 import voluptuous as vol
 
-from homeassistant.components import climate, mqtt
-from homeassistant.components.climate import (
+from openpeerpower.components import climate, mqtt
+from openpeerpower.components.climate import (
     PLATFORM_SCHEMA as CLIMATE_PLATFORM_SCHEMA, ClimateDevice)
-from homeassistant.components.climate.const import (
+from openpeerpower.components.climate.const import (
     ATTR_OPERATION_MODE, DEFAULT_MAX_TEMP, DEFAULT_MIN_TEMP, STATE_AUTO,
     STATE_COOL, STATE_DRY, STATE_FAN_ONLY, STATE_HEAT, SUPPORT_AUX_HEAT,
     SUPPORT_AWAY_MODE, SUPPORT_FAN_MODE, SUPPORT_HOLD_MODE,
@@ -14,14 +14,14 @@ from homeassistant.components.climate.const import (
     ATTR_TARGET_TEMP_LOW,
     ATTR_TARGET_TEMP_HIGH, SUPPORT_TARGET_TEMPERATURE_LOW,
     SUPPORT_TARGET_TEMPERATURE_HIGH)
-from homeassistant.components.fan import SPEED_HIGH, SPEED_LOW, SPEED_MEDIUM
-from homeassistant.const import (
+from openpeerpower.components.fan import SPEED_HIGH, SPEED_LOW, SPEED_MEDIUM
+from openpeerpower.const import (
     ATTR_TEMPERATURE, CONF_DEVICE, CONF_NAME, CONF_VALUE_TEMPLATE, STATE_OFF,
     STATE_ON)
-from homeassistant.core import callback
-import homeassistant.helpers.config_validation as cv
-from homeassistant.helpers.dispatcher import async_dispatcher_connect
-from homeassistant.helpers.typing import ConfigType, OpenPeerPowerType
+from openpeerpower.core import callback
+import openpeerpower.helpers.config_validation as cv
+from openpeerpower.helpers.dispatcher import async_dispatcher_connect
+from openpeerpower.helpers.typing import ConfigType, OpenPeerPowerType
 
 from . import (
     ATTR_DISCOVERY_HASH, CONF_QOS, CONF_RETAIN, CONF_UNIQUE_ID,
@@ -170,35 +170,35 @@ PLATFORM_SCHEMA = SCHEMA_BASE.extend({
     mqtt.MQTT_JSON_ATTRS_SCHEMA.schema)
 
 
-async def async_setup_platform(hass: OpenPeerPowerType, config: ConfigType,
+async def async_setup_platform(opp: OpenPeerPowerType, config: ConfigType,
                                async_add_entities, discovery_info=None):
     """Set up MQTT climate device through configuration.yaml."""
-    await _async_setup_entity(hass, config, async_add_entities)
+    await _async_setup_entity(opp, config, async_add_entities)
 
 
-async def async_setup_entry(hass, config_entry, async_add_entities):
+async def async_setup_entry(opp, config_entry, async_add_entities):
     """Set up MQTT climate device dynamically through MQTT discovery."""
     async def async_discover(discovery_payload):
         """Discover and add a MQTT climate device."""
         try:
             discovery_hash = discovery_payload.pop(ATTR_DISCOVERY_HASH)
             config = PLATFORM_SCHEMA(discovery_payload)
-            await _async_setup_entity(hass, config, async_add_entities,
+            await _async_setup_entity(opp, config, async_add_entities,
                                       config_entry, discovery_hash)
         except Exception:
             if discovery_hash:
-                clear_discovery_hash(hass, discovery_hash)
+                clear_discovery_hash(opp, discovery_hash)
             raise
 
     async_dispatcher_connect(
-        hass, MQTT_DISCOVERY_NEW.format(climate.DOMAIN, 'mqtt'),
+        opp, MQTT_DISCOVERY_NEW.format(climate.DOMAIN, 'mqtt'),
         async_discover)
 
 
-async def _async_setup_entity(hass, config, async_add_entities,
+async def _async_setup_entity(opp, config, async_add_entities,
                               config_entry=None, discovery_hash=None):
     """Set up the MQTT climate devices."""
-    async_add_entities([MqttClimate(hass, config, config_entry,
+    async_add_entities([MqttClimate(opp, config, config_entry,
                                     discovery_hash,)])
 
 
@@ -206,13 +206,13 @@ class MqttClimate(MqttAttributes, MqttAvailability, MqttDiscoveryUpdate,
                   MqttEntityDeviceInfo, ClimateDevice):
     """Representation of an MQTT climate device."""
 
-    def __init__(self, hass, config, config_entry, discovery_hash):
+    def __init__(self, opp, config, config_entry, discovery_hash):
         """Initialize the climate device."""
         self._config = config
         self._unique_id = config.get(CONF_UNIQUE_ID)
         self._sub_state = None
 
-        self.hass = hass
+        self.opp = opp
         self._aux = False
         self._away = False
         self._current_fan_mode = None
@@ -224,7 +224,7 @@ class MqttClimate(MqttAttributes, MqttAvailability, MqttDiscoveryUpdate,
         self._target_temp_high = None
         self._target_temp_low = None
         self._topic = None
-        self._unit_of_measurement = hass.config.units.temperature_unit
+        self._unit_of_measurement = opp.config.units.temperature_unit
         self._value_templates = None
 
         self._setup_from_config(config)
@@ -237,9 +237,9 @@ class MqttClimate(MqttAttributes, MqttAvailability, MqttDiscoveryUpdate,
                                      self.discovery_update)
         MqttEntityDeviceInfo.__init__(self, device_config, config_entry)
 
-    async def async_added_to_hass(self):
-        """Handle being added to home assistant."""
-        await super().async_added_to_hass()
+    async def async_added_to_opp(self):
+        """Handle being added to open peer power."""
+        await super().async_added_to_opp()
         await self._subscribe_topics()
 
     async def discovery_update(self, discovery_payload):
@@ -287,14 +287,14 @@ class MqttClimate(MqttAttributes, MqttAvailability, MqttDiscoveryUpdate,
             value_templates[key] = lambda value: value
         if CONF_VALUE_TEMPLATE in config:
             value_template = config.get(CONF_VALUE_TEMPLATE)
-            value_template.hass = self.hass
+            value_template.opp = self.opp
             value_templates = {
                 key: value_template.async_render_with_possible_json_value
                 for key in TEMPLATE_KEYS}
         for key in TEMPLATE_KEYS & config.keys():
             tpl = config[key]
             value_templates[key] = tpl.async_render_with_possible_json_value
-            tpl.hass = self.hass
+            tpl.opp = self.opp
         self._value_templates = value_templates
 
     async def _subscribe_topics(self):
@@ -449,15 +449,15 @@ class MqttClimate(MqttAttributes, MqttAvailability, MqttDiscoveryUpdate,
                          handle_hold_mode_received)
 
         self._sub_state = await subscription.async_subscribe_topics(
-            self.hass, self._sub_state,
+            self.opp, self._sub_state,
             topics)
 
-    async def async_will_remove_from_hass(self):
+    async def async_will_remove_from_opp(self):
         """Unsubscribe when removed."""
         self._sub_state = await subscription.async_unsubscribe_topics(
-            self.hass, self._sub_state)
-        await MqttAttributes.async_will_remove_from_hass(self)
-        await MqttAvailability.async_will_remove_from_hass(self)
+            self.opp, self._sub_state)
+        await MqttAttributes.async_will_remove_from_opp(self)
+        await MqttAvailability.async_will_remove_from_opp(self)
 
     @property
     def should_poll(self):
@@ -542,7 +542,7 @@ class MqttClimate(MqttAttributes, MqttAvailability, MqttDiscoveryUpdate,
     def _publish(self, topic, payload):
         if self._topic[topic] is not None:
             mqtt.async_publish(
-                self.hass, self._topic[topic], payload,
+                self.opp, self._topic[topic], payload,
                 self._config[CONF_QOS], self._config[CONF_RETAIN])
 
     def _set_temperature(self, temp, cmnd_topic, state_topic, attr):

@@ -1,7 +1,7 @@
 {
   "domain": "camera",
   "name": "Camera",
-  "documentation": "https://www.home-assistant.io/components/camera",
+  "documentation": "https://www.open-peer-power.io/components/camera",
   "requirements": [],
   "dependencies": [
     "http"

@@ -1,17 +1,17 @@
 """Support for MySensors lights."""
-from homeassistant.components import mysensors
-from homeassistant.components.light import (
+from openpeerpower.components import mysensors
+from openpeerpower.components.light import (
     ATTR_BRIGHTNESS, ATTR_HS_COLOR, ATTR_WHITE_VALUE, DOMAIN,
     SUPPORT_BRIGHTNESS, SUPPORT_COLOR, SUPPORT_WHITE_VALUE, Light)
-from homeassistant.const import STATE_OFF, STATE_ON
-from homeassistant.util.color import rgb_hex_to_rgb_list
-import homeassistant.util.color as color_util
+from openpeerpower.const import STATE_OFF, STATE_ON
+from openpeerpower.util.color import rgb_hex_to_rgb_list
+import openpeerpower.util.color as color_util
 
 SUPPORT_MYSENSORS_RGBW = SUPPORT_COLOR | SUPPORT_WHITE_VALUE
 
 
 async def async_setup_platform(
-        hass, config, async_add_entities, discovery_info=None):
+        opp, config, async_add_entities, discovery_info=None):
     """Set up the mysensors platform for lights."""
     device_class_map = {
         'S_DIMMER': MySensorsLightDimmer,
@@ -19,7 +19,7 @@ async def async_setup_platform(
         'S_RGBW_LIGHT': MySensorsLightRGBW,
     }
     mysensors.setup_mysensors_platform(
-        hass, DOMAIN, discovery_info, device_class_map,
+        opp, DOMAIN, discovery_info, device_class_map,
         async_add_entities=async_add_entities)
 
 

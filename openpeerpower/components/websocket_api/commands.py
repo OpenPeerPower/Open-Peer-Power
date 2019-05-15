@@ -1,28 +1,28 @@
 """Commands part of Websocket API."""
 import voluptuous as vol
 
-from homeassistant.auth.permissions.const import POLICY_READ
-from homeassistant.const import (
+from openpeerpower.auth.permissions.const import POLICY_READ
+from openpeerpower.const import (
     MATCH_ALL, EVENT_TIME_CHANGED, EVENT_STATE_CHANGED)
-from homeassistant.core import callback, DOMAIN as HASS_DOMAIN
-from homeassistant.exceptions import Unauthorized, ServiceNotFound, \
+from openpeerpower.core import callback, DOMAIN as HASS_DOMAIN
+from openpeerpower.exceptions import Unauthorized, ServiceNotFound, \
     OpenPeerPowerError
-from homeassistant.helpers import config_validation as cv
-from homeassistant.helpers.service import async_get_all_descriptions
+from openpeerpower.helpers import config_validation as cv
+from openpeerpower.helpers.service import async_get_all_descriptions
 
 from . import const, decorators, messages
 
 
 @callback
-def async_register_commands(hass, async_reg):
+def async_register_commands(opp, async_reg):
     """Register commands."""
-    async_reg(hass, handle_subscribe_events)
-    async_reg(hass, handle_unsubscribe_events)
-    async_reg(hass, handle_call_service)
-    async_reg(hass, handle_get_states)
-    async_reg(hass, handle_get_services)
-    async_reg(hass, handle_get_config)
-    async_reg(hass, handle_ping)
+    async_reg(opp, handle_subscribe_events)
+    async_reg(opp, handle_unsubscribe_events)
+    async_reg(opp, handle_call_service)
+    async_reg(opp, handle_get_states)
+    async_reg(opp, handle_get_services)
+    async_reg(opp, handle_get_config)
+    async_reg(opp, handle_ping)
 
 
 def pong_message(iden):
@@ -38,7 +38,7 @@ def pong_message(iden):
     vol.Required('type'): 'subscribe_events',
     vol.Optional('event_type', default=MATCH_ALL): str,
 })
-def handle_subscribe_events(hass, connection, msg):
+def handle_subscribe_events(opp, connection, msg):
     """Handle subscribe events command.
 
     Async friendly.
@@ -72,7 +72,7 @@ def handle_subscribe_events(hass, connection, msg):
                 msg['id'], event.as_dict()
             ))
 
-    connection.subscriptions[msg['id']] = hass.bus.async_listen(
+    connection.subscriptions[msg['id']] = opp.bus.async_listen(
         event_type, forward_events)
 
     connection.send_message(messages.result_message(msg['id']))
@@ -83,7 +83,7 @@ def handle_subscribe_events(hass, connection, msg):
     vol.Required('type'): 'unsubscribe_events',
     vol.Required('subscription'): cv.positive_int,
 })
-def handle_unsubscribe_events(hass, connection, msg):
+def handle_unsubscribe_events(opp, connection, msg):
     """Handle unsubscribe events command.
 
     Async friendly.
@@ -105,7 +105,7 @@ def handle_unsubscribe_events(hass, connection, msg):
     vol.Required('service'): str,
     vol.Optional('service_data'): dict
 })
-async def handle_call_service(hass, connection, msg):
+async def handle_call_service(opp, connection, msg):
     """Handle call service command.
 
     Async friendly.
@@ -116,7 +116,7 @@ async def handle_call_service(hass, connection, msg):
         blocking = False
 
     try:
-        await hass.services.async_call(
+        await opp.services.async_call(
             msg['domain'], msg['service'], msg.get('service_data'), blocking,
             connection.context(msg))
         connection.send_message(messages.result_message(msg['id']))
@@ -137,17 +137,17 @@ async def handle_call_service(hass, connection, msg):
 @decorators.websocket_command({
     vol.Required('type'): 'get_states',
 })
-def handle_get_states(hass, connection, msg):
+def handle_get_states(opp, connection, msg):
     """Handle get states command.
 
     Async friendly.
     """
     if connection.user.permissions.access_all_entities('read'):
-        states = hass.states.async_all()
+        states = opp.states.async_all()
     else:
         entity_perm = connection.user.permissions.check_entity
         states = [
-            state for state in hass.states.async_all()
+            state for state in opp.states.async_all()
             if entity_perm(state.entity_id, 'read')
         ]
 
@@ -159,12 +159,12 @@ def handle_get_states(hass, connection, msg):
 @decorators.websocket_command({
     vol.Required('type'): 'get_services',
 })
-async def handle_get_services(hass, connection, msg):
+async def handle_get_services(opp, connection, msg):
     """Handle get services command.
 
     Async friendly.
     """
-    descriptions = await async_get_all_descriptions(hass)
+    descriptions = await async_get_all_descriptions(opp)
     connection.send_message(
         messages.result_message(msg['id'], descriptions))
 
@@ -173,20 +173,20 @@ async def handle_get_services(hass, connection, msg):
 @decorators.websocket_command({
     vol.Required('type'): 'get_config',
 })
-def handle_get_config(hass, connection, msg):
+def handle_get_config(opp, connection, msg):
     """Handle get config command.
 
     Async friendly.
     """
     connection.send_message(messages.result_message(
-        msg['id'], hass.config.as_dict()))
+        msg['id'], opp.config.as_dict()))
 
 
 @callback
 @decorators.websocket_command({
     vol.Required('type'): 'ping',
 })
-def handle_ping(hass, connection, msg):
+def handle_ping(opp, connection, msg):
     """Handle ping command.
 
     Async friendly.

@@ -1,7 +1,7 @@
 """Support for MySensors sensors."""
-from homeassistant.components import mysensors
-from homeassistant.components.sensor import DOMAIN
-from homeassistant.const import (TEMP_CELSIUS, TEMP_FAHRENHEIT, POWER_WATT,
+from openpeerpower.components import mysensors
+from openpeerpower.components.sensor import DOMAIN
+from openpeerpower.const import (TEMP_CELSIUS, TEMP_FAHRENHEIT, POWER_WATT,
                                  ENERGY_KILO_WATT_HOUR)
 
 SENSORS = {
@@ -38,10 +38,10 @@ SENSORS = {
 
 
 async def async_setup_platform(
-        hass, config, async_add_entities, discovery_info=None):
+        opp, config, async_add_entities, discovery_info=None):
     """Set up the MySensors platform for sensors."""
     mysensors.setup_mysensors_platform(
-        hass, DOMAIN, discovery_info, MySensorsSensor,
+        opp, DOMAIN, discovery_info, MySensorsSensor,
         async_add_entities=async_add_entities)
 
 

@@ -1,15 +1,15 @@
 """Support for tracking MySensors devices."""
-from homeassistant.components import mysensors
-from homeassistant.components.device_tracker import DOMAIN
-from homeassistant.helpers.dispatcher import async_dispatcher_connect
-from homeassistant.util import slugify
+from openpeerpower.components import mysensors
+from openpeerpower.components.device_tracker import DOMAIN
+from openpeerpower.helpers.dispatcher import async_dispatcher_connect
+from openpeerpower.util import slugify
 
 
-async def async_setup_scanner(hass, config, async_see, discovery_info=None):
+async def async_setup_scanner(opp, config, async_see, discovery_info=None):
     """Set up the MySensors device scanner."""
     new_devices = mysensors.setup_mysensors_platform(
-        hass, DOMAIN, discovery_info, MySensorsDeviceScanner,
-        device_args=(hass, async_see))
+        opp, DOMAIN, discovery_info, MySensorsDeviceScanner,
+        device_args=(opp, async_see))
     if not new_devices:
         return False
 
@@ -19,10 +19,10 @@ async def async_setup_scanner(hass, config, async_see, discovery_info=None):
             gateway_id, device.node_id, device.child_id,
             device.value_type)
         async_dispatcher_connect(
-            hass, mysensors.const.CHILD_CALLBACK.format(*dev_id),
+            opp, mysensors.const.CHILD_CALLBACK.format(*dev_id),
             device.async_update_callback)
         async_dispatcher_connect(
-            hass,
+            opp,
             mysensors.const.NODE_CALLBACK.format(gateway_id, device.node_id),
             device.async_update_callback)
 
@@ -32,11 +32,11 @@ async def async_setup_scanner(hass, config, async_see, discovery_info=None):
 class MySensorsDeviceScanner(mysensors.device.MySensorsDevice):
     """Represent a MySensors scanner."""
 
-    def __init__(self, hass, async_see, *args):
+    def __init__(self, opp, async_see, *args):
         """Set up instance."""
         super().__init__(*args)
         self.async_see = async_see
-        self.hass = hass
+        self.opp = opp
 
     async def _async_update_callback(self):
         """Update the device."""

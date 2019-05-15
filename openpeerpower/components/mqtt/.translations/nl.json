@@ -18,11 +18,11 @@
                 "description": "MQTT",
                 "title": "MQTT"
             },
-            "hassio_confirm": {
+            "oppio_confirm": {
                 "data": {
                     "discovery": "Detectie inschakelen"
                 },
-                "description": "Wilt u Home Assistant configureren om verbinding te maken met de MQTT-broker die wordt aangeboden door de hass.io add-on {addon} ?",
+                "description": "Wilt u Home Assistant configureren om verbinding te maken met de MQTT-broker die wordt aangeboden door de opp.io add-on {addon} ?",
                 "title": "MQTTT Broker via Hass.io add-on"
             }
         },

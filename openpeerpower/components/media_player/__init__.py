@@ -14,22 +14,22 @@ from aiohttp.hdrs import CACHE_CONTROL, CONTENT_TYPE
 import async_timeout
 import voluptuous as vol
 
-from homeassistant.components import websocket_api
-from homeassistant.components.http import KEY_AUTHENTICATED, OpenPeerPowerView
-from homeassistant.const import (
+from openpeerpower.components import websocket_api
+from openpeerpower.components.http import KEY_AUTHENTICATED, OpenPeerPowerView
+from openpeerpower.const import (
     ATTR_ENTITY_ID, SERVICE_MEDIA_NEXT_TRACK, SERVICE_MEDIA_PAUSE,
     SERVICE_MEDIA_PLAY, SERVICE_MEDIA_PLAY_PAUSE, SERVICE_MEDIA_PREVIOUS_TRACK,
     SERVICE_MEDIA_SEEK, SERVICE_MEDIA_STOP, SERVICE_SHUFFLE_SET,
     SERVICE_TOGGLE, SERVICE_TURN_OFF, SERVICE_TURN_ON, SERVICE_VOLUME_DOWN,
     SERVICE_VOLUME_MUTE, SERVICE_VOLUME_SET, SERVICE_VOLUME_UP, STATE_IDLE,
     STATE_OFF, STATE_PLAYING)
-from homeassistant.helpers.aiohttp_client import async_get_clientsession
-import homeassistant.helpers.config_validation as cv
-from homeassistant.helpers.config_validation import (  # noqa
+from openpeerpower.helpers.aiohttp_client import async_get_clientsession
+import openpeerpower.helpers.config_validation as cv
+from openpeerpower.helpers.config_validation import (  # noqa
     PLATFORM_SCHEMA, PLATFORM_SCHEMA_BASE)
-from homeassistant.helpers.entity import Entity
-from homeassistant.helpers.entity_component import EntityComponent
-from homeassistant.loader import bind_hass
+from openpeerpower.helpers.entity import Entity
+from openpeerpower.helpers.entity_component import EntityComponent
+from openpeerpower.loader import bind_opp
 
 from .const import (
     ATTR_APP_ID, ATTR_APP_NAME, ATTR_INPUT_SOURCE, ATTR_INPUT_SOURCE_LIST,
@@ -141,15 +141,15 @@ ATTR_TO_PROPERTY = [
 ]
 
 
-@bind_hass
-def is_on(hass, entity_id=None):
+@bind_opp
+def is_on(opp, entity_id=None):
     """
     Return true if specified media player entity_id is on.
 
     Check all media player if no entity_id specified.
     """
-    entity_ids = [entity_id] if entity_id else hass.states.entity_ids(DOMAIN)
-    return any(not hass.states.is_state(entity_id, STATE_OFF)
+    entity_ids = [entity_id] if entity_id else opp.states.entity_ids(DOMAIN)
+    return any(not opp.states.is_state(entity_id, STATE_OFF)
                for entity_id in entity_ids)
 
 
@@ -161,15 +161,15 @@ SCHEMA_WEBSOCKET_GET_THUMBNAIL = \
     })
 
 
-async def async_setup(hass, config):
+async def async_setup(opp, config):
     """Track states and offer events for media_players."""
-    component = hass.data[DOMAIN] = EntityComponent(
-        logging.getLogger(__name__), DOMAIN, hass, SCAN_INTERVAL)
+    component = opp.data[DOMAIN] = EntityComponent(
+        logging.getLogger(__name__), DOMAIN, opp, SCAN_INTERVAL)
 
-    hass.components.websocket_api.async_register_command(
+    opp.components.websocket_api.async_register_command(
         WS_TYPE_MEDIA_PLAYER_THUMBNAIL, websocket_handle_thumbnail,
         SCHEMA_WEBSOCKET_GET_THUMBNAIL)
-    hass.http.register_view(MediaPlayerImageView(component))
+    opp.http.register_view(MediaPlayerImageView(component))
 
     await component.async_setup(config)
 
@@ -263,14 +263,14 @@ async def async_setup(hass, config):
     return True
 
 
-async def async_setup_entry(hass, entry):
+async def async_setup_entry(opp, entry):
     """Set up a config entry."""
-    return await hass.data[DOMAIN].async_setup_entry(entry)
+    return await opp.data[DOMAIN].async_setup_entry(entry)
 
 
-async def async_unload_entry(hass, entry):
+async def async_unload_entry(opp, entry):
     """Unload a config entry."""
-    return await hass.data[DOMAIN].async_unload_entry(entry)
+    return await opp.data[DOMAIN].async_unload_entry(entry)
 
 
 class MediaPlayerDevice(Entity):
@@ -326,7 +326,7 @@ class MediaPlayerDevice(Entity):
     def media_position_updated_at(self):
         """When was the position of the current playing media valid.
 
-        Returns value from homeassistant.util.dt.utcnow().
+        Returns value from openpeerpower.util.dt.utcnow().
         """
         return None
 
@@ -355,7 +355,7 @@ class MediaPlayerDevice(Entity):
         if url is None:
             return None, None
 
-        return await _async_fetch_image(self.hass, url)
+        return await _async_fetch_image(self.opp, url)
 
     @property
     def media_title(self):
@@ -456,7 +456,7 @@ class MediaPlayerDevice(Entity):
 
         This method must be run in the event loop and returns a coroutine.
         """
-        return self.hass.async_add_job(self.turn_on)
+        return self.opp.async_add_job(self.turn_on)
 
     def turn_off(self):
         """Turn the media player off."""
@@ -467,7 +467,7 @@ class MediaPlayerDevice(Entity):
 
         This method must be run in the event loop and returns a coroutine.
         """
-        return self.hass.async_add_job(self.turn_off)
+        return self.opp.async_add_job(self.turn_off)
 
     def mute_volume(self, mute):
         """Mute the volume."""
@@ -478,7 +478,7 @@ class MediaPlayerDevice(Entity):
 
         This method must be run in the event loop and returns a coroutine.
         """
-        return self.hass.async_add_job(self.mute_volume, mute)
+        return self.opp.async_add_job(self.mute_volume, mute)
 
     def set_volume_level(self, volume):
         """Set volume level, range 0..1."""
@@ -489,7 +489,7 @@ class MediaPlayerDevice(Entity):
 
         This method must be run in the event loop and returns a coroutine.
         """
-        return self.hass.async_add_job(self.set_volume_level, volume)
+        return self.opp.async_add_job(self.set_volume_level, volume)
 
     def media_play(self):
         """Send play command."""
@@ -500,7 +500,7 @@ class MediaPlayerDevice(Entity):
 
         This method must be run in the event loop and returns a coroutine.
         """
-        return self.hass.async_add_job(self.media_play)
+        return self.opp.async_add_job(self.media_play)
 
     def media_pause(self):
         """Send pause command."""
@@ -511,7 +511,7 @@ class MediaPlayerDevice(Entity):
 
         This method must be run in the event loop and returns a coroutine.
         """
-        return self.hass.async_add_job(self.media_pause)
+        return self.opp.async_add_job(self.media_pause)
 
     def media_stop(self):
         """Send stop command."""
@@ -522,7 +522,7 @@ class MediaPlayerDevice(Entity):
 
         This method must be run in the event loop and returns a coroutine.
         """
-        return self.hass.async_add_job(self.media_stop)
+        return self.opp.async_add_job(self.media_stop)
 
     def media_previous_track(self):
         """Send previous track command."""
@@ -533,7 +533,7 @@ class MediaPlayerDevice(Entity):
 
         This method must be run in the event loop and returns a coroutine.
         """
-        return self.hass.async_add_job(self.media_previous_track)
+        return self.opp.async_add_job(self.media_previous_track)
 
     def media_next_track(self):
         """Send next track command."""
@@ -544,7 +544,7 @@ class MediaPlayerDevice(Entity):
 
         This method must be run in the event loop and returns a coroutine.
         """
-        return self.hass.async_add_job(self.media_next_track)
+        return self.opp.async_add_job(self.media_next_track)
 
     def media_seek(self, position):
         """Send seek command."""
@@ -555,7 +555,7 @@ class MediaPlayerDevice(Entity):
 
         This method must be run in the event loop and returns a coroutine.
         """
-        return self.hass.async_add_job(self.media_seek, position)
+        return self.opp.async_add_job(self.media_seek, position)
 
     def play_media(self, media_type, media_id, **kwargs):
         """Play a piece of media."""
@@ -566,7 +566,7 @@ class MediaPlayerDevice(Entity):
 
         This method must be run in the event loop and returns a coroutine.
         """
-        return self.hass.async_add_job(
+        return self.opp.async_add_job(
             ft.partial(self.play_media, media_type, media_id, **kwargs))
 
     def select_source(self, source):
@@ -578,7 +578,7 @@ class MediaPlayerDevice(Entity):
 
         This method must be run in the event loop and returns a coroutine.
         """
-        return self.hass.async_add_job(self.select_source, source)
+        return self.opp.async_add_job(self.select_source, source)
 
     def select_sound_mode(self, sound_mode):
         """Select sound mode."""
@@ -589,7 +589,7 @@ class MediaPlayerDevice(Entity):
 
         This method must be run in the event loop and returns a coroutine.
         """
-        return self.hass.async_add_job(self.select_sound_mode, sound_mode)
+        return self.opp.async_add_job(self.select_sound_mode, sound_mode)
 
     def clear_playlist(self):
         """Clear players playlist."""
@@ -600,7 +600,7 @@ class MediaPlayerDevice(Entity):
 
         This method must be run in the event loop and returns a coroutine.
         """
-        return self.hass.async_add_job(self.clear_playlist)
+        return self.opp.async_add_job(self.clear_playlist)
 
     def set_shuffle(self, shuffle):
         """Enable/disable shuffle mode."""
@@ -611,7 +611,7 @@ class MediaPlayerDevice(Entity):
 
         This method must be run in the event loop and returns a coroutine.
         """
-        return self.hass.async_add_job(self.set_shuffle, shuffle)
+        return self.opp.async_add_job(self.set_shuffle, shuffle)
 
     # No need to overwrite these.
     @property
@@ -686,7 +686,7 @@ class MediaPlayerDevice(Entity):
         """
         if hasattr(self, 'toggle'):
             # pylint: disable=no-member
-            return self.hass.async_add_job(self.toggle)
+            return self.opp.async_add_job(self.toggle)
 
         if self.state in [STATE_OFF, STATE_IDLE]:
             return self.async_turn_on()
@@ -699,7 +699,7 @@ class MediaPlayerDevice(Entity):
         """
         if hasattr(self, 'volume_up'):
             # pylint: disable=no-member
-            await self.hass.async_add_job(self.volume_up)
+            await self.opp.async_add_job(self.volume_up)
             return
 
         if self.volume_level < 1 \
@@ -713,7 +713,7 @@ class MediaPlayerDevice(Entity):
         """
         if hasattr(self, 'volume_down'):
             # pylint: disable=no-member
-            await self.hass.async_add_job(self.volume_down)
+            await self.opp.async_add_job(self.volume_down)
             return
 
         if self.volume_level > 0 \
@@ -728,7 +728,7 @@ class MediaPlayerDevice(Entity):
         """
         if hasattr(self, 'media_play_pause'):
             # pylint: disable=no-member
-            return self.hass.async_add_job(self.media_play_pause)
+            return self.opp.async_add_job(self.media_play_pause)
 
         if self.state == STATE_PLAYING:
             return self.async_media_pause()
@@ -765,7 +765,7 @@ class MediaPlayerDevice(Entity):
         return state_attr
 
 
-async def _async_fetch_image(hass, url):
+async def _async_fetch_image(opp, url):
     """Fetch image.
 
     Images are cached in memory (the images are typically 10-100kB in size).
@@ -774,19 +774,19 @@ async def _async_fetch_image(hass, url):
     cache_maxsize = ENTITY_IMAGE_CACHE[CACHE_MAXSIZE]
 
     if urlparse(url).hostname is None:
-        url = hass.config.api.base_url + url
+        url = opp.config.api.base_url + url
 
     if url not in cache_images:
-        cache_images[url] = {CACHE_LOCK: asyncio.Lock(loop=hass.loop)}
+        cache_images[url] = {CACHE_LOCK: asyncio.Lock(loop=opp.loop)}
 
     async with cache_images[url][CACHE_LOCK]:
         if CACHE_CONTENT in cache_images[url]:
             return cache_images[url][CACHE_CONTENT]
 
         content, content_type = (None, None)
-        websession = async_get_clientsession(hass)
+        websession = async_get_clientsession(opp)
         try:
-            with async_timeout.timeout(10, loop=hass.loop):
+            with async_timeout.timeout(10, loop=opp.loop):
                 response = await websession.get(url)
 
                 if response.status == 200:
@@ -848,12 +848,12 @@ class MediaPlayerImageView(OpenPeerPowerView):
 
 
 @websocket_api.async_response
-async def websocket_handle_thumbnail(hass, connection, msg):
+async def websocket_handle_thumbnail(opp, connection, msg):
     """Handle get media player cover command.
 
     Async friendly.
     """
-    component = hass.data[DOMAIN]
+    component = opp.data[DOMAIN]
     player = component.get_entity(msg['entity_id'])
 
     if player is None:

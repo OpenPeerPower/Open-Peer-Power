@@ -19,17 +19,17 @@ class CameraEntityPreferences:
 
     @property
     def preload_stream(self):
-        """Return if stream is loaded on hass start."""
+        """Return if stream is loaded on opp start."""
         return self._prefs.get(PREF_PRELOAD_STREAM, False)
 
 
 class CameraPreferences:
     """Handle camera preferences."""
 
-    def __init__(self, hass):
+    def __init__(self, opp):
         """Initialize camera prefs."""
-        self._hass = hass
-        self._store = hass.helpers.storage.Store(STORAGE_VERSION, STORAGE_KEY)
+        self._opp = opp
+        self._store = opp.helpers.storage.Store(STORAGE_VERSION, STORAGE_KEY)
         self._prefs = None
 
     async def async_initialize(self):

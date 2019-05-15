@@ -2,12 +2,12 @@
 import voluptuous as vol
 from voluptuous.humanize import humanize_error
 
-from homeassistant.auth.providers import legacy_api_password
-from homeassistant.components.http.ban import (
+from openpeerpower.auth.providers import legacy_api_password
+from openpeerpower.components.http.ban import (
     process_wrong_login,
     process_success_login,
 )
-from homeassistant.const import __version__
+from openpeerpower.const import __version__
 
 from .connection import ActiveConnection
 from .error import Disconnect
@@ -51,9 +51,9 @@ def auth_invalid_message(message):
 class AuthPhase:
     """Connection that requires client to authenticate first."""
 
-    def __init__(self, logger, hass, send_message, request):
+    def __init__(self, logger, opp, send_message, request):
         """Initialize the authentiated connection."""
-        self._hass = hass
+        self._opp = opp
         self._send_message = send_message
         self._logger = logger
         self._request = request
@@ -74,21 +74,21 @@ class AuthPhase:
         if 'access_token' in msg:
             self._logger.debug("Received access_token")
             refresh_token = \
-                await self._hass.auth.async_validate_access_token(
+                await self._opp.auth.async_validate_access_token(
                     msg['access_token'])
             if refresh_token is not None:
                 return await self._async_finish_auth(
                     refresh_token.user, refresh_token)
 
-        elif self._hass.auth.support_legacy and 'api_password' in msg:
+        elif self._opp.auth.support_legacy and 'api_password' in msg:
             self._logger.info(
                 "Received api_password, it is going to deprecate, please use"
                 " access_token instead. For instructions, see https://"
-                "developers.home-assistant.io/docs/en/external_api_websocket"
+                "developers.open-peer-power.io/docs/en/external_api_websocket"
                 ".html#authentication-phase"
             )
             user = await legacy_api_password.async_validate_password(
-                self._hass, msg['api_password'])
+                self._opp, msg['api_password'])
             if user is not None:
                 return await self._async_finish_auth(user, None)
 
@@ -104,4 +104,4 @@ class AuthPhase:
         await process_success_login(self._request)
         self._send_message(auth_ok_message())
         return ActiveConnection(
-            self._logger, self._hass, self._send_message, user, refresh_token)
+            self._logger, self._opp, self._send_message, user, refresh_token)

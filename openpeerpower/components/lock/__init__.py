@@ -5,16 +5,16 @@ import logging
 
 import voluptuous as vol
 
-from homeassistant.loader import bind_hass
-from homeassistant.helpers.entity_component import EntityComponent
-from homeassistant.helpers.entity import Entity
-from homeassistant.helpers.config_validation import (  # noqa
+from openpeerpower.loader import bind_opp
+from openpeerpower.helpers.entity_component import EntityComponent
+from openpeerpower.helpers.entity import Entity
+from openpeerpower.helpers.config_validation import (  # noqa
     PLATFORM_SCHEMA, PLATFORM_SCHEMA_BASE)
-import homeassistant.helpers.config_validation as cv
-from homeassistant.const import (
+import openpeerpower.helpers.config_validation as cv
+from openpeerpower.const import (
     ATTR_CODE, ATTR_CODE_FORMAT, ATTR_ENTITY_ID, STATE_LOCKED, STATE_UNLOCKED,
     SERVICE_LOCK, SERVICE_UNLOCK, SERVICE_OPEN)
-from homeassistant.components import group
+from openpeerpower.components import group
 
 ATTR_CHANGED_BY = 'changed_by'
 
@@ -44,17 +44,17 @@ PROP_TO_ATTR = {
 }
 
 
-@bind_hass
-def is_locked(hass, entity_id=None):
+@bind_opp
+def is_locked(opp, entity_id=None):
     """Return if the lock is locked based on the statemachine."""
     entity_id = entity_id or ENTITY_ID_ALL_LOCKS
-    return hass.states.is_state(entity_id, STATE_LOCKED)
+    return opp.states.is_state(entity_id, STATE_LOCKED)
 
 
-async def async_setup(hass, config):
+async def async_setup(opp, config):
     """Track states and offer events for locks."""
-    component = hass.data[DOMAIN] = EntityComponent(
-        _LOGGER, DOMAIN, hass, SCAN_INTERVAL, GROUP_NAME_ALL_LOCKS)
+    component = opp.data[DOMAIN] = EntityComponent(
+        _LOGGER, DOMAIN, opp, SCAN_INTERVAL, GROUP_NAME_ALL_LOCKS)
 
     await component.async_setup(config)
 
@@ -74,14 +74,14 @@ async def async_setup(hass, config):
     return True
 
 
-async def async_setup_entry(hass, entry):
+async def async_setup_entry(opp, entry):
     """Set up a config entry."""
-    return await hass.data[DOMAIN].async_setup_entry(entry)
+    return await opp.data[DOMAIN].async_setup_entry(entry)
 
 
-async def async_unload_entry(hass, entry):
+async def async_unload_entry(opp, entry):
     """Unload a config entry."""
-    return await hass.data[DOMAIN].async_unload_entry(entry)
+    return await opp.data[DOMAIN].async_unload_entry(entry)
 
 
 class LockDevice(Entity):
@@ -111,7 +111,7 @@ class LockDevice(Entity):
 
         This method must be run in the event loop and returns a coroutine.
         """
-        return self.hass.async_add_job(ft.partial(self.lock, **kwargs))
+        return self.opp.async_add_job(ft.partial(self.lock, **kwargs))
 
     def unlock(self, **kwargs):
         """Unlock the lock."""
@@ -122,7 +122,7 @@ class LockDevice(Entity):
 
         This method must be run in the event loop and returns a coroutine.
         """
-        return self.hass.async_add_job(ft.partial(self.unlock, **kwargs))
+        return self.opp.async_add_job(ft.partial(self.unlock, **kwargs))
 
     def open(self, **kwargs):
         """Open the door latch."""
@@ -133,7 +133,7 @@ class LockDevice(Entity):
 
         This method must be run in the event loop and returns a coroutine.
         """
-        return self.hass.async_add_job(ft.partial(self.open, **kwargs))
+        return self.opp.async_add_job(ft.partial(self.open, **kwargs))
 
     @property
     def state_attributes(self):

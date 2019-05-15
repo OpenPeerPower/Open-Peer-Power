@@ -3,15 +3,15 @@ import logging
 
 import voluptuous as vol
 
-from homeassistant.components import switch
-from homeassistant.const import (
+from openpeerpower.components import switch
+from openpeerpower.const import (
     ATTR_ENTITY_ID, CONF_ENTITY_ID, CONF_NAME, STATE_ON, STATE_UNAVAILABLE)
-from homeassistant.core import State, callback
-import homeassistant.helpers.config_validation as cv
-from homeassistant.helpers.event import async_track_state_change
-from homeassistant.helpers.typing import ConfigType, OpenPeerPowerType
+from openpeerpower.core import State, callback
+import openpeerpower.helpers.config_validation as cv
+from openpeerpower.helpers.event import async_track_state_change
+from openpeerpower.helpers.typing import ConfigType, OpenPeerPowerType
 
-from homeassistant.components.light import PLATFORM_SCHEMA, Light
+from openpeerpower.components.light import PLATFORM_SCHEMA, Light
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -23,7 +23,7 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
 })
 
 
-async def async_setup_platform(hass: OpenPeerPowerType, config: ConfigType,
+async def async_setup_platform(opp: OpenPeerPowerType, config: ConfigType,
                                async_add_entities,
                                discovery_info=None) -> None:
     """Initialize Light Switch platform."""
@@ -65,18 +65,18 @@ class LightSwitch(Light):
     async def async_turn_on(self, **kwargs):
         """Forward the turn_on command to the switch in this light switch."""
         data = {ATTR_ENTITY_ID: self._switch_entity_id}
-        await self.hass.services.async_call(
+        await self.opp.services.async_call(
             switch.DOMAIN, switch.SERVICE_TURN_ON, data, blocking=True)
 
     async def async_turn_off(self, **kwargs):
         """Forward the turn_off command to the switch in this light switch."""
         data = {ATTR_ENTITY_ID: self._switch_entity_id}
-        await self.hass.services.async_call(
+        await self.opp.services.async_call(
             switch.DOMAIN, switch.SERVICE_TURN_OFF, data, blocking=True)
 
     async def async_update(self):
         """Query the switch in this light switch and determine the state."""
-        switch_state = self.hass.states.get(self._switch_entity_id)
+        switch_state = self.opp.states.get(self._switch_entity_id)
 
         if switch_state is None:
             self._available = False
@@ -85,7 +85,7 @@ class LightSwitch(Light):
         self._is_on = switch_state.state == STATE_ON
         self._available = switch_state.state != STATE_UNAVAILABLE
 
-    async def async_added_to_hass(self) -> None:
+    async def async_added_to_opp(self) -> None:
         """Register callbacks."""
         @callback
         def async_state_changed_listener(entity_id: str, old_state: State,
@@ -94,9 +94,9 @@ class LightSwitch(Light):
             self.async_schedule_update_ha_state(True)
 
         self._async_unsub_state_changed = async_track_state_change(
-            self.hass, self._switch_entity_id, async_state_changed_listener)
+            self.opp, self._switch_entity_id, async_state_changed_listener)
 
-    async def async_will_remove_from_hass(self):
+    async def async_will_remove_from_opp(self):
         """Handle removal from Home Assistant."""
         if self._async_unsub_state_changed is not None:
             self._async_unsub_state_changed()

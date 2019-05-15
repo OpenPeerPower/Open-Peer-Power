@@ -37,7 +37,7 @@ openpeerpower/auth/permissions/types.py
 openpeerpower/auth/permissions/util.py
 openpeerpower/auth/providers/__init__.py
 openpeerpower/auth/providers/command_line.py
-openpeerpower/auth/providers/homeassistant.py
+openpeerpower/auth/providers/openpeerpower.py
 openpeerpower/auth/providers/insecure_example.py
 openpeerpower/auth/providers/legacy_api_password.py
 openpeerpower/auth/providers/trusted_networks.py
@@ -47,7 +47,7 @@ openpeerpower/components/time_date.py
 openpeerpower/components/automation/__init__.py
 openpeerpower/components/automation/event.py
 openpeerpower/components/automation/geo_location.py
-openpeerpower/components/automation/homeassistant.py
+openpeerpower/components/automation/openpeerpower.py
 openpeerpower/components/automation/litejet.py
 openpeerpower/components/automation/mqtt.py
 openpeerpower/components/automation/numeric_state.py
@@ -61,7 +61,7 @@ openpeerpower/components/automation/zone.py
 openpeerpower/components/config/__init__.py
 openpeerpower/components/config/area_registry.py
 openpeerpower/components/config/auth.py
-openpeerpower/components/config/auth_provider_homeassistant.py
+openpeerpower/components/config/auth_provider_openpeerpower.py
 openpeerpower/components/config/automation.py
 openpeerpower/components/config/config_entries.py
 openpeerpower/components/config/core.py

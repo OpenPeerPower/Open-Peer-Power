@@ -7,21 +7,21 @@ import os
 
 import voluptuous as vol
 
-from homeassistant.auth.permissions.const import POLICY_CONTROL
-from homeassistant.components.group import \
+from openpeerpower.auth.permissions.const import POLICY_CONTROL
+from openpeerpower.components.group import \
     ENTITY_ID_FORMAT as GROUP_ENTITY_ID_FORMAT
-from homeassistant.const import (
+from openpeerpower.const import (
     ATTR_ENTITY_ID, SERVICE_TOGGLE, SERVICE_TURN_OFF, SERVICE_TURN_ON,
     STATE_ON)
-from homeassistant.exceptions import UnknownUser, Unauthorized
-import homeassistant.helpers.config_validation as cv
-from homeassistant.helpers.config_validation import (  # noqa
+from openpeerpower.exceptions import UnknownUser, Unauthorized
+import openpeerpower.helpers.config_validation as cv
+from openpeerpower.helpers.config_validation import (  # noqa
     PLATFORM_SCHEMA, PLATFORM_SCHEMA_BASE)
-from homeassistant.helpers.entity import ToggleEntity
-from homeassistant.helpers.entity_component import EntityComponent
-from homeassistant.helpers import intent
-from homeassistant.loader import bind_hass
-import homeassistant.util.color as color_util
+from openpeerpower.helpers.entity import ToggleEntity
+from openpeerpower.helpers.entity_component import EntityComponent
+from openpeerpower.helpers import intent
+from openpeerpower.loader import bind_opp
+import openpeerpower.util.color as color_util
 
 DOMAIN = 'light'
 SCAN_INTERVAL = timedelta(seconds=30)
@@ -128,11 +128,11 @@ INTENT_SET = 'HassLightSet'
 _LOGGER = logging.getLogger(__name__)
 
 
-@bind_hass
-def is_on(hass, entity_id=None):
+@bind_opp
+def is_on(opp, entity_id=None):
     """Return if the lights are on based on the statemachine."""
     entity_id = entity_id or ENTITY_ID_ALL_LIGHTS
-    return hass.states.is_state(entity_id, STATE_ON)
+    return opp.states.is_state(entity_id, STATE_ON)
 
 
 def preprocess_turn_on_alternatives(params):
@@ -191,12 +191,12 @@ class SetIntentHandler(intent.IntentHandler):
     }
 
     async def async_handle(self, intent_obj):
-        """Handle the hass intent."""
-        hass = intent_obj.hass
+        """Handle the opp intent."""
+        opp = intent_obj.opp
         slots = self.async_validate_slots(intent_obj.slots)
-        state = hass.helpers.intent.async_match_state(
+        state = opp.helpers.intent.async_match_state(
             slots['name']['value'],
-            [state for state in hass.states.async_all()
+            [state for state in opp.states.async_all()
              if state.domain == DOMAIN])
 
         service_data = {
@@ -220,7 +220,7 @@ class SetIntentHandler(intent.IntentHandler):
             speech_parts.append('{}% brightness'.format(
                 slots['brightness']['value']))
 
-        await hass.services.async_call(DOMAIN, SERVICE_TURN_ON, service_data)
+        await opp.services.async_call(DOMAIN, SERVICE_TURN_ON, service_data)
 
         response = intent_obj.create_response()
 
@@ -241,14 +241,14 @@ class SetIntentHandler(intent.IntentHandler):
         return response
 
 
-async def async_setup(hass, config):
+async def async_setup(opp, config):
     """Expose light control via state machine and services."""
-    component = hass.data[DOMAIN] = EntityComponent(
-        _LOGGER, DOMAIN, hass, SCAN_INTERVAL, GROUP_NAME_ALL_LIGHTS)
+    component = opp.data[DOMAIN] = EntityComponent(
+        _LOGGER, DOMAIN, opp, SCAN_INTERVAL, GROUP_NAME_ALL_LIGHTS)
     await component.async_setup(config)
 
     # load profiles from files
-    profiles_valid = await Profiles.load_profiles(hass)
+    profiles_valid = await Profiles.load_profiles(opp)
     if not profiles_valid:
         return False
 
@@ -262,7 +262,7 @@ async def async_setup(hass, config):
         params.pop(ATTR_ENTITY_ID, None)
 
         if service.context.user_id:
-            user = await hass.auth.async_get_user(service.context.user_id)
+            user = await opp.auth.async_get_user(service.context.user_id)
             if user is None:
                 raise UnknownUser(context=service.context)
 
@@ -303,10 +303,10 @@ async def async_setup(hass, config):
                 light.async_update_ha_state(True))
 
         if update_tasks:
-            await asyncio.wait(update_tasks, loop=hass.loop)
+            await asyncio.wait(update_tasks, loop=opp.loop)
 
     # Listen for light on and light off service calls.
-    hass.services.async_register(
+    opp.services.async_register(
         DOMAIN, SERVICE_TURN_ON, async_handle_light_on_service,
         schema=LIGHT_TURN_ON_SCHEMA)
 
@@ -320,19 +320,19 @@ async def async_setup(hass, config):
         'async_toggle'
     )
 
-    hass.helpers.intent.async_register(SetIntentHandler())
+    opp.helpers.intent.async_register(SetIntentHandler())
 
     return True
 
 
-async def async_setup_entry(hass, entry):
+async def async_setup_entry(opp, entry):
     """Set up a config entry."""
-    return await hass.data[DOMAIN].async_setup_entry(entry)
+    return await opp.data[DOMAIN].async_setup_entry(entry)
 
 
-async def async_unload_entry(hass, entry):
+async def async_unload_entry(opp, entry):
     """Unload a config entry."""
-    return await hass.data[DOMAIN].async_unload_entry(entry)
+    return await opp.data[DOMAIN].async_unload_entry(entry)
 
 
 class Profiles:
@@ -341,13 +341,13 @@ class Profiles:
     _all = None
 
     @classmethod
-    async def load_profiles(cls, hass):
+    async def load_profiles(cls, opp):
         """Load and cache profiles."""
-        def load_profile_data(hass):
+        def load_profile_data(opp):
             """Load built-in profiles and custom profiles."""
             profile_paths = [os.path.join(os.path.dirname(__file__),
                                           LIGHT_PROFILES_FILE),
-                             hass.config.path(LIGHT_PROFILES_FILE)]
+                             opp.config.path(LIGHT_PROFILES_FILE)]
             profiles = {}
 
             for profile_path in profile_paths:
@@ -371,7 +371,7 @@ class Profiles:
                         return None
             return profiles
 
-        cls._all = await hass.async_add_job(load_profile_data, hass)
+        cls._all = await opp.async_add_job(load_profile_data, opp)
         return cls._all is not None
 
     @classmethod

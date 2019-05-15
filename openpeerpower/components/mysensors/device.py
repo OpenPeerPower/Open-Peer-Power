@@ -2,11 +2,11 @@
 import logging
 from functools import partial
 
-from homeassistant.const import (
+from openpeerpower.const import (
     ATTR_BATTERY_LEVEL, STATE_OFF, STATE_ON)
-from homeassistant.core import callback
-from homeassistant.helpers.dispatcher import async_dispatcher_connect
-from homeassistant.helpers.entity import Entity
+from openpeerpower.core import callback
+from openpeerpower.helpers.dispatcher import async_dispatcher_connect
+from openpeerpower.helpers.entity import Entity
 
 from .const import CHILD_CALLBACK, NODE_CALLBACK, UPDATE_DELAY
 
@@ -20,11 +20,11 @@ ATTR_HEARTBEAT = 'heartbeat'
 MYSENSORS_PLATFORM_DEVICES = 'mysensors_devices_{}'
 
 
-def get_mysensors_devices(hass, domain):
+def get_mysensors_devices(opp, domain):
     """Return MySensors devices for a platform."""
-    if MYSENSORS_PLATFORM_DEVICES.format(domain) not in hass.data:
-        hass.data[MYSENSORS_PLATFORM_DEVICES.format(domain)] = {}
-    return hass.data[MYSENSORS_PLATFORM_DEVICES.format(domain)]
+    if MYSENSORS_PLATFORM_DEVICES.format(domain) not in opp.data:
+        opp.data[MYSENSORS_PLATFORM_DEVICES.format(domain)] = {}
+    return opp.data[MYSENSORS_PLATFORM_DEVICES.format(domain)]
 
 
 class MySensorsDevice:
@@ -41,7 +41,7 @@ class MySensorsDevice:
         self.child_type = child.type
         self._values = {}
         self._update_scheduled = False
-        self.hass = None
+        self.opp = None
 
     @property
     def name(self):
@@ -107,8 +107,8 @@ class MySensorsDevice:
                 self._update_scheduled = False
 
         self._update_scheduled = True
-        delayed_update = partial(self.hass.async_create_task, update())
-        self.hass.loop.call_later(UPDATE_DELAY, delayed_update)
+        delayed_update = partial(self.opp.async_create_task, update())
+        self.opp.loop.call_later(UPDATE_DELAY, delayed_update)
 
 
 class MySensorsEntity(MySensorsDevice, Entity):
@@ -128,13 +128,13 @@ class MySensorsEntity(MySensorsDevice, Entity):
         """Update the entity."""
         await self.async_update_ha_state(True)
 
-    async def async_added_to_hass(self):
+    async def async_added_to_opp(self):
         """Register update callback."""
         gateway_id = id(self.gateway)
         dev_id = gateway_id, self.node_id, self.child_id, self.value_type
         async_dispatcher_connect(
-            self.hass, CHILD_CALLBACK.format(*dev_id),
+            self.opp, CHILD_CALLBACK.format(*dev_id),
             self.async_update_callback)
         async_dispatcher_connect(
-            self.hass, NODE_CALLBACK.format(gateway_id, self.node_id),
+            self.opp, NODE_CALLBACK.format(gateway_id, self.node_id),
             self.async_update_callback)

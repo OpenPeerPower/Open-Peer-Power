@@ -4,11 +4,11 @@ import logging
 
 import voluptuous as vol
 
-from homeassistant.const import CONF_NAME
-from homeassistant.core import callback
-from homeassistant.helpers import discovery
-import homeassistant.helpers.config_validation as cv
-from homeassistant.util.decorator import Registry
+from openpeerpower.const import CONF_NAME
+from openpeerpower.core import callback
+from openpeerpower.helpers import discovery
+import openpeerpower.helpers.config_validation as cv
+from openpeerpower.util.decorator import Registry
 
 from .const import ATTR_DEVICES, DOMAIN, FLAT_PLATFORM_TYPES, TYPE_TO_PLATFORMS
 
@@ -17,11 +17,11 @@ SCHEMAS = Registry()
 
 
 @callback
-def discover_mysensors_platform(hass, hass_config, platform, new_devices):
+def discover_mysensors_platform(opp, opp_config, platform, new_devices):
     """Discover a MySensors platform."""
-    task = hass.async_create_task(discovery.async_load_platform(
-        hass, platform, DOMAIN,
-        {ATTR_DEVICES: new_devices, CONF_NAME: DOMAIN}, hass_config))
+    task = opp.async_create_task(discovery.async_load_platform(
+        opp, platform, DOMAIN,
+        {ATTR_DEVICES: new_devices, CONF_NAME: DOMAIN}, opp_config))
     return task
 
 

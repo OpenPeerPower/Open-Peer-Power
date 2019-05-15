@@ -18,11 +18,11 @@
                 "description": "Bitte gib die Verbindungsinformationen deines MQTT-Brokers ein.",
                 "title": "MQTT"
             },
-            "hassio_confirm": {
+            "oppio_confirm": {
                 "data": {
                     "discovery": "Suche aktivieren"
                 },
-                "description": "M\u00f6chtest du Home Assistant so konfigurieren, dass er eine Verbindung mit dem MQTT-Broker herstellt, der vom Add-on hass.io {addon} bereitgestellt wird?",
+                "description": "M\u00f6chtest du Home Assistant so konfigurieren, dass er eine Verbindung mit dem MQTT-Broker herstellt, der vom Add-on opp.io {addon} bereitgestellt wird?",
                 "title": "MQTT Broker per Hass.io add-on"
             }
         },

@@ -2,12 +2,12 @@
 import asyncio
 from typing import Iterable, Optional
 
-from homeassistant.const import (
+from openpeerpower.const import (
     ATTR_TEMPERATURE, SERVICE_TURN_OFF,
     SERVICE_TURN_ON, STATE_OFF, STATE_ON)
-from homeassistant.core import Context, State
-from homeassistant.helpers.typing import OpenPeerPowerType
-from homeassistant.loader import bind_hass
+from openpeerpower.core import Context, State
+from openpeerpower.helpers.typing import OpenPeerPowerType
+from openpeerpower.loader import bind_opp
 
 from .const import (
     ATTR_AUX_HEAT,
@@ -29,7 +29,7 @@ from .const import (
 )
 
 
-async def _async_reproduce_states(hass: OpenPeerPowerType,
+async def _async_reproduce_states(opp: OpenPeerPowerType,
                                   state: State,
                                   context: Optional[Context] = None) -> None:
     """Reproduce component states."""
@@ -41,7 +41,7 @@ async def _async_reproduce_states(hass: OpenPeerPowerType,
             if key in state.attributes:
                 data[key] = state.attributes[key]
 
-        await hass.services.async_call(
+        await opp.services.async_call(
             DOMAIN, service, data,
             blocking=True, context=context)
 
@@ -81,11 +81,11 @@ async def _async_reproduce_states(hass: OpenPeerPowerType,
                            [ATTR_HUMIDITY])
 
 
-@bind_hass
-async def async_reproduce_states(hass: OpenPeerPowerType,
+@bind_opp
+async def async_reproduce_states(opp: OpenPeerPowerType,
                                  states: Iterable[State],
                                  context: Optional[Context] = None) -> None:
     """Reproduce component states."""
     await asyncio.gather(*[
-        _async_reproduce_states(hass, state, context)
+        _async_reproduce_states(opp, state, context)
         for state in states])

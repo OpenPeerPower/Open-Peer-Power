@@ -1,12 +1,12 @@
 """MySensors platform that offers a Climate (MySensors-HVAC) component."""
-from homeassistant.components import mysensors
-from homeassistant.components.climate import ClimateDevice
-from homeassistant.components.climate.const import (
+from openpeerpower.components import mysensors
+from openpeerpower.components.climate import ClimateDevice
+from openpeerpower.components.climate.const import (
     ATTR_TARGET_TEMP_HIGH, ATTR_TARGET_TEMP_LOW, DOMAIN, STATE_AUTO,
     STATE_COOL, STATE_HEAT, SUPPORT_FAN_MODE,
     SUPPORT_OPERATION_MODE, SUPPORT_TARGET_TEMPERATURE,
     SUPPORT_TARGET_TEMPERATURE_HIGH, SUPPORT_TARGET_TEMPERATURE_LOW)
-from homeassistant.const import (
+from openpeerpower.const import (
     ATTR_TEMPERATURE, STATE_OFF, TEMP_CELSIUS, TEMP_FAHRENHEIT)
 
 DICT_HA_TO_MYS = {
@@ -27,10 +27,10 @@ OPERATION_LIST = [STATE_OFF, STATE_AUTO, STATE_COOL, STATE_HEAT]
 
 
 async def async_setup_platform(
-        hass, config, async_add_entities, discovery_info=None):
+        opp, config, async_add_entities, discovery_info=None):
     """Set up the mysensors climate."""
     mysensors.setup_mysensors_platform(
-        hass, DOMAIN, discovery_info, MySensorsHVAC,
+        opp, DOMAIN, discovery_info, MySensorsHVAC,
         async_add_entities=async_add_entities)
 
 

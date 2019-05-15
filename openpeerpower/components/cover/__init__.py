@@ -5,15 +5,15 @@ import logging
 
 import voluptuous as vol
 
-from homeassistant.loader import bind_hass
-from homeassistant.helpers.entity_component import EntityComponent
-from homeassistant.helpers.entity import Entity
-from homeassistant.helpers.config_validation import (  # noqa
+from openpeerpower.loader import bind_opp
+from openpeerpower.helpers.entity_component import EntityComponent
+from openpeerpower.helpers.entity import Entity
+from openpeerpower.helpers.config_validation import (  # noqa
     PLATFORM_SCHEMA, PLATFORM_SCHEMA_BASE)
-import homeassistant.helpers.config_validation as cv
-from homeassistant.components import group
-from homeassistant.helpers import intent
-from homeassistant.const import (
+import openpeerpower.helpers.config_validation as cv
+from openpeerpower.components import group
+from openpeerpower.helpers import intent
+from openpeerpower.const import (
     SERVICE_OPEN_COVER, SERVICE_CLOSE_COVER, SERVICE_SET_COVER_POSITION,
     SERVICE_STOP_COVER, SERVICE_OPEN_COVER_TILT, SERVICE_CLOSE_COVER_TILT,
     SERVICE_STOP_COVER_TILT, SERVICE_SET_COVER_TILT_POSITION, STATE_OPEN,
@@ -84,17 +84,17 @@ COVER_SET_COVER_TILT_POSITION_SCHEMA = COVER_SERVICE_SCHEMA.extend({
 })
 
 
-@bind_hass
-def is_closed(hass, entity_id=None):
+@bind_opp
+def is_closed(opp, entity_id=None):
     """Return if the cover is closed based on the statemachine."""
     entity_id = entity_id or ENTITY_ID_ALL_COVERS
-    return hass.states.is_state(entity_id, STATE_CLOSED)
+    return opp.states.is_state(entity_id, STATE_CLOSED)
 
 
-async def async_setup(hass, config):
+async def async_setup(opp, config):
     """Track states and offer events for covers."""
-    component = hass.data[DOMAIN] = EntityComponent(
-        _LOGGER, DOMAIN, hass, SCAN_INTERVAL, GROUP_NAME_ALL_COVERS)
+    component = opp.data[DOMAIN] = EntityComponent(
+        _LOGGER, DOMAIN, opp, SCAN_INTERVAL, GROUP_NAME_ALL_COVERS)
 
     await component.async_setup(config)
 
@@ -138,24 +138,24 @@ async def async_setup(hass, config):
         'async_set_cover_tilt_position'
     )
 
-    hass.helpers.intent.async_register(intent.ServiceIntentHandler(
+    opp.helpers.intent.async_register(intent.ServiceIntentHandler(
         INTENT_OPEN_COVER, DOMAIN, SERVICE_OPEN_COVER,
         "Opened {}"))
-    hass.helpers.intent.async_register(intent.ServiceIntentHandler(
+    opp.helpers.intent.async_register(intent.ServiceIntentHandler(
         INTENT_CLOSE_COVER, DOMAIN, SERVICE_CLOSE_COVER,
         "Closed {}"))
 
     return True
 
 
-async def async_setup_entry(hass, entry):
+async def async_setup_entry(opp, entry):
     """Set up a config entry."""
-    return await hass.data[DOMAIN].async_setup_entry(entry)
+    return await opp.data[DOMAIN].async_setup_entry(entry)
 
 
-async def async_unload_entry(hass, entry):
+async def async_unload_entry(opp, entry):
     """Unload a config entry."""
-    return await hass.data[DOMAIN].async_unload_entry(entry)
+    return await opp.data[DOMAIN].async_unload_entry(entry)
 
 
 class CoverDevice(Entity):
@@ -246,7 +246,7 @@ class CoverDevice(Entity):
 
         This method must be run in the event loop and returns a coroutine.
         """
-        return self.hass.async_add_job(ft.partial(self.open_cover, **kwargs))
+        return self.opp.async_add_job(ft.partial(self.open_cover, **kwargs))
 
     def close_cover(self, **kwargs):
         """Close cover."""
@@ -257,7 +257,7 @@ class CoverDevice(Entity):
 
         This method must be run in the event loop and returns a coroutine.
         """
-        return self.hass.async_add_job(ft.partial(self.close_cover, **kwargs))
+        return self.opp.async_add_job(ft.partial(self.close_cover, **kwargs))
 
     def set_cover_position(self, **kwargs):
         """Move the cover to a specific position."""
@@ -268,7 +268,7 @@ class CoverDevice(Entity):
 
         This method must be run in the event loop and returns a coroutine.
         """
-        return self.hass.async_add_job(
+        return self.opp.async_add_job(
             ft.partial(self.set_cover_position, **kwargs))
 
     def stop_cover(self, **kwargs):
@@ -280,7 +280,7 @@ class CoverDevice(Entity):
 
         This method must be run in the event loop and returns a coroutine.
         """
-        return self.hass.async_add_job(ft.partial(self.stop_cover, **kwargs))
+        return self.opp.async_add_job(ft.partial(self.stop_cover, **kwargs))
 
     def open_cover_tilt(self, **kwargs):
         """Open the cover tilt."""
@@ -291,7 +291,7 @@ class CoverDevice(Entity):
 
         This method must be run in the event loop and returns a coroutine.
         """
-        return self.hass.async_add_job(
+        return self.opp.async_add_job(
             ft.partial(self.open_cover_tilt, **kwargs))
 
     def close_cover_tilt(self, **kwargs):
@@ -303,7 +303,7 @@ class CoverDevice(Entity):
 
         This method must be run in the event loop and returns a coroutine.
         """
-        return self.hass.async_add_job(
+        return self.opp.async_add_job(
             ft.partial(self.close_cover_tilt, **kwargs))
 
     def set_cover_tilt_position(self, **kwargs):
@@ -315,7 +315,7 @@ class CoverDevice(Entity):
 
         This method must be run in the event loop and returns a coroutine.
         """
-        return self.hass.async_add_job(
+        return self.opp.async_add_job(
             ft.partial(self.set_cover_tilt_position, **kwargs))
 
     def stop_cover_tilt(self, **kwargs):
@@ -327,5 +327,5 @@ class CoverDevice(Entity):
 
         This method must be run in the event loop and returns a coroutine.
         """
-        return self.hass.async_add_job(
+        return self.opp.async_add_job(
             ft.partial(self.stop_cover_tilt, **kwargs))
