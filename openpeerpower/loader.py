@@ -1,57 +1,264 @@
 """
-The methods for loading Open Peer Power components.
+The methods for loading Open Peer Power integrations.
 
-Components can be accessed via opp.components.switch from your code.
-If you want to retrieve a platform that is part of a component, you should
-call get_component(opp, 'switch.your_platform'). 
+This module has quite some complex parts. I have tried to add as much
+documentation as possible to keep it understandable.
 """
+import asyncio
 import functools as ft
 import importlib
+import json
 import logging
+import pathlib
 import sys
 from types import ModuleType
+from typing import (
+    Optional,
+    Set,
+    TYPE_CHECKING,
+    Callable,
+    Any,
+    TypeVar,
+    List,
+    Dict,
+    Union,
+    cast,
+)
 
-from openpeerpower.const import PLATFORM_FORMAT
+# Typing imports that create a circular dependency
+# pylint: disable=using-constant-test,unused-import
+if TYPE_CHECKING:
+    from openpeerpower.core import OpenPeerPower  # noqa
+
+CALLABLE_T = TypeVar('CALLABLE_T', bound=Callable)  # noqa pylint: disable=invalid-name
+
+DEPENDENCY_BLACKLIST = {'config'}
 
 _LOGGER = logging.getLogger(__name__)
 
 
-DATA_KEY = 'components'
-PACKAGE_COMPONENTS = 'openpeerpower.components'
+DATA_COMPONENTS = 'components'
+DATA_INTEGRATIONS = 'integrations'
+PACKAGE_CUSTOM_COMPONENTS = 'custom_components'
+PACKAGE_BUILTIN = 'openpeerpower.components'
+LOOKUP_PATHS = [PACKAGE_CUSTOM_COMPONENTS, PACKAGE_BUILTIN]
+CUSTOM_WARNING = (
+    'You are using a custom integration for %s which has not '
+    'been tested by Open Peer Power. This component might '
+    'cause stability problems, be sure to disable it if you '
+    'do experience issues with Open Peer Power.'
+)
+_UNDEF = object()
 
 
-def set_component(opp,  # type: OpenPeerPower
-                  comp_name: str, component: ModuleType) -> None:
-    """Set a component in the cache.
+def manifest_from_legacy_module(domain: str, module: ModuleType) -> Dict:
+    """Generate a manifest from a legacy module."""
+    return {
+        'domain': domain,
+        'name': domain,
+        'documentation': None,
+        'requirements': getattr(module, 'REQUIREMENTS', []),
+        'dependencies': getattr(module, 'DEPENDENCIES', []),
+        'codeowners': [],
+    }
 
-    Async friendly.
-    """
-    cache = opp.data.get(DATA_KEY)
+
+class Integration:
+    """An integration in Open Peer Power."""
+
+    @classmethod
+    def resolve_from_root(cls, opp: 'OpenPeerPower', root_module: ModuleType,
+                          domain: str) -> 'Optional[Integration]':
+        """Resolve an integration from a root module."""
+        for base in root_module.__path__:   # type: ignore
+            manifest_path = (
+                pathlib.Path(base) / domain / 'manifest.json'
+            )
+
+            if not manifest_path.is_file():
+                continue
+
+            try:
+                manifest = json.loads(manifest_path.read_text())
+            except ValueError as err:
+                _LOGGER.error("Error parsing manifest.json file at %s: %s",
+                              manifest_path, err)
+                continue
+
+            return cls(
+                opp, "{}.{}".format(root_module.__name__, domain),
+                manifest_path.parent, manifest
+            )
+
+        return None
+
+    @classmethod
+    def resolve_legacy(cls, opp: 'OpenPeerPower', domain: str) \
+            -> 'Optional[Integration]':
+        """Resolve legacy component.
+
+        Will create a stub manifest.
+        """
+        comp = _load_file(opp, domain, LOOKUP_PATHS)
+
+        if comp is None:
+            return None
+
+        return cls(
+            opp, comp.__name__, pathlib.Path(comp.__file__).parent,
+            manifest_from_legacy_module(domain, comp)
+        )
+
+    def __init__(self, opp: 'OpenPeerPower', pkg_path: str,
+                 file_path: pathlib.Path, manifest: Dict):
+        """Initialize an integration."""
+        self.opp = opp
+        self.pkg_path = pkg_path
+        self.file_path = file_path
+        self.name = manifest['name']  # type: str
+        self.domain = manifest['domain']  # type: str
+        self.dependencies = manifest['dependencies']  # type: List[str]
+        self.after_dependencies = manifest.get(
+            'after_dependencies')  # type: Optional[List[str]]
+        self.requirements = manifest['requirements']  # type: List[str]
+        _LOGGER.info("Loaded %s from %s", self.domain, pkg_path)
+
+    def get_component(self) -> ModuleType:
+        """Return the component."""
+        cache = self.opp.data.setdefault(DATA_COMPONENTS, {})
+        if self.domain not in cache:
+            cache[self.domain] = importlib.import_module(self.pkg_path)
+        return cache[self.domain]  # type: ignore
+
+    def get_platform(self, platform_name: str) -> ModuleType:
+        """Return a platform for an integration."""
+        cache = self.opp.data.setdefault(DATA_COMPONENTS, {})
+        full_name = "{}.{}".format(self.domain, platform_name)
+        if full_name not in cache:
+            cache[full_name] = importlib.import_module(
+                "{}.{}".format(self.pkg_path, platform_name)
+            )
+        return cache[full_name]  # type: ignore
+
+    def __repr__(self) -> str:
+        """Text representation of class."""
+        return "<Integration {}: {}>".format(self.domain, self.pkg_path)
+
+
+async def async_get_integration(opp: 'OpenPeerPower', domain: str)\
+         -> Integration:
+    """Get an integration."""
+    cache = opp.data.get(DATA_INTEGRATIONS)
     if cache is None:
-        cache = opp.data[DATA_KEY] = {}
-    cache[comp_name] = component
+        if not _async_mount_config_dir(opp):
+            raise IntegrationNotFound(domain)
+        cache = opp.data[DATA_INTEGRATIONS] = {}
 
-def get_component(opp,  # type: OpenPeerPower
-                  comp_or_platform: str) -> ModuleType:
-    """Try to load specified component.
+    int_or_evt = cache.get(
+        domain, _UNDEF)  # type: Optional[Union[Integration, asyncio.Event]]
+
+    if isinstance(int_or_evt, asyncio.Event):
+        await int_or_evt.wait()
+        int_or_evt = cache.get(domain, _UNDEF)
+
+        # When we have waited and it's _UNDEF, it doesn't exist
+        # We don't cache that it doesn't exist, or else people can't fix it
+        # and then restart, because their config will never be valid.
+        if int_or_evt is _UNDEF:
+            raise IntegrationNotFound(domain)
+
+    if int_or_evt is not _UNDEF:
+        return cast(Integration, int_or_evt)
+
+    event = cache[domain] = asyncio.Event()
+
+    try:
+        import custom_components
+        integration = await opp.async_add_executor_job(
+            Integration.resolve_from_root, opp, custom_components, domain
+        )
+        if integration is not None:
+            _LOGGER.warning(CUSTOM_WARNING, domain)
+            cache[domain] = integration
+            event.set()
+            return integration
+
+    except ImportError:
+        # Import error if "custom_components" doesn't exist
+        pass
+
+    from openpeerpower import components
+
+    integration = await opp.async_add_executor_job(
+        Integration.resolve_from_root, opp, components, domain
+    )
+
+    if integration is not None:
+        cache[domain] = integration
+        event.set()
+        return integration
+
+    integration = Integration.resolve_legacy(opp, domain)
+    if integration is not None:
+        cache[domain] = integration
+    else:
+        # Remove event from cache.
+        cache.pop(domain)
+
+    event.set()
+
+    if not integration:
+        raise IntegrationNotFound(domain)
+
+    return integration
+
+
+class LoaderError(Exception):
+    """Loader base error."""
+
+
+class IntegrationNotFound(LoaderError):
+    """Raised when a component is not found."""
+
+    def __init__(self, domain: str) -> None:
+        """Initialize a component not found error."""
+        super().__init__("Component {} not found.".format(domain))
+        self.domain = domain
+
+
+class CircularDependency(LoaderError):
+    """Raised when a circular dependency is found when resolving components."""
+
+    def __init__(self, from_domain: str, to_domain: str) -> None:
+        """Initialize circular dependency error."""
+        super().__init__("Circular dependency detected: {} -> {}.".format(
+            from_domain, to_domain))
+        self.from_domain = from_domain
+        self.to_domain = to_domain
+
+
+def _load_file(opp,  # type: OpenPeerPower
+               comp_or_platform: str,
+               base_paths: List[str]) -> Optional[ModuleType]:
+    """Try to load specified file.
 
     Looks in config dir first, then built-in components.
     Only returns it if also found to be valid.
     Async friendly.
     """
     try:
-        return opp.data[DATA_KEY][comp_or_platform]  # type: ignore
+        return opp.data[DATA_COMPONENTS][comp_or_platform]  # type: ignore
     except KeyError:
         pass
 
-    cache = opp.data.get(DATA_KEY)
+    cache = opp.data.get(DATA_COMPONENTS)
     if cache is None:
-        cache = opp.data[DATA_KEY] = {}
+        if not _async_mount_config_dir(opp):
+            return None
+        cache = opp.data[DATA_COMPONENTS] = {}
 
-    # First check custom, then built-in
-    potential_paths = ['openpeerpower.components.{}'.format(comp_or_platform)]
-
-    for index, path in enumerate(potential_paths):
+    for path in ('{}.{}'.format(base, comp_or_platform)
+                 for base in base_paths):
         try:
             module = importlib.import_module(path)
 
@@ -67,9 +274,10 @@ def get_component(opp,  # type: OpenPeerPower
             if getattr(module, '__file__', None) is None:
                 continue
 
-            _LOGGER.info("Loaded %s from %s", comp_or_platform, path)
-
             cache[comp_or_platform] = module
+
+            if module.__name__.startswith(PACKAGE_CUSTOM_COMPONENTS):
+                _LOGGER.warning(CUSTOM_WARNING, comp_or_platform)
 
             return module
 
@@ -90,6 +298,133 @@ def get_component(opp,  # type: OpenPeerPower
                     ("Error loading %s. Make sure all "
                      "dependencies are installed"), path)
 
-    _LOGGER.error("Unable to find component %s", comp_or_platform)
-
     return None
+
+
+class ModuleWrapper:
+    """Class to wrap a Python module and auto fill in opp argument."""
+
+    def __init__(self,
+                 opp,  # type: OpenPeerPower
+                 module: ModuleType) -> None:
+        """Initialize the module wrapper."""
+        self._opp = opp
+        self._module = module
+
+    def __getattr__(self, attr: str) -> Any:
+        """Fetch an attribute."""
+        value = getattr(self._module, attr)
+
+        if hasattr(value, '__bind_opp'):
+            value = ft.partial(value, self._opp)
+
+        setattr(self, attr, value)
+        return value
+
+
+class Components:
+    """Helper to load components."""
+
+    def __init__(
+            self,
+            opp  # type: OpenPeerPower
+    ) -> None:
+        """Initialize the Components class."""
+        self._opp = opp
+
+    def __getattr__(self, comp_name: str) -> ModuleWrapper:
+        """Fetch a component."""
+        # Test integration cache
+        integration = self._opp.data.get(DATA_INTEGRATIONS, {}).get(comp_name)
+
+        if isinstance(integration, Integration):
+            component = integration.get_component(
+            )  # type: Optional[ModuleType]
+        else:
+            # Fallback to importing old-school
+            component = _load_file(self._opp, comp_name, LOOKUP_PATHS)
+
+        if component is None:
+            raise ImportError('Unable to load {}'.format(comp_name))
+
+        wrapped = ModuleWrapper(self._opp, component)
+        setattr(self, comp_name, wrapped)
+        return wrapped
+
+
+class Helpers:
+    """Helper to load helpers."""
+
+    def __init__(
+            self,
+            opp  # type: OpenPeerPower
+    ) -> None:
+        """Initialize the Helpers class."""
+        self._opp = opp
+
+    def __getattr__(self, helper_name: str) -> ModuleWrapper:
+        """Fetch a helper."""
+        helper = importlib.import_module(
+            'openpeerpower.helpers.{}'.format(helper_name))
+        wrapped = ModuleWrapper(self._opp, helper)
+        setattr(self, helper_name, wrapped)
+        return wrapped
+
+
+def bind_opp(func: CALLABLE_T) -> CALLABLE_T:
+    """Decorate function to indicate that first argument is opp."""
+    setattr(func, '__bind_opp', True)
+    return func
+
+async def async_component_dependencies(opp,  # type: OpenPeerPower
+                                       domain: str) -> Set[str]:
+    """Return all dependencies and subdependencies of components.
+
+    Raises CircularDependency if a circular dependency is found.
+    """
+    return await _async_component_dependencies(opp, domain, set(), set())
+
+
+async def _async_component_dependencies(opp,  # type: OpenPeerPower
+                                        domain: str, loaded: Set[str],
+                                        loading: Set) -> Set[str]:
+    """Recursive function to get component dependencies.
+
+    Async friendly.
+    """
+    integration = await async_get_integration(opp, domain)
+
+    loading.add(domain)
+
+    for dependency_domain in integration.dependencies:
+        # Check not already loaded
+        if dependency_domain in loaded:
+            continue
+
+        # If we are already loading it, we have a circular dependency.
+        if dependency_domain in loading:
+            raise CircularDependency(domain, dependency_domain)
+
+        dep_loaded = await _async_component_dependencies(
+            opp, dependency_domain, loaded, loading)
+
+        loaded.update(dep_loaded)
+
+    loaded.add(domain)
+    loading.remove(domain)
+
+    return loaded
+
+
+def _async_mount_config_dir(opp,  # type: OpenPeerPower
+                            ) -> bool:
+    """Mount config dir in order to load custom_component.
+
+    Async friendly but not a coroutine.
+    """
+    if opp.config.config_dir is None:
+        _LOGGER.error("Can't load components - config dir is not set")
+        return False
+    if opp.config.config_dir not in sys.path:
+        sys.path.insert(0, opp.config.config_dir)
+    return True

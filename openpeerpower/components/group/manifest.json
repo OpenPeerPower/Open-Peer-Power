@@ -1,0 +1,10 @@
+{
+  "domain": "group",
+  "name": "Group",
+  "documentation": "https://www.open-peer-power.io/components/group",
+  "requirements": [],
+  "dependencies": [],
+  "codeowners": [
+    "@open-peer-power/core"
+  ]
+}

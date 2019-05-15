@@ -1,0 +1,12 @@
+{
+  "domain": "script",
+  "name": "Script",
+  "documentation": "https://www.open-peer-power.io/components/script",
+  "requirements": [],
+  "dependencies": [
+    "group"
+  ],
+  "codeowners": [
+    "@open-peer-power/core"
+  ]
+}

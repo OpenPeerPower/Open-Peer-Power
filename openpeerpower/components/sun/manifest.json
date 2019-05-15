@@ -1,0 +1,10 @@
+{
+  "domain": "sun",
+  "name": "Sun",
+  "documentation": "https://www.open-peer-power.io/components/sun",
+  "requirements": [],
+  "dependencies": [],
+  "codeowners": [
+    "@open-peer-power/core"
+  ]
+}

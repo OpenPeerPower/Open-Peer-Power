@@ -1,0 +1,12 @@
+{
+  "domain": "config",
+  "name": "Config",
+  "documentation": "https://www.open-peer-power.io/components/config",
+  "requirements": [],
+  "dependencies": [
+    "http"
+  ],
+  "codeowners": [
+    "@open-peer-power/core"
+  ]
+}

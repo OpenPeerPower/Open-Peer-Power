@@ -2,14 +2,14 @@
 Support for showing the date and the time.
 
 For more details about this platform, please refer to the documentation at
-https://home-assistant.io/components/sensor.time_date/
+https://open-peer-power.io/components/sensor.time_date/
 """
 from datetime import timedelta
 import logging
 
-from homeassistant.components.sensor import PLATFORM_SCHEMA
-from homeassistant.const import CONF_DISPLAY_OPTIONS
-import homeassistant.util.dt as dt_util
+from openpeerpower.components.sensor import PLATFORM_SCHEMA
+from openpeerpower.const import CONF_DISPLAY_OPTIONS
+import openpeerpower.util.dt as dt_util
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -33,12 +33,12 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
 class TimeDateSensor(Entity):
     """Implementation of a Time and Date sensor."""
 
-    def __init__(self, hass, option_type):
+    def __init__(self, opp, option_type):
         """Initialize the sensor."""
         self._name = OPTION_TYPES[option_type]
         self.type = option_type
         self._state = None
-        self.hass = hass
+        self.opp = opp
 
         self._update_internal_state(dt_util.utcnow())
 

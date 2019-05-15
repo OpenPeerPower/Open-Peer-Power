@@ -1,13 +1,23 @@
-"""Provide methods to bootstrap an Open Peer Power instance."""
+"""Provide methods to bootstrap a Open Peer Power instance."""
+import asyncio
 import logging
 import logging.handlers
 import os
 import sys
 from time import time
 from collections import OrderedDict
+from typing import Any, Optional, Dict, Set
 
-from openpeerpower import core
+import voluptuous as vol
+
+from openpeerpower import core, config as conf_util, config_entries, loader
 from openpeerpower.const import EVENT_OPENPEERPOWER_CLOSE
+from openpeerpower.setup import async_setup_component
+from openpeerpower.util.logging import AsyncHandler
+from openpeerpower.util.package import async_get_user_site, is_virtual_env
+from openpeerpower.util.yaml import clear_secret_cache
+from openpeerpower.exceptions import OpenPeerPowerError
+from openpeerpower.helpers import config_validation as cv
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -16,25 +26,19 @@ ERROR_LOG_FILENAME = 'open-peer-power.log'
 # opp.data key for logging information.
 DATA_LOGGING = 'logging'
 
-FIRST_INIT_COMPONENT = {'system_log', 'recorder',
-                        'logger', 'introduction', 'history'}
+DEBUGGER_INTEGRATIONS = {'ptvsd', }
+CORE_INTEGRATIONS = ('openpeerpower', 'persistent_notification')
+LOGGING_INTEGRATIONS = {'logger', 'system_log'}
+STAGE_1_INTEGRATIONS = {
+    # To record data
+    'recorder',
+    # To make sure we forward data to other instances
+    'mqtt_eventstream',
+}
 
-def from_config_dict(config: Any,
-                     enable_log: bool = True,
-                     verbose: bool = False,
-                     log_rotate_days: Any = None,
-                     log_file: Any = None,
-                     log_no_color: bool = False) \
-                     -> Optional[core.OpenPeerPower]:
-    """Try to configure Open Peer Power from a configuration dictionary.
-    Dynamically loads required components and its dependencies.
-    """
-    if opp is None:
-        opp = core.OpenPeerPower()
-    return opp
 
 async def async_from_config_dict(config: Dict[str, Any],
-                                 opp: core.HomeAssistant,
+                                 opp: core.OpenPeerPower,
                                  config_dir: Optional[str] = None,
                                  enable_log: bool = True,
                                  verbose: bool = False,
@@ -42,7 +46,7 @@ async def async_from_config_dict(config: Dict[str, Any],
                                  log_rotate_days: Any = None,
                                  log_file: Any = None,
                                  log_no_color: bool = False) \
-                           -> Optional[core.HomeAssistant]:
+                           -> Optional[core.OpenPeerPower]:
     """Try to configure Open Peer Power from a configuration dictionary.
 
     Dynamically loads required components and its dependencies.
@@ -54,104 +58,100 @@ async def async_from_config_dict(config: Dict[str, Any],
         async_enable_logging(opp, verbose, log_rotate_days, log_file,
                              log_no_color)
 
-    core_config = config.get(core.DOMAIN, {})
-    has_api_password = bool((config.get('http') or {}).get('api_password'))
-    has_trusted_networks = bool((config.get('http') or {})
-                                .get('trusted_networks'))
-
-    try:
-        await conf_util.async_process_ha_core_config(
-            opp, core_config, has_api_password, has_trusted_networks)
-    except vol.Invalid as config_err:
-        conf_util.async_log_exception(
-            config_err, 'homeassistant', core_config, opp)
-        return None
-    except HomeAssistantError:
-        _LOGGER.error("Open Peer Power core failed to initialize. "
-                      "Further initialization aborted")
-        return None
-
-    await opp.async_add_executor_job(
-        conf_util.process_ha_config_upgrade, opp)
-
     opp.config.skip_pip = skip_pip
     if skip_pip:
         _LOGGER.warning("Skipping pip installation of required modules. "
                         "This may cause issues")
 
+    core_config = config.get(core.DOMAIN, {})
+    api_password = config.get('http', {}).get('api_password')
+    trusted_networks = config.get('http', {}).get('trusted_networks')
+
+    try:
+        await conf_util.async_process_ha_core_config(
+            opp, core_config, api_password, trusted_networks)
+    except vol.Invalid as config_err:
+        conf_util.async_log_exception(
+            config_err, 'openpeerpower', core_config, opp)
+        return None
+    except OpenPeerPowerError:
+        _LOGGER.error("Open Peer Power core failed to initialize. "
+                      "Further initialization aborted")
+        return None
+
     # Make a copy because we are mutating it.
     config = OrderedDict(config)
 
     # Merge packages
-    conf_util.merge_packages_config(
+    await conf_util.merge_packages_config(
         opp, config, core_config.get(conf_util.CONF_PACKAGES, {}))
 
-    # Ensure we have no None values after merge
-    for key, value in config.items():
-        if not value:
-            config[key] = {}
-
     opp.config_entries = config_entries.ConfigEntries(opp, config)
-    await opp.config_entries.async_load()
+    await opp.config_entries.async_initialize()
 
-    # Filter out the repeating and common config section [homeassistant]
-    components = set(key.split(' ')[0] for key in config.keys()
-                     if key != core.DOMAIN)
-    components.update(opp.config_entries.async_domains())
-
-    await persistent_notification.async_setup(opp, config)
-
-    _LOGGER.info("Open Peer Power core initialized")
-
-    # stage 1
-    for component in components:
-        if component not in FIRST_INIT_COMPONENT:
-            continue
-        opp.async_create_task(async_setup_component(opp, component, config))
-
-    await opp.async_block_till_done()
-
-    # stage 2
-    for component in components:
-        if component in FIRST_INIT_COMPONENT:
-            continue
-        opp.async_create_task(async_setup_component(opp, component, config))
-
-    await opp.async_block_till_done()
+    await _async_set_up_integrations(opp, config)
 
     stop = time()
     _LOGGER.info("Open Peer Power initialized in %.2fs", stop-start)
 
+    # TEMP: warn users for invalid slugs
+    # Remove after 0.94 or 1.0
+    if cv.INVALID_SLUGS_FOUND or cv.INVALID_ENTITY_IDS_FOUND:
+        msg = []
+
+        if cv.INVALID_ENTITY_IDS_FOUND:
+            msg.append(
+                "Your configuration contains invalid entity ID references. "
+                "Please find and update the following. "
+                "This will become a breaking change."
+            )
+            msg.append('\n'.join('- {} -> {}'.format(*item)
+                                 for item
+                                 in cv.INVALID_ENTITY_IDS_FOUND.items()))
+
+        if cv.INVALID_SLUGS_FOUND:
+            msg.append(
+                "Your configuration contains invalid slugs. "
+                "Please find and update the following. "
+                "This will become a breaking change."
+            )
+            msg.append('\n'.join('- {} -> {}'.format(*item)
+                                 for item in cv.INVALID_SLUGS_FOUND.items()))
+
+        opp.components.persistent_notification.async_create(
+            '\n\n'.join(msg), "Config Warning", "config_warning"
+        )
+
+    # TEMP: warn users of invalid extra keys
+    # Remove after 0.92
+    if cv.INVALID_EXTRA_KEYS_FOUND:
+        msg = []
+        msg.append(
+            "Your configuration contains extra keys "
+            "that the platform does not support (but were silently "
+            "accepted before 0.88). Please find and remove the following."
+            "This will become a breaking change."
+        )
+        msg.append('\n'.join('- {}'.format(it)
+                             for it in cv.INVALID_EXTRA_KEYS_FOUND))
+
+        opp.components.persistent_notification.async_create(
+            '\n\n'.join(msg), "Config Warning", "config_warning"
+        )
+
     return opp
 
-
-def from_config_file(config_path: str,
-                     opp: Optional[core.HomeAssistant] = None,
-                     verbose: bool = False,
-                     skip_pip: bool = True,
-                     log_rotate_days: Any = None,
-                     log_file: Any = None,
-                     log_no_color: bool = False)\
-        -> Optional[core.HomeAssistant]:
-    """Read the configuration file and try to start all the functionality.
-
-    Will add functionality to 'opp' parameter if given,
-    instantiates a new Open Peer Power object if 'opp' is not given.
-    """
-    if opp is None:
-        opp = core.HomeAssistant()
-
-    return opp
 
 async def async_from_config_file(config_path: str,
-                                 opp: core.HomeAssistant,
+                                 opp: core.OpenPeerPower,
                                  verbose: bool = False,
                                  skip_pip: bool = True,
                                  log_rotate_days: Any = None,
                                  log_file: Any = None,
                                  log_no_color: bool = False)\
-        -> Optional[core.HomeAssistant]:
+        -> Optional[core.OpenPeerPower]:
     """Read the configuration file and try to start all the functionality.
+
     Will add functionality to 'opp' parameter.
     This method is a coroutine.
     """
@@ -165,10 +165,13 @@ async def async_from_config_file(config_path: str,
     async_enable_logging(opp, verbose, log_rotate_days, log_file,
                          log_no_color)
 
+    await opp.async_add_executor_job(
+        conf_util.process_ha_config_upgrade, opp)
+
     try:
         config_dict = await opp.async_add_executor_job(
             conf_util.load_yaml_config_file, config_path)
-    except HomeAssistantError as err:
+    except OpenPeerPowerError as err:
         _LOGGER.error("Error loading %s: %s", config_path, err)
         return None
     finally:
@@ -179,7 +182,7 @@ async def async_from_config_file(config_path: str,
 
 
 @core.callback
-def async_enable_logging(opp: core.HomeAssistant,
+def async_enable_logging(opp: core.OpenPeerPower,
                          verbose: bool = False,
                          log_rotate_days: Optional[int] = None,
                          log_file: Optional[str] = None,
@@ -257,7 +260,7 @@ def async_enable_logging(opp: core.HomeAssistant,
             await async_handler.async_close(blocking=True)
 
         opp.bus.async_listen_once(
-            EVENT_HOMEASSISTANT_CLOSE, async_stop_async_handler)
+            EVENT_OPENPEERPOWER_CLOSE, async_stop_async_handler)
 
         logger = logging.getLogger('')
         logger.addHandler(async_handler)  # type: ignore
@@ -280,3 +283,139 @@ async def async_mount_local_lib_path(config_dir: str) -> str:
     if lib_dir not in sys.path:
         sys.path.insert(0, lib_dir)
     return deps_dir
+
+
+@core.callback
+def _get_domains(opp: core.OpenPeerPower, config: Dict[str, Any]) -> Set[str]:
+    """Get domains of components to set up."""
+    # Filter out the repeating and common config section [openpeerpower]
+    domains = set(key.split(' ')[0] for key in config.keys()
+                  if key != core.DOMAIN)
+
+    # Add config entry domains
+    domains.update(opp.config_entries.async_domains())  # type: ignore
+
+    # Make sure the Opp.io component is loaded
+    if 'HASSIO' in os.environ:
+        domains.add('oppio')
+
+    return domains
+
+
+async def _async_set_up_integrations(
+        opp: core.OpenPeerPower, config: Dict[str, Any]) -> None:
+    """Set up all the integrations."""
+    domains = _get_domains(opp, config)
+
+    # Start up debuggers. Start these first in case they want to wait.
+    debuggers = domains & DEBUGGER_INTEGRATIONS
+    if debuggers:
+        _LOGGER.debug("Starting up debuggers %s", debuggers)
+        await asyncio.gather(*[
+            async_setup_component(opp, domain, config)
+            for domain in debuggers])
+        domains -= DEBUGGER_INTEGRATIONS
+
+    # Resolve all dependencies of all components so we can find the logging
+    # and integrations that need faster initialization.
+    resolved_domains_task = asyncio.gather(*[
+        loader.async_component_dependencies(opp, domain)
+        for domain in domains
+    ], return_exceptions=True)
+
+    # Set up core.
+    _LOGGER.debug("Setting up %s", CORE_INTEGRATIONS)
+
+    if not all(await asyncio.gather(*[
+            async_setup_component(opp, domain, config)
+            for domain in CORE_INTEGRATIONS
+    ])):
+        _LOGGER.error("Open Peer Power core failed to initialize. "
+                      "Further initialization aborted")
+        return
+
+    _LOGGER.debug("Open Peer Power core initialized")
+
+    # Finish resolving domains
+    for dep_domains in await resolved_domains_task:
+        # Result is either a set or an exception. We ignore exceptions
+        # It will be properly handled during setup of the domain.
+        if isinstance(dep_domains, set):
+            domains.update(dep_domains)
+
+    # setup components
+    logging_domains = domains & LOGGING_INTEGRATIONS
+    stage_1_domains = domains & STAGE_1_INTEGRATIONS
+    stage_2_domains = domains - logging_domains - stage_1_domains
+
+    if logging_domains:
+        _LOGGER.info("Setting up %s", logging_domains)
+
+        await asyncio.gather(*[
+            async_setup_component(opp, domain, config)
+            for domain in logging_domains
+        ])
+
+    # Kick off loading the registries. They don't need to be awaited.
+    asyncio.gather(
+        opp.helpers.device_registry.async_get_registry(),
+        opp.helpers.entity_registry.async_get_registry(),
+        opp.helpers.area_registry.async_get_registry())
+
+    if stage_1_domains:
+        await asyncio.gather(*[
+            async_setup_component(opp, domain, config)
+            for domain in stage_1_domains
+        ])
+
+    # Load all integrations
+    after_dependencies = {}  # type: Dict[str, Set[str]]
+
+    for int_or_exc in await asyncio.gather(*[
+            loader.async_get_integration(opp, domain)
+            for domain in stage_2_domains
+    ], return_exceptions=True):
+        # Exceptions are handled in async_setup_component.
+        if (isinstance(int_or_exc, loader.Integration) and
+                int_or_exc.after_dependencies):
+            after_dependencies[int_or_exc.domain] = set(
+                int_or_exc.after_dependencies
+            )
+
+    last_load = None
+    while stage_2_domains:
+        domains_to_load = set()
+
+        for domain in stage_2_domains:
+            after_deps = after_dependencies.get(domain)
+            # Load if integration has no after_dependencies or they are
+            # all loaded
+            if (not after_deps or
+                    not after_deps-opp.config.components):
+                domains_to_load.add(domain)
+
+        if not domains_to_load or domains_to_load == last_load:
+            break
+
+        _LOGGER.debug("Setting up %s", domains_to_load)
+
+        await asyncio.gather(*[
+            async_setup_component(opp, domain, config)
+            for domain in domains_to_load
+        ])
+
+        last_load = domains_to_load
+        stage_2_domains -= domains_to_load
+
+    # These are stage 2 domains that never have their after_dependencies
+    # satisfied.
+    if stage_2_domains:
+        _LOGGER.debug("Final set up: %s", stage_2_domains)
+
+        await asyncio.gather(*[
+            async_setup_component(opp, domain, config)
+            for domain in stage_2_domains
+        ])
+
+    # Wrap up startup
+    await opp.async_block_till_done()
