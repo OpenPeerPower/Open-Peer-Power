@@ -14,7 +14,7 @@ from openpeerpower.helpers.entity import generate_entity_id
 from openpeerpower.helpers.entity_component import EntityComponent
 from openpeerpower.helpers.entity_registry import async_get_registry
 from openpeerpower.const import (
-    ATTR_ENTITY_ID, EVENT_HOMEASSISTANT_START, EVENT_HOMEASSISTANT_STOP)
+    ATTR_ENTITY_ID, EVENT_OPENPEERPOWER_START, EVENT_OPENPEERPOWER_STOP)
 from openpeerpower.helpers.entity_values import EntityValues
 from openpeerpower.helpers.event import async_track_time_change
 from openpeerpower.util import convert
@@ -710,7 +710,7 @@ async def async_setup_entry(opp, config_entry):
         poll_interval = network.get_poll_interval()
         _LOGGER.info("Z-Wave polling interval set to %d ms", poll_interval)
 
-        opp.bus.listen_once(EVENT_HOMEASSISTANT_STOP, stop_network)
+        opp.bus.listen_once(EVENT_OPENPEERPOWER_STOP, stop_network)
 
         # Register node services for Z-Wave network
         opp.services.register(DOMAIN, const.SERVICE_ADD_NODE, add_node)
@@ -785,7 +785,7 @@ async def async_setup_entry(opp, config_entry):
         _LOGGER.info("Z-Wave network autoheal is enabled")
         async_track_time_change(opp, heal_network, hour=0, minute=0, second=0)
 
-    opp.bus.async_listen_once(EVENT_HOMEASSISTANT_START, start_zwave)
+    opp.bus.async_listen_once(EVENT_OPENPEERPOWER_START, start_zwave)
 
     opp.services.async_register(DOMAIN, const.SERVICE_START_NETWORK,
                                  start_zwave)

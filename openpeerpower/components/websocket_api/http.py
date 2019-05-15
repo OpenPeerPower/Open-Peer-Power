@@ -8,7 +8,7 @@ import logging
 from aiohttp import web, WSMsgType
 import async_timeout
 
-from openpeerpower.const import EVENT_HOMEASSISTANT_STOP
+from openpeerpower.const import EVENT_OPENPEERPOWER_STOP
 from openpeerpower.core import callback
 from openpeerpower.components.http import OpenPeerPowerView
 from openpeerpower.helpers.json import JSONEncoder
@@ -111,7 +111,7 @@ class WebSocketHandler:
             self._cancel()
 
         unsub_stop = self.opp.bus.async_listen(
-            EVENT_HOMEASSISTANT_STOP, handle_opp_stop)
+            EVENT_OPENPEERPOWER_STOP, handle_opp_stop)
 
         self._writer_task = self.opp.async_create_task(self._writer())
 

@@ -9,7 +9,7 @@ import async_timeout
 import voluptuous as vol
 
 from openpeerpower.const import (
-    CONF_OPTIMISTIC, EVENT_HOMEASSISTANT_STOP)
+    CONF_OPTIMISTIC, EVENT_OPENPEERPOWER_STOP)
 from openpeerpower.core import callback
 import openpeerpower.helpers.config_validation as cv
 from openpeerpower.setup import async_setup_component
@@ -187,7 +187,7 @@ async def _gw_start(opp, gateway):
         if not connect_task.done():
             connect_task.cancel()
 
-    opp.bus.async_listen_once(EVENT_HOMEASSISTANT_STOP, gw_stop)
+    opp.bus.async_listen_once(EVENT_OPENPEERPOWER_STOP, gw_stop)
     if gateway.device == 'mqtt':
         # Gatways connected via mqtt doesn't send gateway ready message.
         return

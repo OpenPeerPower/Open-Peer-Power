@@ -6,7 +6,7 @@ import voluptuous as vol
 
 from openpeerpower.auth.util import generate_secret
 import openpeerpower.helpers.config_validation as cv
-from openpeerpower.const import EVENT_HOMEASSISTANT_STOP, CONF_FILENAME
+from openpeerpower.const import EVENT_OPENPEERPOWER_STOP, CONF_FILENAME
 from openpeerpower.core import callback
 from openpeerpower.exceptions import OpenPeerPowerError
 from openpeerpower.loader import bind_opp
@@ -99,7 +99,7 @@ async def async_setup(opp, config):
             stream.stop()
         _LOGGER.info("Stopped stream workers.")
 
-    opp.bus.async_listen_once(EVENT_HOMEASSISTANT_STOP, shutdown)
+    opp.bus.async_listen_once(EVENT_OPENPEERPOWER_STOP, shutdown)
 
     async def async_record(call):
         """Call record stream service handler."""

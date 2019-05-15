@@ -21,7 +21,7 @@ from openpeerpower.components import websocket_api
 from openpeerpower.const import (
     CONF_DEVICE, CONF_NAME, CONF_PASSWORD, CONF_PAYLOAD, CONF_PORT,
     CONF_PROTOCOL, CONF_USERNAME, CONF_VALUE_TEMPLATE,
-    EVENT_HOMEASSISTANT_STOP)
+    EVENT_OPENPEERPOWER_STOP)
 from openpeerpower.core import Event, ServiceCall, callback
 from openpeerpower.exceptions import (
     OpenPeerPowerError, Unauthorized, ConfigEntryNotReady)
@@ -585,7 +585,7 @@ async def async_setup_entry(opp, entry):
         """Stop MQTT component."""
         await opp.data[DATA_MQTT].async_disconnect()
 
-    opp.bus.async_listen_once(EVENT_HOMEASSISTANT_STOP, async_stop_mqtt)
+    opp.bus.async_listen_once(EVENT_OPENPEERPOWER_STOP, async_stop_mqtt)
 
     async def async_publish_service(call: ServiceCall):
         """Handle MQTT publish service calls."""

@@ -5,7 +5,7 @@ import tempfile
 
 import voluptuous as vol
 
-from openpeerpower.const import EVENT_HOMEASSISTANT_STOP
+from openpeerpower.const import EVENT_OPENPEERPOWER_STOP
 import openpeerpower.helpers.config_validation as cv
 
 _LOGGER = logging.getLogger(__name__)
@@ -52,7 +52,7 @@ def async_start(opp, password, server_config):
         yield from broker.shutdown()
 
     opp.bus.async_listen_once(
-        EVENT_HOMEASSISTANT_STOP, async_shutdown_mqtt_server)
+        EVENT_OPENPEERPOWER_STOP, async_shutdown_mqtt_server)
 
     return True, client_config
 

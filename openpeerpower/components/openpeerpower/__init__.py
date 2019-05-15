@@ -13,7 +13,7 @@ from openpeerpower.helpers.service import async_extract_entity_ids
 from openpeerpower.helpers import intent
 from openpeerpower.const import (
     ATTR_ENTITY_ID, SERVICE_TURN_ON, SERVICE_TURN_OFF, SERVICE_TOGGLE,
-    SERVICE_HOMEASSISTANT_STOP, SERVICE_HOMEASSISTANT_RESTART,
+    SERVICE_OPENPEERPOWER_STOP, SERVICE_OPENPEERPOWER_RESTART,
     RESTART_EXIT_CODE)
 from openpeerpower.helpers import config_validation as cv
 
@@ -82,7 +82,7 @@ async def async_setup(opp: ha.OpenPeerPower, config: dict) -> Awaitable[bool]:
 
     async def async_handle_core_service(call):
         """Service handler for handling core services."""
-        if call.service == SERVICE_HOMEASSISTANT_STOP:
+        if call.service == SERVICE_OPENPEERPOWER_STOP:
             opp.async_create_task(opp.async_stop())
             return
 
@@ -98,7 +98,7 @@ async def async_setup(opp: ha.OpenPeerPower, config: dict) -> Awaitable[bool]:
                 "Config validating", "{0}.check_config".format(ha.DOMAIN))
             return
 
-        if call.service == SERVICE_HOMEASSISTANT_RESTART:
+        if call.service == SERVICE_OPENPEERPOWER_RESTART:
             opp.async_create_task(opp.async_stop(RESTART_EXIT_CODE))
 
     async def async_handle_update_service(call):
@@ -110,9 +110,9 @@ async def async_setup(opp: ha.OpenPeerPower, config: dict) -> Awaitable[bool]:
             await asyncio.wait(tasks)
 
     opp.services.async_register(
-        ha.DOMAIN, SERVICE_HOMEASSISTANT_STOP, async_handle_core_service)
+        ha.DOMAIN, SERVICE_OPENPEERPOWER_STOP, async_handle_core_service)
     opp.services.async_register(
-        ha.DOMAIN, SERVICE_HOMEASSISTANT_RESTART, async_handle_core_service)
+        ha.DOMAIN, SERVICE_OPENPEERPOWER_RESTART, async_handle_core_service)
     opp.services.async_register(
         ha.DOMAIN, SERVICE_CHECK_CONFIG, async_handle_core_service)
     opp.services.async_register(
