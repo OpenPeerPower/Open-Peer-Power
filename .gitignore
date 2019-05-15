@@ -4,3 +4,4 @@ logs
 
 # python output
 _pycache_
+*.pyc
