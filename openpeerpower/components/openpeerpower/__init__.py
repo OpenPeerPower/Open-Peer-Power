@@ -28,7 +28,7 @@ SCHEMA_UPDATE_ENTITY = vol.Schema({
 
 
 async def async_setup(opp: ha.OpenPeerPower, config: dict) -> Awaitable[bool]:
-    """Set up general services related to Home Assistant."""
+    """Set up general services related to Open Power Power."""
     async def async_handle_turn_service(service):
         """Handle calls to openpeerpower.turn_on/off."""
         entity_ids = await async_extract_entity_ids(opp, service)

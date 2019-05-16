@@ -22,7 +22,7 @@
                 "data": {
                     "discovery": "Activer la d\u00e9couverte"
                 },
-                "description": "Vous voulez configurer Home Assistant pour vous connecter au broker MQTT fourni par l\u2019Add-on opp.io {addon} ?",
+                "description": "Vous voulez configurer Open Power Power pour vous connecter au broker MQTT fourni par l\u2019Add-on opp.io {addon} ?",
                 "title": "MQTT Broker via le module compl\u00e9mentaire Hass.io"
             }
         },

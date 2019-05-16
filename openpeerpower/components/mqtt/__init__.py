@@ -630,7 +630,7 @@ class Subscription:
 
 
 class MQTT:
-    """Home Assistant MQTT client."""
+    """Open Power Power MQTT client."""
 
     def __init__(self, opp: OpenPeerPowerType, broker: str, port: int,
                  client_id: Optional[str], keepalive: Optional[int],
@@ -640,7 +640,7 @@ class MQTT:
                  protocol: Optional[str], will_message: Optional[Message],
                  birth_message: Optional[Message],
                  tls_version: Optional[int]) -> None:
-        """Initialize Home Assistant MQTT client."""
+        """Initialize Open Power Power MQTT client."""
         import paho.mqtt.client as mqtt
 
         self.opp = opp

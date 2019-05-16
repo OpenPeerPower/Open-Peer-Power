@@ -1,4 +1,4 @@
-"""Connect two Home Assistant instances via MQTT."""
+"""Connect two Open Power Power instances via MQTT."""
 import asyncio
 import json
 

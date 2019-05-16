@@ -77,6 +77,9 @@ default_config:
 # Discover some devices automatically
 discovery:
 
+# Track the sun
+sun:
+
 # Sensors
 sensor:
   # Weather prediction
