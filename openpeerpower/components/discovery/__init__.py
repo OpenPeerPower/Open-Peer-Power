@@ -14,7 +14,7 @@ import voluptuous as vol
 
 from openpeerpower import config_entries
 from openpeerpower.core import callback
-from openpeerpower.const import EVENT_HOMEASSISTANT_START
+from openpeerpower.const import EVENT_OPENPEERPOWER_START
 import openpeerpower.helpers.config_validation as cv
 from openpeerpower.helpers.event import async_track_point_in_utc_time
 from openpeerpower.helpers.discovery import async_load_platform, async_discover
@@ -210,7 +210,7 @@ async def async_setup(opp, config):
         """Schedule the first discovery when Open Power Power starts up."""
         async_track_point_in_utc_time(opp, scan_devices, dt_util.utcnow())
 
-    opp.bus.async_listen_once(EVENT_HOMEASSISTANT_START, schedule_first)
+    opp.bus.async_listen_once(EVENT_OPENPEERPOWER_START, schedule_first)
 
     return True
 

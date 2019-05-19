@@ -165,9 +165,6 @@ async def async_from_config_file(config_path: str,
     async_enable_logging(opp, verbose, log_rotate_days, log_file,
                          log_no_color)
 
-    await opp.async_add_executor_job(
-        conf_util.process_ha_config_upgrade, opp)
-
     try:
         config_dict = await opp.async_add_executor_job(
             conf_util.load_yaml_config_file, config_path)
