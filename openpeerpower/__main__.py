@@ -318,25 +318,9 @@ async def setup_and_run_opp(config_dir: str,
             log_rotate_days=args.log_rotate_days, log_file=args.log_file,
             log_no_color=args.log_no_color)
 
-    if args.open_ui:
-        # Imported here to avoid importing asyncio before monkey patch
-        from openpeerpower.util.async_ import run_callback_threadsafe
-
-        def open_browser(_: Any) -> None:
-            """Open the web interface in a browser."""
-            if opp.config.api is not None:
-                import webbrowser
-                webbrowser.open(opp.config.api.base_url)
-
-        run_callback_threadsafe(
-            opp.loop,
-            opp.bus.async_listen_once,
-            EVENT_OPENPEERPOWER_START, open_browser
-        )
-
-        asyncio.get_event_loop().run_until_complete(
-            websockets.serve(appliances_ws, 'localhost', 6789))
-        asyncio.get_event_loop().run_forever()
+    #asyncio.get_event_loop().run_until_complete(
+    #    websockets.serve(appliances_ws, 'localhost', 6789))
+    #asyncio.get_event_loop().run_forever()
 
     return await opp.async_run()
 

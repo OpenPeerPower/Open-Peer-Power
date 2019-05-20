@@ -93,6 +93,8 @@ DEFAULT_SECRETS = """
 # Use this file to store secrets like usernames and passwords.
 # Learn more at https://open-peer-power.io/docs/configuration/secrets/
 some_password: welcome
+# Enable the websocket api
+websocket_api:
 """
 def _no_duplicate_auth_provider(configs: Sequence[Dict[str, Any]]) \
         -> Sequence[Dict[str, Any]]:
