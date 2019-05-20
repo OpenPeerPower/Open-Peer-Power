@@ -97,7 +97,7 @@ class LightSwitch(Light):
             self.opp, self._switch_entity_id, async_state_changed_listener)
 
     async def async_will_remove_from_opp(self):
-        """Handle removal from Home Assistant."""
+        """Handle removal from Open Power Power."""
         if self._async_unsub_state_changed is not None:
             self._async_unsub_state_changed()
             self._async_unsub_state_changed = None

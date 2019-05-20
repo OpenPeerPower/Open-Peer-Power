@@ -266,7 +266,7 @@ kodi_add_to_playlist:
       example: 'AC/DC'
 
 kodi_call_method:
-  description: 'Call a Kodi JSONRPC API method with optional parameters. Results of the Kodi API call will be redirected in a Home Assistant event: `kodi_call_method_result`.'
+  description: 'Call a Kodi JSONRPC API method with optional parameters. Results of the Kodi API call will be redirected in a Open Power Power event: `kodi_call_method_result`.'
   fields:
     entity_id:
       description: Name(s) of the Kodi entities where to run the API method.

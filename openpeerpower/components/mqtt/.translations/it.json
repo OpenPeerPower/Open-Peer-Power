@@ -22,7 +22,7 @@
                 "data": {
                     "discovery": "Attiva l'individuazione"
                 },
-                "description": "Vuoi configurare Home Assistant per connettersi al broker MQTT fornito dall'add-on di Hass.io {addon}?",
+                "description": "Vuoi configurare Open Power Power per connettersi al broker MQTT fornito dall'add-on di Hass.io {addon}?",
                 "title": "Broker MQTT tramite l'add-on di Hass.io"
             }
         },

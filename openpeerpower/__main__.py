@@ -3,7 +3,10 @@ from __future__ import print_function
 
 import argparse
 import os
+import sys
 import platform
+import asyncio
+import json
 import subprocess
 import sys
 import threading
@@ -101,7 +104,6 @@ async def ensure_config_file(opp: 'core.OpenPeerPower', config_dir: str) \
         sys.exit(1)
 
     return config_path
-
 
 def get_arguments() -> argparse.Namespace:
     """Get parsed passed in arguments."""
@@ -262,6 +264,34 @@ def cmdline() -> List[str]:
 
     return [arg for arg in sys.argv if arg != '--daemon']
 
+def appliance_string():
+    print(appliance_list)
+    return json.dumps(appliance_list)
+
+async def notify_appliances():
+    if USERS:       # asyncio.wait doesn't accept an empty list
+        message = appliance_string()
+        await asyncio.wait([user.send(message) for user in USERS])
+
+async def register(websocket):
+    USERS.add(websocket)
+#    await notify_users()
+
+async def unregister(websocket):
+    USERS.remove(websocket)
+#    await notify_users()
+
+async def appliances_ws(websocket, path):
+    # register(websocket) sends appliance list to websocket
+    await register(websocket)
+    try:
+        await websocket.send(appliance_string())
+        global appliance_list
+        async for message in websocket:
+            appliance_list = json.loads(message)
+            await notify_appliances()
+    finally:
+        await unregister(websocket)
 
 async def setup_and_run_opp(config_dir: str,
                              args: argparse.Namespace) -> int:
@@ -303,6 +333,10 @@ async def setup_and_run_opp(config_dir: str,
             opp.bus.async_listen_once,
             EVENT_OPENPEERPOWER_START, open_browser
         )
+
+        asyncio.get_event_loop().run_until_complete(
+            websockets.serve(appliances_ws, 'localhost', 6789))
+        asyncio.get_event_loop().run_forever()
 
     return await opp.async_run()
 

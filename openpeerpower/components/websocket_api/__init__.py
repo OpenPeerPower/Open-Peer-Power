@@ -1,4 +1,4 @@
-"""WebSocket based API for Home Assistant."""
+"""WebSocket based API for Open Power Power."""
 from openpeerpower.core import callback
 from openpeerpower.loader import bind_opp
 

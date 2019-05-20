@@ -58,7 +58,7 @@ def async_start(opp, password, server_config):
 
 
 def generate_config(opp, passwd, password):
-    """Generate a configuration based on current Home Assistant instance."""
+    """Generate a configuration based on current Open Power Power instance."""
     from . import PROTOCOL_311
 
     config = {

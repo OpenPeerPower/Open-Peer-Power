@@ -77,14 +77,13 @@ default_config:
 # Discover some devices automatically
 discovery:
 
+# Track the sun
+sun:
+
 # Sensors
 sensor:
   # Weather prediction
   - platform: yr
-
-# Text to speech
-tts:
-  - platform: google_translate
 
 group: !include groups.yaml
 automation: !include automations.yaml
@@ -95,17 +94,6 @@ DEFAULT_SECRETS = """
 # Learn more at https://open-peer-power.io/docs/configuration/secrets/
 some_password: welcome
 """
-TTS_PRE_92 = """
-tts:
-  - platform: google
-"""
-TTS_92 = """
-tts:
-  - platform: google_translate
-    service_name: google_say
-"""
-
-
 def _no_duplicate_auth_provider(configs: Sequence[Dict[str, Any]]) \
         -> Sequence[Dict[str, Any]]:
     """No duplicate auth provider config allowed in a list.
@@ -124,7 +112,6 @@ def _no_duplicate_auth_provider(configs: Sequence[Dict[str, Any]]) \
                 ))
         config_keys.add(key)
     return configs
-
 
 def _no_duplicate_auth_mfa_module(configs: Sequence[Dict[str, Any]]) \
         -> Sequence[Dict[str, Any]]:
@@ -146,7 +133,6 @@ def _no_duplicate_auth_mfa_module(configs: Sequence[Dict[str, Any]]) \
                 ))
         config_keys.add(key)
     return configs
-
 
 PACKAGES_CONFIG_SCHEMA = cv.schema_with_slug_keys(  # Package names are slugs
     vol.Schema({cv.string: vol.Any(dict, list, None)})  # Component config
@@ -197,13 +183,11 @@ CORE_CONFIG_SCHEMA = CUSTOMIZE_CONFIG_SCHEMA.extend({
                 _no_duplicate_auth_mfa_module),
 })
 
-
 def get_default_config_dir() -> str:
     """Put together the default configuration directory based on the OS."""
     data_dir = os.getenv('APPDATA') if os.name == "nt" \
         else os.path.expanduser('~')
     return os.path.join(data_dir, CONFIG_DIR_NAME)  # type: ignore
-
 
 async def async_ensure_config_exists(opp: OpenPeerPower, config_dir: str,
                                      detect_location: bool = True)\
@@ -222,7 +206,6 @@ async def async_ensure_config_exists(opp: OpenPeerPower, config_dir: str,
             opp, config_dir, detect_location)
 
     return config_path
-
 
 async def async_create_default_config(
         opp: OpenPeerPower, config_dir: str, detect_location: bool = True
@@ -258,7 +241,6 @@ async def async_create_default_config(
     return await opp.async_add_executor_job(
         _write_default_config, config_dir, info
     )
-
 
 def _write_default_config(config_dir: str, info: Dict)\
         -> Optional[str]:
@@ -352,7 +334,6 @@ def find_config_file(config_dir: Optional[str]) -> Optional[str]:
 
     return config_path if os.path.isfile(config_path) else None
 
-
 def load_yaml_config_file(config_path: str) -> Dict[Any, Any]:
     """Parse a YAML configuration file.
 
@@ -374,61 +355,6 @@ def load_yaml_config_file(config_path: str) -> Dict[Any, Any]:
     for key, value in conf_dict.items():
         conf_dict[key] = value or {}
     return conf_dict
-
-
-def process_ha_config_upgrade(opp: OpenPeerPower) -> None:
-    """Upgrade configuration if necessary.
-
-    This method needs to run in an executor.
-    """
-    version_path = opp.config.path(VERSION_FILE)
-
-    try:
-        with open(version_path, 'rt') as inp:
-            conf_version = inp.readline().strip()
-    except FileNotFoundError:
-        # Last version to not have this file
-        conf_version = '0.7.7'
-
-    if conf_version == __version__:
-        return
-
-    _LOGGER.info("Upgrading configuration directory from %s to %s",
-                 conf_version, __version__)
-
-    if LooseVersion(conf_version) < LooseVersion('0.50'):
-        # 0.50 introduced persistent deps dir.
-        lib_path = opp.config.path('deps')
-        if os.path.isdir(lib_path):
-            shutil.rmtree(lib_path)
-
-    if LooseVersion(conf_version) < LooseVersion('0.92'):
-        # 0.92 moved google/tts.py to google_translate/tts.py
-        config_path = find_config_file(opp.config.config_dir)
-        assert config_path is not None
-
-        with open(config_path, 'rt', encoding='utf-8') as config_file:
-            config_raw = config_file.read()
-
-        if TTS_PRE_92 in config_raw:
-            _LOGGER.info("Migrating google tts to google_translate tts")
-            config_raw = config_raw.replace(TTS_PRE_92, TTS_92)
-            try:
-                with open(config_path, 'wt', encoding='utf-8') as config_file:
-                    config_file.write(config_raw)
-            except IOError:
-                _LOGGER.exception("Migrating to google_translate tts failed")
-                pass
-
-    with open(version_path, 'wt') as outp:
-        outp.write(__version__)
-
-    _LOGGER.debug("Migrating old system configuration files to new locations")
-    for oldf, newf in FILE_MIGRATION:
-        if os.path.isfile(opp.config.path(oldf)):
-            _LOGGER.info("Migrating %s to %s", oldf, newf)
-            os.rename(opp.config.path(oldf), opp.config.path(newf))
-
 
 @callback
 def async_log_exception(ex: vol.Invalid, domain: str, config: Dict,

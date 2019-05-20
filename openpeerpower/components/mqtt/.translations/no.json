@@ -22,7 +22,7 @@
                 "data": {
                     "discovery": "Aktiver oppdagelse"
                 },
-                "description": "Vil du konfigurere Home Assistant til \u00e5 koble til MQTT megler gitt av opp.io tillegget {addon}?",
+                "description": "Vil du konfigurere Open Power Power til \u00e5 koble til MQTT megler gitt av opp.io tillegget {addon}?",
                 "title": "MQTT megler via Hass.io tillegg"
             }
         },

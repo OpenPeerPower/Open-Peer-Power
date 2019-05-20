@@ -1,6 +1,6 @@
 {
   "domain": "openpeerpower",
-  "name": "Home Assistant Core Integration",
+  "name": "Open Power Power Core Integration",
   "documentation": "https://www.open-peer-power.io/components/openpeerpower",
   "requirements": [],
   "dependencies": [],

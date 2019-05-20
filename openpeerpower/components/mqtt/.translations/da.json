@@ -22,7 +22,7 @@
                 "data": {
                     "discovery": "Aktiv\u00e9r opdagelse"
                 },
-                "description": "Vil du konfigurere Home Assistant til at oprette forbindelse til MQTT brokeren, der leveres af opp.io add-on {addon}?",
+                "description": "Vil du konfigurere Open Power Power til at oprette forbindelse til MQTT brokeren, der leveres af opp.io add-on {addon}?",
                 "title": "MQTT Broker via Hass.io add-on"
             }
         },

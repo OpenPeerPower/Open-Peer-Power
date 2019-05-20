@@ -1,14 +1,14 @@
 check_config:
-  description: Check the Home Assistant configuration files for errors. Errors will be displayed in the Home Assistant log.
+  description: Check the Open Power Power configuration files for errors. Errors will be displayed in the Open Power Power log.
 
 reload_core_config:
   description: Reload the core configuration.
 
 restart:
-  description: Restart the Home Assistant service.
+  description: Restart the Open Power Power service.
 
 stop:
-  description: Stop the Home Assistant service.
+  description: Stop the Open Power Power service.
 
 toggle:
   description: Generic service to toggle devices on/off under any domain. Same usage as the light.turn_on, switch.turn_on, etc. services.
