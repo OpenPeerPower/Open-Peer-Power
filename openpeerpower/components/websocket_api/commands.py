@@ -126,7 +126,7 @@ async def handle_call_service(opp, connection, msg):
     except OpenPeerPowerError as err:
         connection.logger.exception(err)
         connection.send_message(messages.error_message(
-            msg['id'], const.ERR_HOME_ASSISTANT_ERROR, '{}'.format(err)))
+            msg['id'], const.ERR_OPEN_PEER_POWER_ERROR, '{}'.format(err)))
     except Exception as err:  # pylint: disable=broad-except
         connection.logger.exception(err)
         connection.send_message(messages.error_message(
