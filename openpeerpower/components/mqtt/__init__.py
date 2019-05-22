@@ -46,7 +46,7 @@ DOMAIN = 'mqtt'
 
 DATA_MQTT = 'mqtt'
 DATA_MQTT_CONFIG = 'mqtt_config'
-DATA_MQTT_HASS_CONFIG = 'mqtt_opp_config'
+DATA_MQTT_OPP_CONFIG = 'mqtt_opp_config'
 
 SERVICE_PUBLISH = 'publish'
 
@@ -441,7 +441,7 @@ async def async_setup(opp: OpenPeerPowerType, config: ConfigType) -> bool:
     # We need this because discovery can cause components to be set up and
     # otherwise it will not load the users config.
     # This needs a better solution.
-    opp.data[DATA_MQTT_HASS_CONFIG] = config
+    opp.data[DATA_MQTT_OPP_CONFIG] = config
 
     websocket_api.async_register_command(opp, websocket_subscribe)
 
@@ -614,7 +614,7 @@ async def async_setup_entry(opp, entry):
 
     if conf.get(CONF_DISCOVERY):
         await _async_setup_discovery(
-            opp, conf, opp.data[DATA_MQTT_HASS_CONFIG], entry)
+            opp, conf, opp.data[DATA_MQTT_OPP_CONFIG], entry)
 
     return True
 
