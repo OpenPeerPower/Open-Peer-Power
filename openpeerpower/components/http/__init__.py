@@ -20,8 +20,8 @@ from .auth import setup_auth
 from .ban import setup_bans
 from .const import (  # noqa
     KEY_AUTHENTICATED,
-    KEY_HASS,
-    KEY_HASS_USER,
+    KEY_OPP,
+    KEY_OPP_USER,
     KEY_REAL_IP,
 )
 from .cors import setup_cors
@@ -210,7 +210,7 @@ class OpenPeerPowerHTTP:
                  login_threshold, is_ban_enabled, ssl_profile):
         """Initialize the HTTP Open Peer Power server."""
         app = self.app = web.Application(middlewares=[])
-        app[KEY_HASS] = opp
+        app[KEY_OPP] = opp
 
         # This order matters
         setup_real_ip(app, use_x_forwarded_for, trusted_proxies)
