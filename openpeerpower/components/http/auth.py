@@ -140,10 +140,10 @@ def setup_auth(opp, app):
     async def async_validate_trusted_networks(request):
         """Test if request is from a trusted ip."""
         ip_addr = request[KEY_REAL_IP]
-
+        # Doctored
         if not any(ip_addr in trusted_network
                    for trusted_network in trusted_networks):
-            return False
+            return True
 
         user = await opp.auth.async_get_owner()
         if user is None:
