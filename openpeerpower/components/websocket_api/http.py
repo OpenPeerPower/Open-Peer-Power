@@ -131,6 +131,8 @@ class WebSocketHandler:
                     'Did not receive auth message within 10 seconds'
                 raise Disconnect
 
+            #if msg.type in (WSMsgType.CLOSE, WSMsgType.CLOSING):
+
             if msg.type in (WSMsgType.CLOSE, WSMsgType.CLOSING):
                 raise Disconnect
 
