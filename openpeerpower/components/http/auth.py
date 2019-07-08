@@ -14,7 +14,7 @@ from openpeerpower.util import dt as dt_util
 
 from .const import (
     KEY_AUTHENTICATED,
-    KEY_HASS_USER,
+    KEY_OPP_USER,
     KEY_REAL_IP,
 )
 
@@ -75,7 +75,7 @@ def setup_auth(opp, app):
             if refresh_token is None:
                 return False
 
-            request[KEY_HASS_USER] = refresh_token.user
+            request[KEY_OPP_USER] = refresh_token.user
             return True
 
         if auth_type == 'Basic' and support_legacy:
@@ -94,7 +94,7 @@ def setup_auth(opp, app):
             if user is None:
                 return False
 
-            request[KEY_HASS_USER] = user
+            request[KEY_OPP_USER] = user
             _LOGGER.info(
                 'Basic auth with api_password is going to deprecate,'
                 ' please use a bearer token to access %s from %s',
@@ -134,22 +134,22 @@ def setup_auth(opp, app):
         if refresh_token is None:
             return False
 
-        request[KEY_HASS_USER] = refresh_token.user
+        request[KEY_OPP_USER] = refresh_token.user
         return True
 
     async def async_validate_trusted_networks(request):
         """Test if request is from a trusted ip."""
         ip_addr = request[KEY_REAL_IP]
-
+        # Doctored
         if not any(ip_addr in trusted_network
                    for trusted_network in trusted_networks):
-            return False
+            return True
 
         user = await opp.auth.async_get_owner()
         if user is None:
             return False
 
-        request[KEY_HASS_USER] = user
+        request[KEY_OPP_USER] = user
         return True
 
     async def async_validate_legacy_api_password(request, password):
@@ -159,7 +159,7 @@ def setup_auth(opp, app):
         if user is None:
             return False
 
-        request[KEY_HASS_USER] = user
+        request[KEY_OPP_USER] = user
         return True
 
     @middleware

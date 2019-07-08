@@ -29,7 +29,7 @@ EVENT_ENTITY_REGISTRY_UPDATED = 'entity_registry_updated'
 SAVE_DELAY = 10
 _LOGGER = logging.getLogger(__name__)
 _UNDEF = object()
-DISABLED_HASS = 'opp'
+DISABLED_OPP = 'opp'
 DISABLED_USER = 'user'
 
 STORAGE_VERSION = 1
@@ -48,7 +48,7 @@ class RegistryEntry:
     config_entry_id = attr.ib(type=str, default=None)
     disabled_by = attr.ib(
         type=str, default=None,
-        validator=attr.validators.in_((DISABLED_HASS, DISABLED_USER, None)))
+        validator=attr.validators.in_((DISABLED_OPP, DISABLED_USER, None)))
     update_listeners = attr.ib(type=list, default=attr.Factory(list),
                                repr=False)
     domain = attr.ib(type=str, init=False, repr=False)

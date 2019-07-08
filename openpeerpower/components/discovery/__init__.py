@@ -30,8 +30,8 @@ SERVICE_DECONZ = 'deconz'
 SERVICE_DLNA_DMR = 'dlna_dmr'
 SERVICE_ENIGMA2 = 'enigma2'
 SERVICE_FREEBOX = 'freebox'
-SERVICE_HASS_IOS_APP = 'hass_ios'
-SERVICE_HASSIO = 'hassio'
+SERVICE_OPP_IOS_APP = 'hass_ios'
+SERVICE_OPPIO = 'hassio'
 SERVICE_HOMEKIT = 'homekit'
 SERVICE_HEOS = 'heos'
 SERVICE_HUE = 'philips_hue'
@@ -66,10 +66,10 @@ CONFIG_ENTRY_HANDLERS = {
 
 SERVICE_HANDLERS = {
     SERVICE_MOBILE_APP: ('mobile_app', None),
-    SERVICE_HASS_IOS_APP: ('ios', None),
+    SERVICE_OPP_IOS_APP: ('ios', None),
     SERVICE_NETGEAR: ('device_tracker', None),
     SERVICE_WEMO: ('wemo', None),
-    SERVICE_HASSIO: ('hassio', None),
+    SERVICE_OPPIO: ('hassio', None),
     SERVICE_APPLE_TV: ('apple_tv', None),
     SERVICE_ENIGMA2: ('media_player', 'enigma2'),
     SERVICE_ROKU: ('roku', None),

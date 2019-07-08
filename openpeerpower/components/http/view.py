@@ -14,7 +14,7 @@ from openpeerpower.core import Context, is_callback
 from openpeerpower.helpers.json import JSONEncoder
 
 from .ban import process_success_login
-from .const import KEY_AUTHENTICATED, KEY_HASS, KEY_REAL_IP
+from .const import KEY_AUTHENTICATED, KEY_OPP, KEY_REAL_IP
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -92,7 +92,7 @@ def request_handler_factory(view, handler):
 
     async def handle(request):
         """Handle incoming request."""
-        if not request.app[KEY_HASS].is_running:
+        if not request.app[KEY_OPP].is_running:
             return web.Response(status=503)
 
         authenticated = request.get(KEY_AUTHENTICATED, False)

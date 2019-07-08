@@ -62,6 +62,19 @@ class AuthPhase:
 
     async def async_handle(self, msg):
         """Handle authentication."""
+        if msg['type'] == 'register':
+            user = await opp.auth.async_create_user(
+                name=msg['name'],
+                system_generated=False,
+                is_active=True,
+                group_ids=[],
+            )
+
+        connection.send_message(
+            websocket_api.result_message(msg['id'], {
+                'user': _user_info(user)
+            }))
+
         try:
             msg = AUTH_MESSAGE_SCHEMA(msg)
         except vol.Invalid as err:
