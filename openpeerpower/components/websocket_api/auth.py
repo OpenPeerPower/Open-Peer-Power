@@ -62,13 +62,9 @@ class AuthPhase:
 
     async def async_handle(self, msg):
         """Handle authentication."""
-        if msg['type'] == 'register':
-            from openpeerpower import auth
-            user = await auth.async_create_user(
+        if msg['type'] == 'register':           
+            user = await self._opp.auth.async_create_user(
                 name=msg['name'],
-                system_generated=False,
-                is_active=True,
-                group_ids=[],
             )
 
         connection.send_message(
