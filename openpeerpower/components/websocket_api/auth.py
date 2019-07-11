@@ -62,15 +62,32 @@ class AuthPhase:
 
     async def async_handle(self, msg):
         """Handle authentication."""
-        if msg['type'] == 'register':           
+        if msg['type'] == 'register':
+            provider = _async_get_opp_provider(self._opp)
+            await provider.async_initialize()   
             user = await self._opp.auth.async_create_user(
                 name=msg['name'],
             )
-
-        connection.send_message(
-            websocket_api.result_message(msg['id'], {
-                'user': _user_info(user)
-            }))
+            await self._opp.async_add_executor_job(
+                provider.data.add_auth, msg['username'], msg['password'])
+            credentials = await provider.async_get_or_create_credentials({
+                'username': msg['username']
+            })
+            await provider.data.async_save()
+            await self._opp.auth.async_link_user(user, credentials)
+            if 'person' in self._opp.config.components:
+                await self._opp.components.person.async_create_person(
+                    data['name'], user_id=user.id
+                )
+            # Return authorization code for fetching tokens and connect
+            # during onboarding.
+            auth_code = self._opp.components.auth.create_auth_code(
+                msg['client_id'], user
+            )
+            connection.send_message(
+                websocket_api.result_message(msg['id'], {
+                    'user': _user_info(user)
+                }))
 
         try:
             msg = AUTH_MESSAGE_SCHEMA(msg)
@@ -117,3 +134,11 @@ class AuthPhase:
         self._send_message(auth_ok_message())
         return ActiveConnection(
             self._logger, self._opp, self._send_message, user, refresh_token)
+
+def _async_get_opp_provider(opp):
+    """Get the Open Peer Power auth provider."""
+    for prv in opp.auth.auth_providers:
+        if prv.type == 'openpeerpower':
+            return prv
+
+    raise RuntimeError('No Open Peer Power provider found')
