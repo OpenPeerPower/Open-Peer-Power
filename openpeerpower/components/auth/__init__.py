@@ -123,7 +123,7 @@ import voluptuous as vol
 
 from openpeerpower.auth.models import User, Credentials, \
     TOKEN_TYPE_LONG_LIVED_ACCESS_TOKEN
-from openpeerpower.loader import bind_hass
+from openpeerpower.loader import bind_opp
 from openpeerpower.components import websocket_api
 from openpeerpower.components.http import KEY_REAL_IP
 from openpeerpower.components.http.auth import async_sign_path
@@ -179,7 +179,7 @@ RESULT_TYPE_USER = 'user'
 _LOGGER = logging.getLogger(__name__)
 
 
-@bind_hass
+@bind_opp
 def create_auth_code(opp, client_id: str, user: User) -> str:
     """Create an authorization code to fetch tokens."""
     return opp.data[DOMAIN](client_id, user)
@@ -386,7 +386,7 @@ class LinkUserView(openpeerpowerView):
     async def post(self, request, data):
         """Link a user."""
         opp = request.app['opp']
-        user = request['hass_user']
+        user = request['opp_user']
 
         credentials = self._retrieve_credentials(
             data['client_id'], RESULT_TYPE_CREDENTIALS, data['code'])
