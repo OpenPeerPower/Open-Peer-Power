@@ -2,20 +2,20 @@
 from functools import wraps
 import voluptuous as vol
 
-from homeassistant.components import websocket_api
+from openpeerpower.components import websocket_api
 
 DATA_STORAGE = 'frontend_storage'
 STORAGE_VERSION_USER_DATA = 1
 STORAGE_KEY_USER_DATA = 'frontend.user_data_{}'
 
 
-async def async_setup_frontend_storage(hass):
+async def async_setup_frontend_storage(opp):
     """Set up frontend storage."""
-    hass.data[DATA_STORAGE] = ({}, {})
-    hass.components.websocket_api.async_register_command(
+    opp.data[DATA_STORAGE] = ({}, {})
+    opp.components.websocket_api.async_register_command(
         websocket_set_user_data
     )
-    hass.components.websocket_api.async_register_command(
+    opp.components.websocket_api.async_register_command(
         websocket_get_user_data
     )
 
@@ -23,14 +23,14 @@ async def async_setup_frontend_storage(hass):
 def with_store(orig_func):
     """Decorate function to provide data."""
     @wraps(orig_func)
-    async def with_store_func(hass, connection, msg):
+    async def with_store_func(opp, connection, msg):
         """Provide user specific data and store to function."""
-        stores, data = hass.data[DATA_STORAGE]
+        stores, data = opp.data[DATA_STORAGE]
         user_id = connection.user.id
         store = stores.get(user_id)
 
         if store is None:
-            store = stores[user_id] = hass.helpers.storage.Store(
+            store = stores[user_id] = opp.helpers.storage.Store(
                 STORAGE_VERSION_USER_DATA,
                 STORAGE_KEY_USER_DATA.format(connection.user.id)
             )
@@ -39,7 +39,7 @@ def with_store(orig_func):
             data[user_id] = await store.async_load() or {}
 
         await orig_func(
-            hass, connection, msg,
+            opp, connection, msg,
             store,
             data[user_id],
         )
@@ -53,7 +53,7 @@ def with_store(orig_func):
 })
 @websocket_api.async_response
 @with_store
-async def websocket_set_user_data(hass, connection, msg, store, data):
+async def websocket_set_user_data(opp, connection, msg, store, data):
     """Handle set global data command.
 
     Async friendly.
@@ -71,7 +71,7 @@ async def websocket_set_user_data(hass, connection, msg, store, data):
 })
 @websocket_api.async_response
 @with_store
-async def websocket_get_user_data(hass, connection, msg, store, data):
+async def websocket_get_user_data(opp, connection, msg, store, data):
     """Handle get global data command.
 
     Async friendly.
