@@ -84,10 +84,11 @@ class AuthPhase:
             auth_code = self._opp.components.auth.create_auth_code(
                 msg['client_id'], user
             )
-            connection.send_message(
-                websocket_api.result_message(msg['id'], {
-                    'user': _user_info(user)
-                }))
+            self._send_message(
+                {'id':msg['id'],
+                 'auth_code': auth_code,
+                }
+            )
 
         try:
             msg = AUTH_MESSAGE_SCHEMA(msg)
