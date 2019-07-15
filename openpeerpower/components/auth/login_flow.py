@@ -74,7 +74,7 @@ from openpeerpower.components.http import KEY_REAL_IP
 from openpeerpower.components.http.ban import process_wrong_login, \
     log_invalid_auth
 from openpeerpower.components.http.data_validator import RequestDataValidator
-from openpeerpower.components.http.view import openpeerpowerView
+from openpeerpower.components.http.view import OpenPeerPowerView
 from . import indieauth
 
 
@@ -87,7 +87,7 @@ async def async_setup(opp, store_result):
         LoginFlowResourceView(opp.auth.login_flow, store_result))
 
 
-class AuthProvidersView(openpeerpowerView):
+class AuthProvidersView(OpenPeerPowerView):
     """View to get available auth providers."""
 
     url = '/auth/providers'
@@ -135,7 +135,7 @@ def _prepare_result_json(result):
     return data
 
 
-class LoginFlowIndexView(openpeerpowerView):
+class LoginFlowIndexView(OpenPeerPowerView):
     """View to create a config flow."""
 
     url = '/auth/login_flow'
@@ -189,7 +189,7 @@ class LoginFlowIndexView(openpeerpowerView):
         return self.json(_prepare_result_json(result))
 
 
-class LoginFlowResourceView(openpeerpowerView):
+class LoginFlowResourceView(OpenPeerPowerView):
     """View to interact with the flow manager."""
 
     url = '/auth/login_flow/{flow_id}'

@@ -5,7 +5,7 @@ import voluptuous as vol
 
 from openpeerpower import data_entry_flow
 from openpeerpower.components import websocket_api
-from openpeerpower.core import callback, openpeerpower
+from openpeerpower.core import callback, OpenPeerPower
 
 WS_TYPE_SETUP_MFA = 'auth/setup_mfa'
 SCHEMA_WS_SETUP_MFA = websocket_api.BASE_COMMAND_MESSAGE_SCHEMA.extend({
@@ -54,7 +54,7 @@ async def async_setup(opp):
 @callback
 @websocket_api.ws_require_user(allow_system_user=False)
 def websocket_setup_mfa(
-        opp: openpeerpower, connection: websocket_api.ActiveConnection, msg):
+        opp: OpenPeerPower, connection: websocket_api.ActiveConnection, msg):
     """Return a setup flow for mfa auth module."""
     async def async_setup_flow(msg):
         """Return a setup flow for mfa auth module."""
@@ -90,7 +90,7 @@ def websocket_setup_mfa(
 @callback
 @websocket_api.ws_require_user(allow_system_user=False)
 def websocket_depose_mfa(
-        opp: openpeerpower, connection: websocket_api.ActiveConnection, msg):
+        opp: OpenPeerPower, connection: websocket_api.ActiveConnection, msg):
     """Remove user from mfa module."""
     async def async_depose(msg):
         """Remove user from mfa auth module."""

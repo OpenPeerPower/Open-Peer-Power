@@ -5,20 +5,14 @@
   "requirements": [],
   "dependencies": [
     "automation",
-    "cloud",
     "config",
-    "conversation",
-    "frontend",
-    "history",
-    "logbook",
-    "map",
-    "mobile_app",
-    "person",
     "script",
     "sun",
-    "system_health",
-    "updater",
-    "zeroconf"
+    "api",
+    "auth",
+    "http",
+    "onboarding",
+    "websocket_api"
   ],
   "codeowners": []
 }

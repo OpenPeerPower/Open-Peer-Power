@@ -16,6 +16,7 @@ TYPE_AUTH = 'auth'
 TYPE_AUTH_INVALID = 'auth_invalid'
 TYPE_AUTH_OK = 'auth_ok'
 TYPE_AUTH_REQUIRED = 'auth_required'
+TYPE_AUTH_TOKEN = 'auth_token'
 
 AUTH_MESSAGE_SCHEMA = vol.Schema({
     vol.Required('type'): TYPE_AUTH,
@@ -84,10 +85,13 @@ class AuthPhase:
             auth_code = self._opp.components.auth.create_auth_code(
                 msg['client_id'], user
             )
-            connection.send_message(
-                websocket_api.result_message(msg['id'], {
-                    'user': _user_info(user)
-                }))
+            self._send_message(
+                {'id':msg['id'],
+                 'type': TYPE_AUTH_TOKEN,
+                 'auth_code': auth_code,
+                }
+            )
+            return
 
         try:
             msg = AUTH_MESSAGE_SCHEMA(msg)
