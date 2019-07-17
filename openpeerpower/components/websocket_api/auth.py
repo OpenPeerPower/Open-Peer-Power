@@ -16,6 +16,7 @@ TYPE_AUTH = 'auth'
 TYPE_AUTH_INVALID = 'auth_invalid'
 TYPE_AUTH_OK = 'auth_ok'
 TYPE_AUTH_REQUIRED = 'auth_required'
+TYPE_AUTH_CODE = 'auth_code'
 TYPE_AUTH_TOKEN = 'auth_token'
 
 AUTH_MESSAGE_SCHEMA = vol.Schema({
@@ -80,14 +81,13 @@ class AuthPhase:
                 await self._opp.components.person.async_create_person(
                     data['name'], user_id=user.id
                 )
-            # Return authorization code for fetching tokens and connect
+            # Return authorization token for fetching tokens and connect
             # during onboarding.
             auth_code = self._opp.components.auth.create_auth_code(
                 msg['client_id'], user
             )
             self._send_message(
-                {'id':msg['id'],
-                 'type': TYPE_AUTH_TOKEN,
+                {'type': TYPE_AUTH_CODE,
                  'auth_code': auth_code,
                 }
             )
