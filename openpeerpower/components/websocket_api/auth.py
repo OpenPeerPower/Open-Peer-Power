@@ -11,6 +11,8 @@ from openpeerpower.const import __version__
 
 from .connection import ActiveConnection
 from .error import Disconnect
+import jwt
+from openpeerpower.auth.util import generate_secret
 
 TYPE_AUTH = 'auth'
 TYPE_AUTH_INVALID = 'auth_invalid'
@@ -18,6 +20,8 @@ TYPE_AUTH_OK = 'auth_ok'
 TYPE_AUTH_REQUIRED = 'auth_required'
 TYPE_AUTH_CODE = 'auth_code'
 TYPE_AUTH_TOKEN = 'auth_token'
+DATA_SIGN_SECRET = 'http.auth.sign_secret'
+SIGN_QUERY_PARAM = 'authSig'
 
 AUTH_MESSAGE_SCHEMA = vol.Schema({
     vol.Required('type'): TYPE_AUTH,
@@ -92,7 +96,29 @@ class AuthPhase:
                 }
             )
             return
-
+        
+        if msg['type'] == 'authorize':
+            secret = self._opp.data.get(DATA_SIGN_SECRET)
+            if secret is None:
+              return False
+            signature = msg[SIGN_QUERY_PARAM]
+            if signature is None:
+              return False
+            try:
+              claims = jwt.decode(
+                signature,
+                secret,
+                algorithms=['HS256'],
+                options={'verify_iss': False}
+              )
+            except jwt.InvalidTokenError:
+              return False
+            refresh_token = await self._opp.auth.async_get_refresh_token(claims['iss'])
+            if refresh_token is None:
+              return False
+            request[KEY_OPP_USER] = refresh_token.user
+            return True
+            
         try:
             msg = AUTH_MESSAGE_SCHEMA(msg)
         except vol.Invalid as err:
