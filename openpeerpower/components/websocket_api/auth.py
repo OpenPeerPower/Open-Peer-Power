@@ -100,7 +100,8 @@ class AuthPhase:
         if msg['type'] == 'authorize':
             secret = self._opp.data.get(DATA_SIGN_SECRET)
             if secret is None:
-              return False
+              secret = self._opp.data[DATA_SIGN_SECRET] = generate_secret()
+
             signature = msg[SIGN_QUERY_PARAM]
             if signature is None:
               return False
