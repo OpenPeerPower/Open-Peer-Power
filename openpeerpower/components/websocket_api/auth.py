@@ -93,13 +93,20 @@ class AuthPhase:
             self._send_message(
                 {'type': TYPE_AUTH_CODE,
                  'auth_code': auth_code,
+                 'user_id': user.id
                 }
             )
             return
         
         if msg['type'] == 'authorize':
-            user = await self._opp.auth.async_get_user(, msg['user_id'])
+            user = await self._opp.auth.async_get_user(msg['user_id'])
             refresh_token = await self._opp.auth.async_create_refresh_token(user, msg['client_id'])
+            self._send_message(
+                {'type': TYPE_AUTH_TOKEN,
+                 'auth_code': json.dumps(refresh_token)
+                }
+            )
+            return
             
         try:
             msg = AUTH_MESSAGE_SCHEMA(msg)
