@@ -98,27 +98,8 @@ class AuthPhase:
             return
         
         if msg['type'] == 'authorize':
-            secret = self._opp.data.get(DATA_SIGN_SECRET)
-            if secret is None:
-              secret = self._opp.data[DATA_SIGN_SECRET] = generate_secret()
-
-            signature = msg[SIGN_QUERY_PARAM]
-            if signature is None:
-              return False
-            try:
-              claims = jwt.decode(
-                signature,
-                secret,
-                algorithms=['HS256'],
-                options={'verify_iss': False}
-              )
-            except jwt.InvalidTokenError:
-              return False
-            refresh_token = await self._opp.auth.async_get_refresh_token(claims['iss'])
-            if refresh_token is None:
-              return False
-            request[KEY_OPP_USER] = refresh_token.user
-            return True
+            user = await self._opp.auth.async_get_user(, msg['user_id'])
+            refresh_token = await self._opp.auth.async_create_refresh_token(user, msg['client_id'])
             
         try:
             msg = AUTH_MESSAGE_SCHEMA(msg)
