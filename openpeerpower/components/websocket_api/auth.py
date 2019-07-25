@@ -59,7 +59,7 @@ class AuthPhase:
     """Connection that requires client to authenticate first."""
 
     def __init__(self, logger, opp, send_message, request):
-        """Initialize the authentiated connection."""
+        """Initialize the authenticated connection."""
         self._opp = opp
         self._send_message = send_message
         self._logger = logger
@@ -91,41 +91,15 @@ class AuthPhase:
             auth_code = self._opp.components.auth.create_auth_code(
                 msg['client_id'], user
             )
-            self._send_message(
-                {'type': TYPE_AUTH_CODE,
-                 'auth_code': auth_code,
-                 'user_id': user.id
-                }
-            )
-            return
         
-        if msg['type'] == 'authorize':
-            user = await self._opp.auth.async_get_user(msg['user_id'])
             refresh_token = await self._opp.auth.async_create_refresh_token(
                 user, msg['client_id'],'FrontEnd', token_type = 'long_lived_access_token')
-            self._send_message(
-                {'type': TYPE_AUTH_TOKEN,
-                 'refresh_token': refresh_token.id
-                }
-            )
-            return
+            #self._send_message(
+            #    {'type': TYPE_AUTH_TOKEN,
+            #     'refresh_token': refresh_token.id
+            #    }
+            #)
             
-        try:
-            msg = AUTH_MESSAGE_SCHEMA(msg)
-        except vol.Invalid as err:
-            error_msg = 'Auth message incorrectly formatted: {}'.format(
-                humanize_error(msg, err))
-            self._logger.warning(error_msg)
-            self._send_message(auth_invalid_message(error_msg))
-            raise Disconnect
-
-        if 'access_token' in msg:
-            self._logger.debug("Received access_token")
-            # Temprarily pass through any token
-            #refresh_token = 'XYZ'
-            refresh_token = \
-                await self._opp.auth.async_validate_access_token(
-                    msg['access_token'])
             if refresh_token is not None:
                 return await self._async_finish_auth(
                     refresh_token.user, refresh_token)
