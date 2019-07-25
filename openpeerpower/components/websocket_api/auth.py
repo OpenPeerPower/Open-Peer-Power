@@ -12,6 +12,7 @@ from openpeerpower.const import __version__
 from .connection import ActiveConnection
 from .error import Disconnect
 import jwt
+import json
 from openpeerpower.auth.util import generate_secret
 
 TYPE_AUTH = 'auth'
@@ -100,10 +101,11 @@ class AuthPhase:
         
         if msg['type'] == 'authorize':
             user = await self._opp.auth.async_get_user(msg['user_id'])
-            refresh_token = await self._opp.auth.async_create_refresh_token(user, msg['client_id'])
+            refresh_token = await self._opp.auth.async_create_refresh_token(
+                user, msg['client_id'],'FrontEnd', token_type = 'long_lived_access_token')
             self._send_message(
                 {'type': TYPE_AUTH_TOKEN,
-                 'auth_code': json.dumps(refresh_token)
+                 'refresh_token': refresh_token.id
                 }
             )
             return
