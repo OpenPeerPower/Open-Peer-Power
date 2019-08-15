@@ -98,7 +98,10 @@ class AuthPhase:
             #    {'type': TYPE_AUTH_TOKEN,
             #     'refresh_token': refresh_token.id
             #    }
-            #)
+            #
+            # 
+            # 
+            # )
             
             if refresh_token is not None:
                 return await self._async_finish_auth(
