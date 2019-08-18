@@ -69,6 +69,15 @@ class AuthPhase:
 
     async def async_handle(self, msg):
         """Handle authentication."""
+        if msg['type'] == 'auth':
+            self._logger.debug("Received access_token")
+            refresh_token = \
+                await self._opp.auth.async_validate_access_token(
+                    msg['access_token'])
+            if refresh_token is not None:
+                return await self._async_finish_auth(
+                    refresh_token.user, refresh_token)
+
         if msg['type'] == 'register':
             provider = _async_get_opp_provider(self._opp)
             await provider.async_initialize()   
@@ -94,14 +103,11 @@ class AuthPhase:
         
             refresh_token = await self._opp.auth.async_create_refresh_token(
                 user, msg['client_id'],'FrontEnd', token_type = 'long_lived_access_token')
-            #self._send_message(
-            #    {'type': TYPE_AUTH_TOKEN,
-            #     'refresh_token': refresh_token.id
-            #    }
-            #
-            # 
-            # 
-            # )
+            self._send_message(
+                {'type': TYPE_AUTH_TOKEN,
+                 'refresh_token': refresh_token.id
+               }
+             )
             
             if refresh_token is not None:
                 return await self._async_finish_auth(

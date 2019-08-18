@@ -144,12 +144,12 @@ class WebSocketHandler:
                 self.opp.data.get(DATA_CONNECTIONS, 0) + 1
             self.opp.helpers.dispatcher.async_dispatcher_send(
                 SIGNAL_WEBSOCKET_CONNECTED)
-            msg = await wsock.receive()
             try:
                 msg = msg.json()
             except ValueError:
                 disconnect_warn = 'Received invalid JSON.'
-                raise Disconnect
+
+            self._logger.debug("Received %s", msg)
             connection = await auth.async_handle(msg)
 
             # Command phase
