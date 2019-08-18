@@ -103,11 +103,6 @@ class AuthPhase:
         
             refresh_token = await self._opp.auth.async_create_refresh_token(
                 user, msg['client_id'],'FrontEnd', token_type = 'long_lived_access_token')
-            self._send_message(
-                {'type': TYPE_AUTH_TOKEN,
-                 'refresh_token': refresh_token.id
-               }
-             )
             
             if refresh_token is not None:
                 return await self._async_finish_auth(
