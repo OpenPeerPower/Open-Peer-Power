@@ -35,7 +35,7 @@ def auth_ok_message():
     """Return an auth_ok message."""
     return {
         'type': TYPE_AUTH_OK,
-        'ha_version': __version__,
+        'opp_version': __version__,
     }
 
 
@@ -43,7 +43,7 @@ def auth_required_message():
     """Return an auth_required message."""
     return {
         'type': TYPE_AUTH_REQUIRED,
-        'ha_version': __version__,
+        'opp_version': __version__,
     }
 
 
