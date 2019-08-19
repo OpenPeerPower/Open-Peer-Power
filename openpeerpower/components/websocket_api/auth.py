@@ -108,17 +108,23 @@ class AuthPhase:
                 return await self._async_finish_auth(
                     refresh_token.user, refresh_token)
 
-        elif self._opp.auth.support_legacy and 'api_password' in msg:
-            self._logger.info(
-                "Received api_password, it is going to deprecate, please use"
-                " access_token instead. For instructions, see https://"
-                "developers.open-peer-power.io/docs/en/external_api_websocket"
-                ".html#authentication-phase"
-            )
-            user = await legacy_api_password.async_validate_password(
-                self._opp, msg['api_password'])
-            if user is not None:
-                return await self._async_finish_auth(user, None)
+        #elif self._opp.auth.support_legacy and 'api_password' in msg:
+        if msg['type'] == 'login':
+        #elif 'api_password' in msg:
+            #self._logger.info(
+            #    "Received api_password, it is going to deprecate, please use"
+            #    " access_token instead. For instructions, see https://"
+            #    "developers.open-peer-power.io/docs/en/external_api_websocket"
+            #    ".html#authentication-phase"
+            #)
+            provider = _async_get_opp_provider(self._opp)
+            try:
+                await provider.async_validate_login(
+                    msg['username'], msg['api_password'])
+                print("Auth valid")
+            except InvalidAuthError:
+                print("Auth invalid")
+            return
 
         self._send_message(auth_invalid_message(
             'Invalid access token or password'))
