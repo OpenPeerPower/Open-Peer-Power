@@ -42,7 +42,7 @@ RE_YAML_ERROR = re.compile(r"openpeerpower\.util\.yaml")
 RE_ASCII = re.compile(r"\033\[[^m]*m")
 HA_COMPONENT_URL = '[{}](https://open-peer-power.io/components/{}/)'
 YAML_CONFIG_FILE = 'configuration.yaml'
-VERSION_FILE = '.HA_VERSION'
+VERSION_FILE = '.OPP_VERSION'
 CONFIG_DIR_NAME = '.openpeerpower'
 DATA_CUSTOMIZE = 'opp_customize'
 
