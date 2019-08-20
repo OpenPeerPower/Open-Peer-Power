@@ -30,11 +30,12 @@ AUTH_MESSAGE_SCHEMA = vol.Schema({
     vol.Exclusive('access_token', 'auth'): str,
 })
 
-def auth_ok_message():
+def auth_ok_message(access_token = ''):
     """Return an auth_ok message."""
     return {
         'type': TYPE_AUTH_OK,
         'opp_version': __version__,
+        'access_token': access_token
     }
 
 
@@ -99,13 +100,13 @@ class AuthPhase:
             #auth_code = self._opp.components.auth.create_auth_code(
             #    msg['client_id'], user
             #)
-            for refresh_token in user.refresh_tokens.values():
-                if refresh_token.client_name == msg['username']:
-                    break
+            #for refresh_token in user.refresh_tokens.values():
+            #    if refresh_token.client_name == msg['username']:
+            #        break
 
-            #refresh_token = await self._opp.auth.async_create_refresh_token(
-            #    user, msg['client_id'],'FrontEnd', token_type = 'long_lived_access_token')
-            # 
+            refresh_token = await self._opp.auth.async_create_refresh_token(
+                user, msg['client_id'],msg['username'], token_type = 'long_lived_access_token')
+             
             if refresh_token is not None:
                 return await self._async_finish_auth(
                     refresh_token.user, refresh_token)
@@ -142,7 +143,8 @@ class AuthPhase:
         """Create an active connection."""
         self._logger.debug("Auth OK")
         await process_success_login(self._request)
-        self._send_message(auth_ok_message())
+        access_token = self._opp.auth.async_create_access_token(refresh_token)
+        self._send_message(auth_ok_message(access_token))
         return ActiveConnection(
             self._logger, self._opp, self._send_message, user, refresh_token)
 
