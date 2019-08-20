@@ -14,7 +14,7 @@ from .error import Disconnect
 import jwt
 import json
 from openpeerpower.auth.util import generate_secret
-
+from openpeerpower.auth.providers.openpeerpower import InvalidAuth
 TYPE_AUTH = 'auth'
 TYPE_AUTH_INVALID = 'auth_invalid'
 TYPE_AUTH_OK = 'auth_ok'
@@ -29,7 +29,6 @@ AUTH_MESSAGE_SCHEMA = vol.Schema({
     vol.Exclusive('api_password', 'auth'): str,
     vol.Exclusive('access_token', 'auth'): str,
 })
-
 
 def auth_ok_message():
     """Return an auth_ok message."""
@@ -110,21 +109,25 @@ class AuthPhase:
 
         #elif self._opp.auth.support_legacy and 'api_password' in msg:
         if msg['type'] == 'login':
-        #elif 'api_password' in msg:
-            #self._logger.info(
-            #    "Received api_password, it is going to deprecate, please use"
-            #    " access_token instead. For instructions, see https://"
-            #    "developers.open-peer-power.io/docs/en/external_api_websocket"
-            #    ".html#authentication-phase"
-            #)
             provider = _async_get_opp_provider(self._opp)
             try:
                 await provider.async_validate_login(
                     msg['username'], msg['api_password'])
-                print("Auth valid")
-            except InvalidAuthError:
+
+                # password is valied return authorization token for fetching tokens and connect
+                user = await self._opp.auth.async_get_user_by_credentials(
+                    await provider.async_get_or_create_credentials({
+                    'username': msg['username']
+                    })
+                )
+                for refresh_token in user.refresh_tokens.values():
+                    if refresh_token.client_name == msg['username']:
+                        break
+                if refresh_token is not None:
+                    return await self._async_finish_auth(
+                        refresh_token.user, refresh_token)
+            except InvalidAuth:
                 print("Auth invalid")
-            return
 
         self._send_message(auth_invalid_message(
             'Invalid access token or password'))
