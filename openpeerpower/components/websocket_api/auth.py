@@ -96,13 +96,16 @@ class AuthPhase:
                 )
             # Return authorization token for fetching tokens and connect
             # during onboarding.
-            auth_code = self._opp.components.auth.create_auth_code(
-                msg['client_id'], user
-            )
-        
-            refresh_token = await self._opp.auth.async_create_refresh_token(
-                user, msg['client_id'],'FrontEnd', token_type = 'long_lived_access_token')
-            
+            #auth_code = self._opp.components.auth.create_auth_code(
+            #    msg['client_id'], user
+            #)
+            for refresh_token in user.refresh_tokens.values():
+                if refresh_token.client_name == msg['username']:
+                    break
+
+            #refresh_token = await self._opp.auth.async_create_refresh_token(
+            #    user, msg['client_id'],'FrontEnd', token_type = 'long_lived_access_token')
+            # 
             if refresh_token is not None:
                 return await self._async_finish_auth(
                     refresh_token.user, refresh_token)
