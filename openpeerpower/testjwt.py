@@ -9,8 +9,9 @@ import asyncws
 import os
 
 
-ACCESS_TOKEN = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJkZmNlNDZmMjhlMDM0Njg1YWI3OTkxMWRjNTVhNzNkNCIsImlhdCI6MTU2NjAzNjcyNywiZXhwIjoxNTk3NTcyNzI3fQ.29NB-zX8nawoaWE03qpIfEoGHxFlz0m95AN8XYqV-kk'
-fName = 'C:\\Users\\s69171\\AppData\\Roaming\\.openpeerpower\\access_token.txt'
+#fName = 'C:\\Users\\s69171\\AppData\\Roaming\\.openpeerpower\\access_token.txt'
+fName = 'C:\\Users\\Paul\\AppData\\Roaming\\.openpeerpower\\access_token.txt'
+AT = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiIwNTY1ZmIyMTJjZDY0OWUzODE3OWE1NjVkNWI2MzI0ZSIsImlhdCI6MTU2NjMwNDI5MSwiZXhwIjoxNTY2MzA2MDkxfQ.scict7xxyhreFxuUYpHN90lf_ttYh3-t40YGZsHvgfQ'
 
 
 async def main():
@@ -29,12 +30,12 @@ async def main():
                 'access_token': ACCESS_TOKEN}
                 ))
             else:
-                await websocket.send(json.dumps(
-                { 'type': 'register', 'client_id': 'http://127.0.0.1:8081', 'name': 'Paul', 'username': 'paul','password': 'Boswald0'}
-                ))
                 #await websocket.send(json.dumps(
-                #{ 'type': 'login', 'client_id': 'http://127.0.0.1:8081', 'name': 'Paul', 'username': 'paul','api_password': 'Boswald0'}
+                #{ 'type': 'register', 'client_id': 'http://127.0.0.1:8081', 'name': 'Paul', 'username': 'paul','password': 'Boswald0'}
                 #))
+                await websocket.send(json.dumps(
+                { 'type': 'login', 'client_id': 'http://127.0.0.1:8081', 'name': 'Paul', 'username': 'paul','api_password': 'Boswald0'}
+                ))
         
         if msg['type'] == 'auth_ok':
             if os.path.exists(fName):
@@ -42,10 +43,13 @@ async def main():
                 {'id': 2, 'type': 'get_states'}
                 ))
             else:
-                await websocket.send(json.dumps(
-                {"id": 1, "type": "auth/long_lived_access_token", "client_name": "paul", "client_icon": '', "lifespan": 365}
+                if msg['access_token']:
+                    with open(fName, 'w') as f:
+                        f.write(msg['access_token'])
+                #await websocket.send(json.dumps(
+                #{"id": 1, "type": "auth/long_lived_access_token", "client_name": "paul", "client_icon": '', "lifespan": 365}
             #{'id': 2, 'type': 'subscribe_events', 'event_type': 'state_changed'}
-            ))
+            #))
 
         if msg['type'] == 'result' and msg['id'] == 1:
             ACCESS_TOKEN = msg['result']
