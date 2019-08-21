@@ -9,8 +9,8 @@ import asyncws
 import os
 
 
-#fName = 'C:\\Users\\s69171\\AppData\\Roaming\\.openpeerpower\\access_token.txt'
-fName = 'C:\\Users\\Paul\\AppData\\Roaming\\.openpeerpower\\access_token.txt'
+fName = 'C:\\Users\\s69171\\AppData\\Roaming\\.openpeerpower\\access_token.txt'
+#fName = 'C:\\Users\\Paul\\AppData\\Roaming\\.openpeerpower\\access_token.txt'
 AT = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiIwNTY1ZmIyMTJjZDY0OWUzODE3OWE1NjVkNWI2MzI0ZSIsImlhdCI6MTU2NjMwNDI5MSwiZXhwIjoxNTY2MzA2MDkxfQ.scict7xxyhreFxuUYpHN90lf_ttYh3-t40YGZsHvgfQ'
 
 
@@ -30,12 +30,12 @@ async def main():
                 'access_token': ACCESS_TOKEN}
                 ))
             else:
-                #await websocket.send(json.dumps(
-                #{ 'type': 'register', 'client_id': 'http://127.0.0.1:8081', 'name': 'Paul', 'username': 'paul','password': 'Boswald0'}
-                #))
                 await websocket.send(json.dumps(
-                { 'type': 'login', 'client_id': 'http://127.0.0.1:8081', 'name': 'Paul', 'username': 'paul','api_password': 'Boswald0'}
+                { 'type': 'register', 'client_id': 'http://127.0.0.1:8081', 'name': 'Paul', 'username': 'paul','password': 'Boswald0'}
                 ))
+                #await websocket.send(json.dumps(
+                #{ 'type': 'login', 'client_id': 'http://127.0.0.1:8081', 'name': 'Paul', 'username': 'paul','api_password': 'Boswald0'}
+                #))
         
         if msg['type'] == 'auth_ok':
             if os.path.exists(fName):

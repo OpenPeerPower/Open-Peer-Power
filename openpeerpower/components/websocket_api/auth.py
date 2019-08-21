@@ -13,6 +13,7 @@ from .connection import ActiveConnection
 from .error import Disconnect
 import jwt
 import json
+from datetime import timedelta
 from openpeerpower.auth.util import generate_secret
 from openpeerpower.auth.providers.openpeerpower import InvalidAuth
 TYPE_AUTH = 'auth'
@@ -105,7 +106,10 @@ class AuthPhase:
             #        break
 
             refresh_token = await self._opp.auth.async_create_refresh_token(
-                user, msg['client_id'],msg['username'], token_type = 'long_lived_access_token')
+                user, msg['client_id'],msg['username'],
+                token_type = 'long_lived_access_token',
+                access_token_expiration=timedelta(days=365)
+                )
              
             if refresh_token is not None:
                 return await self._async_finish_auth(
