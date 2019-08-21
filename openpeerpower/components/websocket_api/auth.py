@@ -97,13 +97,6 @@ class AuthPhase:
                     data['name'], user_id=user.id
                 )
             # Return authorization token for fetching tokens and connect
-            # during onboarding.
-            #auth_code = self._opp.components.auth.create_auth_code(
-            #    msg['client_id'], user
-            #)
-            #for refresh_token in user.refresh_tokens.values():
-            #    if refresh_token.client_name == msg['username']:
-            #        break
 
             refresh_token = await self._opp.auth.async_create_refresh_token(
                 user, msg['client_id'],msg['username'],
@@ -122,7 +115,7 @@ class AuthPhase:
                 await provider.async_validate_login(
                     msg['username'], msg['api_password'])
 
-                # password is valied return authorization token for fetching tokens and connect
+                # password is valid return authorization token for fetching tokens and connect
                 user = await self._opp.auth.async_get_user_by_credentials(
                     await provider.async_get_or_create_credentials({
                     'username': msg['username']
