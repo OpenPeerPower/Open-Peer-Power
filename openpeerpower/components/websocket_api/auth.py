@@ -15,7 +15,10 @@ import jwt
 import json
 from datetime import timedelta
 from openpeerpower.auth.util import generate_secret
-from openpeerpower.auth.providers.openpeerpower import InvalidAuth
+from openpeerpower.auth.providers.openpeerpower import (
+    InvalidAuth,
+    NoUsers
+)
 TYPE_AUTH = 'auth'
 TYPE_AUTH_INVALID = 'auth_invalid'
 TYPE_AUTH_OK = 'auth_ok'
@@ -108,7 +111,6 @@ class AuthPhase:
                 return await self._async_finish_auth(
                     refresh_token.user, refresh_token)
 
-        #elif self._opp.auth.support_legacy and 'api_password' in msg:
         if msg['type'] == 'login':
             provider = _async_get_opp_provider(self._opp)
             try:
@@ -129,6 +131,52 @@ class AuthPhase:
                         refresh_token.user, refresh_token)
             except InvalidAuth:
                 print("Auth invalid")
+
+        if msg['type'] == 'rogin':
+            provider = _async_get_opp_provider(self._opp)
+            try:
+                await provider.async_validate_login(
+                    msg['username'], msg['api_password'])
+
+                # password is valid return authorization token for fetching tokens and connect
+                user = await self._opp.auth.async_get_user_by_credentials(
+                    await provider.async_get_or_create_credentials({
+                    'username': msg['username']
+                    })
+                )
+                for refresh_token in user.refresh_tokens.values():
+                    if refresh_token.client_name == msg['username']:
+                        break
+            except InvalidAuth:
+                print("Auth invalid")
+                return
+            except NoUsers:
+                await provider.async_initialize()   
+                user = await self._opp.auth.async_create_user(
+                    name=msg['name'],
+                )
+                await self._opp.async_add_executor_job(
+                    provider.data.add_auth, msg['username'], msg['password'])
+                credentials = await provider.async_get_or_create_credentials({
+                    'username': msg['username']
+                })
+                await provider.data.async_save()
+                await self._opp.auth.async_link_user(user, credentials)
+                if 'person' in self._opp.config.components:
+                    await self._opp.components.person.async_create_person(
+                        data['name'], user_id=user.id
+                    )
+            # Return authorization token for fetching tokens and connect
+
+                refresh_token = await self._opp.auth.async_create_refresh_token(
+                    user, msg['client_id'],msg['username'],
+                    token_type = 'long_lived_access_token',
+                    access_token_expiration=timedelta(days=365)
+                    )
+            finally:
+                if refresh_token is not None:
+                    return await self._async_finish_auth(
+                        refresh_token.user, refresh_token)
 
         self._send_message(auth_invalid_message(
             'Invalid access token or password'))
