@@ -82,35 +82,6 @@ class AuthPhase:
                 return await self._async_finish_auth(
                     refresh_token.user, refresh_token)
 
-        if msg['type'] == 'register':
-            provider = _async_get_opp_provider(self._opp)
-            await provider.async_initialize()   
-            user = await self._opp.auth.async_create_user(
-                name=msg['name'],
-            )
-            await self._opp.async_add_executor_job(
-                provider.data.add_auth, msg['username'], msg['password'])
-            credentials = await provider.async_get_or_create_credentials({
-                'username': msg['username']
-            })
-            await provider.data.async_save()
-            await self._opp.auth.async_link_user(user, credentials)
-            if 'person' in self._opp.config.components:
-                await self._opp.components.person.async_create_person(
-                    data['name'], user_id=user.id
-                )
-            # Return authorization token for fetching tokens and connect
-
-            refresh_token = await self._opp.auth.async_create_refresh_token(
-                user, msg['client_id'],msg['username'],
-                token_type = 'long_lived_access_token',
-                access_token_expiration=timedelta(days=365)
-                )
-             
-            if refresh_token is not None:
-                return await self._async_finish_auth(
-                    refresh_token.user, refresh_token)
-
         if msg['type'] == 'login':
             provider = _async_get_opp_provider(self._opp)
             try:
@@ -131,24 +102,6 @@ class AuthPhase:
                         refresh_token.user, refresh_token)
             except InvalidAuth:
                 print("Auth invalid")
-
-        if msg['type'] == 'rogin':
-            provider = _async_get_opp_provider(self._opp)
-            try:
-                await provider.async_validate_login(
-                    msg['username'], msg['api_password'])
-
-                # password is valid return authorization token for fetching tokens and connect
-                user = await self._opp.auth.async_get_user_by_credentials(
-                    await provider.async_get_or_create_credentials({
-                    'username': msg['username']
-                    })
-                )
-                for refresh_token in user.refresh_tokens.values():
-                    if refresh_token.client_name == msg['username']:
-                        break
-            except InvalidAuth:
-                print("Auth invalid")
                 return
             except NoUsers:
                 await provider.async_initialize()   
@@ -156,7 +109,7 @@ class AuthPhase:
                     name=msg['name'],
                 )
                 await self._opp.async_add_executor_job(
-                    provider.data.add_auth, msg['username'], msg['password'])
+                    provider.data.add_auth, msg['username'], msg['api_password'])
                 credentials = await provider.async_get_or_create_credentials({
                     'username': msg['username']
                 })
@@ -173,7 +126,6 @@ class AuthPhase:
                     token_type = 'long_lived_access_token',
                     access_token_expiration=timedelta(days=365)
                     )
-            finally:
                 if refresh_token is not None:
                     return await self._async_finish_auth(
                         refresh_token.user, refresh_token)
