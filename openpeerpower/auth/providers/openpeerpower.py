@@ -44,6 +44,10 @@ class InvalidUser(OpenPeerPowerError):
     Will not be raised when validating authentication.
     """
 
+class NoUsers(OpenPeerPowerError):
+    """Raised when there are no users defined yet.
+    """
+
 
 class Data:
     """Hold the user data."""
@@ -124,9 +128,12 @@ class Data:
         found = None
 
         # Compare all users to avoid timing attacks.
-        for user in self.users:
-            if self.normalize_username(user['username']) == username:
-                found = user
+        if self.users:
+            for user in self.users:
+                if self.normalize_username(user['username']) == username:
+                    found = user
+        else:
+            raise NoUsers
 
         if found is None:
             # check a hash to make timing the same as if user was found
