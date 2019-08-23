@@ -14,11 +14,10 @@ opp = 'C:\\Users\\s69171\\AppData\\Roaming\\.openpeerpower\\opp.txt'
 #fName = 'C:\\Users\\Paul\\AppData\\Roaming\\.openpeerpower\\access_token.txt'
 AT = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiIwNTY1ZmIyMTJjZDY0OWUzODE3OWE1NjVkNWI2MzI0ZSIsImlhdCI6MTU2NjMwNDI5MSwiZXhwIjoxNTY2MzA2MDkxfQ.scict7xxyhreFxuUYpHN90lf_ttYh3-t40YGZsHvgfQ'
 
-
 async def main():
     """Simple WebSocket client """
-    # websocket = await asyncws.connect('ws://localhost:8123/api/websocket')
-    websocket = await asyncws.connect('ws://localhost:8123')
+    websocket = await asyncws.connect('ws://localhost:8123/api/websocket')
+    #websocket = await asyncws.connect('ws://localhost:8123')
     while True:
         message = await websocket.recv()
         msg = json.loads(message)
