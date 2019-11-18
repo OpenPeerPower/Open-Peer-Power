@@ -12,7 +12,7 @@ be in JSON as it's more readable.
 Exchange the authorization code retrieved from the login flow for tokens.
 
 {
-    "client_id": "https://hassbian.local:8123/",
+    "client_id": "https://OPPbian.local:8123/",
     "grant_type": "authorization_code",
     "code": "411ee2f916e648d691e937ae9344681e"
 }

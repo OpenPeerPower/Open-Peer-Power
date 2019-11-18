@@ -8,12 +8,12 @@ from openpeerpower.const import (
     STATE_OFF, STATE_ON)
 from openpeerpower.core import State
 import openpeerpower.helpers.config_validation as cv
-from openpeerpower.helpers.state import HASS_DOMAIN, async_reproduce_state
+from openpeerpower.helpers.state import OPP_DOMAIN, async_reproduce_state
 from openpeerpower.components.scene import STATES, Scene
 
 
 PLATFORM_SCHEMA = vol.Schema({
-    vol.Required(CONF_PLATFORM): HASS_DOMAIN,
+    vol.Required(CONF_PLATFORM): OPP_DOMAIN,
     vol.Required(STATES): vol.All(
         cv.ensure_list,
         [

@@ -176,7 +176,7 @@ class ScriptEntity(ToggleEntity):
         self.script.async_stop()
 
     async def async_will_remove_from_opp(self):
-        """Stop script and remove service when it will be removed from HASS."""
+        """Stop script and remove service when it will be removed from OPP."""
         if self.script.is_running:
             self.script.async_stop()
 

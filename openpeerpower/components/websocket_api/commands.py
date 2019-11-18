@@ -4,7 +4,7 @@ import voluptuous as vol
 from openpeerpower.auth.permissions.const import POLICY_READ
 from openpeerpower.const import (
     MATCH_ALL, EVENT_TIME_CHANGED, EVENT_STATE_CHANGED)
-from openpeerpower.core import callback, DOMAIN as HASS_DOMAIN
+from openpeerpower.core import callback, DOMAIN as OPP_DOMAIN
 from openpeerpower.exceptions import Unauthorized, ServiceNotFound, \
     OpenPeerPowerError
 from openpeerpower.helpers import config_validation as cv
@@ -111,7 +111,7 @@ async def handle_call_service(opp, connection, msg):
     Async friendly.
     """
     blocking = True
-    if (msg['domain'] == HASS_DOMAIN and
+    if (msg['domain'] == OPP_DOMAIN and
             msg['service'] in ['restart', 'stop']):
         blocking = False
 

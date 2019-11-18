@@ -293,7 +293,7 @@ def _get_domains(opp: core.OpenPeerPower, config: Dict[str, Any]) -> Set[str]:
     domains.update(opp.config_entries.async_domains())  # type: ignore
 
     # Make sure the Opp.io component is loaded
-    if 'HASSIO' in os.environ:
+    if 'OPPIO' in os.environ:
         domains.add('oppio')
 
     return domains

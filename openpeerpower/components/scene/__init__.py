@@ -9,7 +9,7 @@ from openpeerpower.const import ATTR_ENTITY_ID, CONF_PLATFORM, SERVICE_TURN_ON
 import openpeerpower.helpers.config_validation as cv
 from openpeerpower.helpers.entity import Entity
 from openpeerpower.helpers.entity_component import EntityComponent
-from openpeerpower.helpers.state import HASS_DOMAIN
+from openpeerpower.helpers.state import OPP_DOMAIN
 
 DOMAIN = 'scene'
 STATE = 'scening'
@@ -19,7 +19,7 @@ STATES = 'states'
 def _opp_domain_validator(config):
     """Validate platform in config for openpeerpower domain."""
     if CONF_PLATFORM not in config:
-        config = {CONF_PLATFORM: HASS_DOMAIN, STATES: config}
+        config = {CONF_PLATFORM: OPP_DOMAIN, STATES: config}
 
     return config
 

@@ -208,7 +208,7 @@ class Data:
 
 @AUTH_PROVIDERS.register('openpeerpower')
 class OppAuthProvider(AuthProvider):
-    """Auth provider based on a local storage of users in HASS config dir."""
+    """Auth provider based on a local storage of users in OPP config dir."""
 
     DEFAULT_TITLE = 'Open Peer Power Local'
 

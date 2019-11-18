@@ -505,12 +505,12 @@ class Group(Entity):
         self._async_update_group_state()
 
     async def async_added_to_opp(self):
-        """Handle addition to HASS."""
+        """Handle addition to OPP."""
         if self.tracking:
             self.async_start()
 
     async def async_will_remove_from_opp(self):
-        """Handle removal from HASS."""
+        """Handle removal from OPP."""
         if self._async_unsub_state_changed:
             self._async_unsub_state_changed()
             self._async_unsub_state_changed = None

@@ -186,7 +186,7 @@ class OpenPeerPower:
         This method is a coroutine.
         """
         if self.state != CoreState.not_running:
-            raise RuntimeError("HASS is already running")
+            raise RuntimeError("OPP is already running")
 
         # _async_stop will set this instead of stopping the loop
         self._stopped = asyncio.Event()

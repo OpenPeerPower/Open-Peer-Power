@@ -30,7 +30,7 @@ from openpeerpower.const import (
     STATE_ON, STATE_OPEN, STATE_UNKNOWN,
     STATE_UNLOCKED, SERVICE_SELECT_OPTION)
 from openpeerpower.core import (
-    Context, State, DOMAIN as HASS_DOMAIN)
+    Context, State, DOMAIN as OPP_DOMAIN)
 from openpeerpower.util.async_ import run_coroutine_threadsafe
 from .typing import OpenPeerPowerType
 
@@ -157,7 +157,7 @@ async def async_reproduce_state_legacy(
     to_call = defaultdict(list)  # type: Dict[Tuple[str, str], List[str]]
 
     if domain == GROUP_DOMAIN:
-        service_domain = HASS_DOMAIN
+        service_domain = OPP_DOMAIN
     else:
         service_domain = domain
 
