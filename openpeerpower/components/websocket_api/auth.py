@@ -86,7 +86,7 @@ class AuthPhase:
             provider = _async_get_opp_provider(self._opp)
             try:
                 await provider.async_validate_login(
-                    msg['username'], msg['api_password'])
+                    msg['username'], msg['password'])
 
                 # password is valid return authorization token for fetching tokens and connect
                 user = await self._opp.auth.async_get_user_by_credentials(
