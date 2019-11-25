@@ -109,7 +109,7 @@ class AuthPhase:
                     name=msg['name'],
                 )
                 await self._opp.async_add_executor_job(
-                    provider.data.add_auth, msg['username'], msg['api_password'])
+                    provider.data.add_auth, msg['username'], msg['password'])
                 credentials = await provider.async_get_or_create_credentials({
                     'username': msg['username']
                 })
