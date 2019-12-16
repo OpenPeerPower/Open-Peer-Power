@@ -18,8 +18,8 @@ DOMAIN = 'sun'
 
 ENTITY_ID = 'sun.sun'
 
-STATE_ABOVE_HORIZON = 'above_horizon'
-STATE_BELOW_HORIZON = 'below_horizon'
+STATE_ABOVE_HORIZON = 'Above Horizon'
+STATE_BELOW_HORIZON = 'Below Horizon'
 
 STATE_ATTR_AZIMUTH = 'azimuth'
 STATE_ATTR_ELEVATION = 'elevation'
