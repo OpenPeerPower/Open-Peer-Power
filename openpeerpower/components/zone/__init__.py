@@ -49,7 +49,7 @@ async def async_setup(opp, config):
                         entry.get(CONF_ICON), entry.get(CONF_PASSIVE))
             zone.entity_id = async_generate_entity_id(
                 ENTITY_ID_FORMAT, entry[CONF_NAME], entities)
-            opp.async_create_task(zone.async_update_ha_state())
+            opp.async_create_task(zone.async_update_op_state())
             entities.add(zone.entity_id)
 
     if ENTITY_ID_HOME not in entities and HOME_ZONE not in zone_entries:
@@ -57,7 +57,7 @@ async def async_setup(opp, config):
                     opp.config.latitude, opp.config.longitude,
                     DEFAULT_RADIUS, ICON_HOME, False)
         zone.entity_id = ENTITY_ID_HOME
-        opp.async_create_task(zone.async_update_ha_state())
+        opp.async_create_task(zone.async_update_op_state())
 
     return True
 
@@ -71,7 +71,7 @@ async def async_setup_entry(opp, config_entry):
                 entry.get(CONF_PASSIVE, DEFAULT_PASSIVE))
     zone.entity_id = async_generate_entity_id(
         ENTITY_ID_FORMAT, name, None, opp)
-    opp.async_create_task(zone.async_update_ha_state())
+    opp.async_create_task(zone.async_update_op_state())
     opp.data[DOMAIN][slugify(name)] = zone
     return True
 

@@ -279,7 +279,7 @@ async def async_setup(opp, config):
                 need_update = True
 
             if need_update:
-                await group.async_update_ha_state()
+                await group.async_update_op_state()
 
             return
 
@@ -303,7 +303,7 @@ async def async_setup(opp, config):
         for group in await component.async_extract_from_service(
                 service, expand_group=False):
             group.visible = visible
-            tasks.append(group.async_update_ha_state())
+            tasks.append(group.async_update_op_state())
 
         if tasks:
             await asyncio.wait(tasks, loop=opp.loop)
@@ -476,7 +476,7 @@ class Group(Entity):
         self.tracking = tuple(ent_id.lower() for ent_id in entity_ids)
         self.group_on, self.group_off = None, None
 
-        await self.async_update_ha_state(True)
+        await self.async_update_op_state(True)
         self.async_start()
 
     @callback
@@ -526,7 +526,7 @@ class Group(Entity):
             return
 
         self._async_update_group_state(new_state)
-        await self.async_update_ha_state()
+        await self.async_update_op_state()
 
     @property
     def _tracking_states(self):

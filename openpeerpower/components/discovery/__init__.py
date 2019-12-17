@@ -30,15 +30,15 @@ SERVICE_DECONZ = 'deconz'
 SERVICE_DLNA_DMR = 'dlna_dmr'
 SERVICE_ENIGMA2 = 'enigma2'
 SERVICE_FREEBOX = 'freebox'
-SERVICE_OPP_IOS_APP = 'hass_ios'
-SERVICE_OPPIO = 'hassio'
+SERVICE_OPP_IOS_APP = 'opp_ios'
+SERVICE_OPPIO = 'oppio'
 SERVICE_HOMEKIT = 'homekit'
 SERVICE_HEOS = 'heos'
 SERVICE_HUE = 'philips_hue'
 SERVICE_IGD = 'igd'
 SERVICE_IKEA_TRADFRI = 'ikea_tradfri'
 SERVICE_KONNECTED = 'konnected'
-SERVICE_MOBILE_APP = 'hass_mobile_app'
+SERVICE_MOBILE_APP = 'opp_mobile_app'
 SERVICE_NETGEAR = 'netgear_router'
 SERVICE_OCTOPRINT = 'octoprint'
 SERVICE_ROKU = 'roku'
@@ -69,7 +69,7 @@ SERVICE_HANDLERS = {
     SERVICE_OPP_IOS_APP: ('ios', None),
     SERVICE_NETGEAR: ('device_tracker', None),
     SERVICE_WEMO: ('wemo', None),
-    SERVICE_OPPIO: ('hassio', None),
+    SERVICE_OPPIO: ('oppio', None),
     SERVICE_APPLE_TV: ('apple_tv', None),
     SERVICE_ENIGMA2: ('media_player', 'enigma2'),
     SERVICE_ROKU: ('roku', None),

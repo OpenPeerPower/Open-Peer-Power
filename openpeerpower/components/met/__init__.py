@@ -1,0 +1,23 @@
+"""The met component."""
+from openpeerpower.core import Config, HomeAssistant
+from .config_flow import MetFlowHandler  # noqa
+from .const import DOMAIN # noqa
+
+
+async def async_setup(opp: HomeAssistant, config: Config) -> bool:
+    """Set up configured Met."""
+    return True
+
+
+async def async_setup_entry(opp, config_entry):
+    """Set up Met as config entry."""
+    opp.async_create_task(opp.config_entries.async_forward_entry_setup(
+        config_entry, 'weather'))
+    return True
+
+
+async def async_unload_entry(opp, config_entry):
+    """Unload a config entry."""
+    await opp.config_entries.async_forward_entry_unload(
+        config_entry, 'weather')
+    return True

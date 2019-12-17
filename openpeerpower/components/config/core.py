@@ -1,7 +1,7 @@
 """Component to interact with Oppbian tools."""
 
 from openpeerpower.components.http import OpenPeerPowerView
-from openpeerpower.config import async_check_ha_config_file
+from openpeerpower.config import async_check_op_config_file
 
 
 async def async_setup(opp):
@@ -18,7 +18,7 @@ class CheckConfigView(OpenPeerPowerView):
 
     async def post(self, request):
         """Validate configuration and return results."""
-        errors = await async_check_ha_config_file(request.app['opp'])
+        errors = await async_check_op_config_file(request.app['opp'])
 
         state = 'invalid' if errors else 'valid'
 

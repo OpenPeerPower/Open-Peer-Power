@@ -174,7 +174,7 @@ class MqttStateVacuum(MqttAttributes, MqttAvailability, MqttDiscoveryUpdate,
         await self.availability_discovery_update(config)
         await self.device_info_discovery_update(config)
         await self._subscribe_topics()
-        self.async_write_ha_state()
+        self.async_write_op_state()
 
     async def async_added_to_opp(self):
         """Subscribe MQTT events."""
@@ -207,7 +207,7 @@ class MqttStateVacuum(MqttAttributes, MqttAvailability, MqttDiscoveryUpdate,
                 self._state = POSSIBLE_STATES[payload[STATE]]
                 del payload[STATE]
             self._state_attrs.update(payload)
-            self.async_write_ha_state()
+            self.async_write_op_state()
 
         if self._config.get(CONF_STATE_TOPIC):
             topics['state_position_topic'] = {

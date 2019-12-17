@@ -87,7 +87,7 @@ async def async_setup(opp: ha.OpenPeerPower, config: dict) -> Awaitable[bool]:
             return
 
         try:
-            errors = await conf_util.async_check_ha_config_file(opp)
+            errors = await conf_util.async_check_op_config_file(opp)
         except OpenPeerPowerError:
             return
 
@@ -128,7 +128,7 @@ async def async_setup(opp: ha.OpenPeerPower, config: dict) -> Awaitable[bool]:
             return
 
         # auth only processed during startup
-        await conf_util.async_process_ha_core_config(
+        await conf_util.async_process_op_core_config(
             opp, conf.get(ha.DOMAIN) or {})
 
     opp.services.async_register(

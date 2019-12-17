@@ -300,7 +300,7 @@ async def async_setup(opp, config):
                 continue
 
             update_tasks.append(
-                light.async_update_ha_state(True))
+                light.async_update_op_state(True))
 
         if update_tasks:
             await asyncio.wait(update_tasks, loop=opp.loop)

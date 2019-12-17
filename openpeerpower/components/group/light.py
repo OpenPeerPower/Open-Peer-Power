@@ -70,7 +70,7 @@ class LightGroup(light.Light):
         def async_state_changed_listener(entity_id: str, old_state: State,
                                          new_state: State):
             """Handle child updates."""
-            self.async_schedule_update_ha_state(True)
+            self.async_schedule_update_op_state(True)
 
         self._async_unsub_state_changed = async_track_state_change(
             self.opp, self._entity_ids, async_state_changed_listener)

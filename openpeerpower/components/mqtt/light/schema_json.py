@@ -133,7 +133,7 @@ class MqttLightJson(MqttAttributes, MqttAvailability, MqttDiscoveryUpdate,
         await self.availability_discovery_update(config)
         await self.device_info_discovery_update(config)
         await self._subscribe_topics()
-        self.async_write_ha_state()
+        self.async_write_op_state()
 
     def _setup_from_config(self, config):
         """(Re)Setup the entity."""
@@ -273,7 +273,7 @@ class MqttLightJson(MqttAttributes, MqttAvailability, MqttDiscoveryUpdate,
                 except ValueError:
                     _LOGGER.warning("Invalid white value received")
 
-            self.async_write_ha_state()
+            self.async_write_op_state()
 
         if self._topic[CONF_STATE_TOPIC] is not None:
             self._sub_state = await subscription.async_subscribe_topics(
@@ -453,7 +453,7 @@ class MqttLightJson(MqttAttributes, MqttAvailability, MqttDiscoveryUpdate,
             should_update = True
 
         if should_update:
-            self.async_write_ha_state()
+            self.async_write_op_state()
 
     async def async_turn_off(self, **kwargs):
         """Turn the device off.
@@ -472,4 +472,4 @@ class MqttLightJson(MqttAttributes, MqttAvailability, MqttDiscoveryUpdate,
         if self._optimistic:
             # Optimistically assume that the light has changed state.
             self._state = False
-            self.async_write_ha_state()
+            self.async_write_op_state()
