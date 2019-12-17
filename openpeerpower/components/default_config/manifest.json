@@ -12,7 +12,8 @@
     "auth",
     "http",
     "onboarding",
-    "websocket_api"
+    "websocket_api",
+    "weather"
   ],
   "codeowners": []
 }
