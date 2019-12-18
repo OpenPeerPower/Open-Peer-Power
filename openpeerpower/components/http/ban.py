@@ -19,9 +19,9 @@ from .const import KEY_REAL_IP
 
 _LOGGER = logging.getLogger(__name__)
 
-KEY_BANNED_IPS = 'ha_banned_ips'
-KEY_FAILED_LOGIN_ATTEMPTS = 'ha_failed_login_attempts'
-KEY_LOGIN_THRESHOLD = 'ha_login_threshold'
+KEY_BANNED_IPS = 'op_banned_ips'
+KEY_FAILED_LOGIN_ATTEMPTS = 'op_failed_login_attempts'
+KEY_LOGIN_THRESHOLD = 'op_login_threshold'
 
 NOTIFICATION_ID_BAN = 'ip-ban'
 NOTIFICATION_ID_LOGIN = 'http-login'

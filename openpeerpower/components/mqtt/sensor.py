@@ -115,7 +115,7 @@ class MqttSensor(MqttAttributes, MqttAvailability, MqttDiscoveryUpdate,
         await self.availability_discovery_update(config)
         await self.device_info_discovery_update(config)
         await self._subscribe_topics()
-        self.async_write_ha_state()
+        self.async_write_op_state()
 
     async def _subscribe_topics(self):
         """(Re)Subscribe to topics."""
@@ -161,7 +161,7 @@ class MqttSensor(MqttAttributes, MqttAvailability, MqttDiscoveryUpdate,
                 payload = template.async_render_with_possible_json_value(
                     payload, self._state)
             self._state = payload
-            self.async_write_ha_state()
+            self.async_write_op_state()
 
         self._sub_state = await subscription.async_subscribe_topics(
             self.opp, self._sub_state,
@@ -181,7 +181,7 @@ class MqttSensor(MqttAttributes, MqttAvailability, MqttDiscoveryUpdate,
         """Triggered when value is expired."""
         self._expiration_trigger = None
         self._state = None
-        self.async_write_ha_state()
+        self.async_write_op_state()
 
     @property
     def should_poll(self):

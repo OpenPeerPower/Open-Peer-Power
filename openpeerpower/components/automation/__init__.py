@@ -269,7 +269,7 @@ class AutomationEntity(ToggleEntity, RestoreEntity):
 
         self._async_detach_triggers()
         self._async_detach_triggers = None
-        await self.async_update_ha_state()
+        await self.async_update_op_state()
 
     async def async_trigger(self, variables, skip_condition=False,
                             context=None):
@@ -291,7 +291,7 @@ class AutomationEntity(ToggleEntity, RestoreEntity):
         }, context=trigger_context)
         await self._async_action(self.entity_id, variables, trigger_context)
         self._last_triggered = utcnow()
-        await self.async_update_ha_state()
+        await self.async_update_op_state()
 
     async def async_will_remove_from_opp(self):
         """Remove listeners when removing automation from OPP."""
@@ -308,7 +308,7 @@ class AutomationEntity(ToggleEntity, RestoreEntity):
 
         self._async_detach_triggers = await self._async_attach_triggers(
             self.async_trigger)
-        await self.async_update_ha_state()
+        await self.async_update_op_state()
 
     @property
     def device_state_attributes(self):

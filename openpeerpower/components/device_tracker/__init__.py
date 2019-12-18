@@ -298,7 +298,7 @@ class DeviceTracker:
                 host_name, location_name, gps, gps_accuracy, battery,
                 attributes, source_type, consider_home)
             if device.track:
-                await device.async_update_ha_state()
+                await device.async_update_op_state()
             return
 
         # If no device can be found, create it
@@ -317,7 +317,7 @@ class DeviceTracker:
             source_type)
 
         if device.track:
-            await device.async_update_ha_state()
+            await device.async_update_op_state()
 
         # During init, we ignore the group
         if self.group and self.track_new:
@@ -377,7 +377,7 @@ class DeviceTracker:
         for device in self.devices.values():
             if (device.track and device.last_update_home) and \
                device.stale(now):
-                self.opp.async_create_task(device.async_update_ha_state(True))
+                self.opp.async_create_task(device.async_update_op_state(True))
 
     async def async_setup_tracked_device(self):
         """Set up all not exists tracked devices.
@@ -387,7 +387,7 @@ class DeviceTracker:
         async def async_init_single_device(dev):
             """Init a single device_tracker entity."""
             await dev.async_added_to_opp()
-            await dev.async_update_ha_state()
+            await dev.async_update_op_state()
 
         tasks = []
         for device in self.devices.values():

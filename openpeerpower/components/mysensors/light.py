@@ -134,7 +134,7 @@ class MySensorsLight(mysensors.device.MySensorsEntity, Light):
             # optimistically assume that light has changed state
             self._state = False
             self._values[value_type] = STATE_OFF
-            self.async_schedule_update_ha_state()
+            self.async_schedule_update_op_state()
 
     def _async_update_light(self):
         """Update the controller with values from light child."""
@@ -171,7 +171,7 @@ class MySensorsLightDimmer(MySensorsLight):
         self._turn_on_light()
         self._turn_on_dimmer(**kwargs)
         if self.gateway.optimistic:
-            self.async_schedule_update_ha_state()
+            self.async_schedule_update_op_state()
 
     async def async_update(self):
         """Update the controller with the latest value from a sensor."""
@@ -197,7 +197,7 @@ class MySensorsLightRGB(MySensorsLight):
         self._turn_on_dimmer(**kwargs)
         self._turn_on_rgb_and_w('%02x%02x%02x', **kwargs)
         if self.gateway.optimistic:
-            self.async_schedule_update_ha_state()
+            self.async_schedule_update_op_state()
 
     async def async_update(self):
         """Update the controller with the latest value from a sensor."""
@@ -226,4 +226,4 @@ class MySensorsLightRGBW(MySensorsLightRGB):
         self._turn_on_dimmer(**kwargs)
         self._turn_on_rgb_and_w('%02x%02x%02x%02x', **kwargs)
         if self.gateway.optimistic:
-            self.async_schedule_update_ha_state()
+            self.async_schedule_update_op_state()

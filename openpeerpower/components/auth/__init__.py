@@ -33,7 +33,7 @@ token.
 Request a new access token using a refresh token.
 
 {
-    "client_id": "https://hassbian.local:8123/",
+    "client_id": "https://oppbian.local:8123/",
     "grant_type": "refresh_token",
     "refresh_token": "IJKLMNOPQRST"
 }

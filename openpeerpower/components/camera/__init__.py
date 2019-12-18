@@ -231,7 +231,7 @@ async def async_setup(opp, config):
         """Update tokens of the entities."""
         for entity in component.entities:
             entity.async_update_token()
-            opp.async_create_task(entity.async_update_ha_state())
+            opp.async_create_task(entity.async_update_op_state())
 
     opp.helpers.event.async_track_time_interval(
         update_tokens, TOKEN_CHANGE_INTERVAL)

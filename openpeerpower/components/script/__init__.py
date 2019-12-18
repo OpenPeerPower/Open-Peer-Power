@@ -132,7 +132,7 @@ class ScriptEntity(ToggleEntity):
         """Initialize the script."""
         self.object_id = object_id
         self.entity_id = ENTITY_ID_FORMAT.format(object_id)
-        self.script = Script(opp, sequence, name, self.async_update_ha_state)
+        self.script = Script(opp, sequence, name, self.async_update_op_state)
 
     @property
     def should_poll(self):

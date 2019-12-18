@@ -186,7 +186,7 @@ class MqttCover(MqttAttributes, MqttAvailability, MqttDiscoveryUpdate,
         await self.availability_discovery_update(config)
         await self.device_info_discovery_update(config)
         await self._subscribe_topics()
-        self.async_write_ha_state()
+        self.async_write_op_state()
 
     def _setup_from_config(self, config):
         self._config = config
@@ -215,7 +215,7 @@ class MqttCover(MqttAttributes, MqttAvailability, MqttDiscoveryUpdate,
 
                 level = self.find_percentage_in_range(float(msg.payload))
                 self._tilt_value = level
-                self.async_write_ha_state()
+                self.async_write_op_state()
 
         @callback
         def state_message_received(msg):
@@ -232,7 +232,7 @@ class MqttCover(MqttAttributes, MqttAvailability, MqttDiscoveryUpdate,
             else:
                 _LOGGER.warning("Payload is not True or False: %s", payload)
                 return
-            self.async_write_ha_state()
+            self.async_write_op_state()
 
         @callback
         def position_message_received(msg):
@@ -252,7 +252,7 @@ class MqttCover(MqttAttributes, MqttAvailability, MqttDiscoveryUpdate,
                     "Payload is not integer within range: %s",
                     payload)
                 return
-            self.async_write_ha_state()
+            self.async_write_op_state()
 
         if self._config.get(CONF_GET_POSITION_TOPIC):
             topics['get_position_topic'] = {
@@ -357,7 +357,7 @@ class MqttCover(MqttAttributes, MqttAvailability, MqttDiscoveryUpdate,
             if self._config.get(CONF_GET_POSITION_TOPIC):
                 self._position = self.find_percentage_in_range(
                     self._config[CONF_POSITION_OPEN], COVER_PAYLOAD)
-            self.async_write_ha_state()
+            self.async_write_op_state()
 
     async def async_close_cover(self, **kwargs):
         """Move the cover down.
@@ -374,7 +374,7 @@ class MqttCover(MqttAttributes, MqttAvailability, MqttDiscoveryUpdate,
             if self._config.get(CONF_GET_POSITION_TOPIC):
                 self._position = self.find_percentage_in_range(
                     self._config[CONF_POSITION_CLOSED], COVER_PAYLOAD)
-            self.async_write_ha_state()
+            self.async_write_op_state()
 
     async def async_stop_cover(self, **kwargs):
         """Stop the device.
@@ -395,7 +395,7 @@ class MqttCover(MqttAttributes, MqttAvailability, MqttDiscoveryUpdate,
                            self._config[CONF_RETAIN])
         if self._tilt_optimistic:
             self._tilt_value = self._config[CONF_TILT_OPEN_POSITION]
-            self.async_write_ha_state()
+            self.async_write_op_state()
 
     async def async_close_cover_tilt(self, **kwargs):
         """Tilt the cover closed."""
@@ -406,7 +406,7 @@ class MqttCover(MqttAttributes, MqttAvailability, MqttDiscoveryUpdate,
                            self._config[CONF_RETAIN])
         if self._tilt_optimistic:
             self._tilt_value = self._config[CONF_TILT_CLOSED_POSITION]
-            self.async_write_ha_state()
+            self.async_write_op_state()
 
     async def async_set_cover_tilt_position(self, **kwargs):
         """Move the cover tilt to a specific position."""
@@ -451,7 +451,7 @@ class MqttCover(MqttAttributes, MqttAvailability, MqttDiscoveryUpdate,
                 self._state = percentage_position == \
                     self._config[CONF_POSITION_CLOSED]
                 self._position = percentage_position
-                self.async_write_ha_state()
+                self.async_write_op_state()
 
     def find_percentage_in_range(self, position, range_type=TILT_PAYLOAD):
         """Find the 0-100% value within the specified range."""

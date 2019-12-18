@@ -26,9 +26,9 @@ And optional parameter 'type' has to set as 'link_user' if login flow used for
 link credential to exist user. Default 'type' is 'authorize'.
 
 {
-    "client_id": "https://hassbian.local:8123/",
+    "client_id": "https://oppbian.local:8123/",
     "handler": ["local_provider", null],
-    "redirect_url": "https://hassbian.local:8123/",
+    "redirect_url": "https://oppbian.local:8123/",
     "type': "authorize"
 }
 

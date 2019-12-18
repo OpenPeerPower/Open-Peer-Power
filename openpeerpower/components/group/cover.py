@@ -69,7 +69,7 @@ class CoverGroup(CoverDevice):
             for values in self._tilts.values():
                 values.discard(entity_id)
             if update_state:
-                self.async_schedule_update_ha_state(True)
+                self.async_schedule_update_op_state(True)
             return
 
         features = new_state.attributes.get(ATTR_SUPPORTED_FEATURES, 0)
@@ -101,7 +101,7 @@ class CoverGroup(CoverDevice):
             self._tilts[KEY_POSITION].discard(entity_id)
 
         if update_state:
-            self.async_schedule_update_ha_state(True)
+            self.async_schedule_update_op_state(True)
 
     async def async_added_to_opp(self):
         """Register listeners."""
