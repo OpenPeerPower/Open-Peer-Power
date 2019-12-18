@@ -5,15 +5,11 @@
   "requirements": [],
   "dependencies": [
     "automation",
-    "config",
     "script",
     "sun",
     "api",
     "auth",
-    "http",
-    "onboarding",
-    "websocket_api",
-    "weather"
+    "websocket_api"
   ],
   "codeowners": []
 }

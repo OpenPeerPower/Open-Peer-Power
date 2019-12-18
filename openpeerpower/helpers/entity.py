@@ -200,7 +200,7 @@ class Entity:
         self._context = context
         self._context_set = dt_util.utcnow()
 
-    async def async_update_ha_state(self, force_refresh=False):
+    async def async_update_op_state(self, force_refresh=False):
         """Update Open Peer Power with current state of entity.
 
         If force_refresh == True will update entity before setting state.
@@ -222,10 +222,10 @@ class Entity:
                 _LOGGER.exception("Update for %s fails", self.entity_id)
                 return
 
-        self._async_write_ha_state()
+        self._async_write_op_state()
 
     @callback
-    def async_write_ha_state(self):
+    def async_write_op_state(self):
         """Write the state to the state machine."""
         if self.opp is None:
             raise RuntimeError("Attribute opp is None for {}".format(self))
@@ -234,10 +234,10 @@ class Entity:
             raise NoEntitySpecifiedError(
                 "No entity id specified for entity {}".format(self.name))
 
-        self._async_write_ha_state()
+        self._async_write_op_state()
 
     @callback
-    def _async_write_ha_state(self):
+    def _async_write_op_state(self):
         """Write the state to the state machine."""
         start = timer()
 
@@ -323,7 +323,7 @@ class Entity:
         self.opp.states.async_set(
             self.entity_id, state, attr, self.force_update, self._context)
 
-    def schedule_update_ha_state(self, force_refresh=False):
+    def schedule_update_op_state(self, force_refresh=False):
         """Schedule an update ha state change task.
 
         Scheduling the update avoids executor deadlocks.
@@ -333,10 +333,10 @@ class Entity:
         If state is changed more than once before the ha state change task has
         been executed, the intermediate state transitions will be missed.
         """
-        self.opp.add_job(self.async_update_ha_state(force_refresh))
+        self.opp.add_job(self.async_update_op_state(force_refresh))
 
     @callback
-    def async_schedule_update_ha_state(self, force_refresh=False):
+    def async_schedule_update_op_state(self, force_refresh=False):
         """Schedule an update ha state change task.
 
         This method must be run in the event loop.
@@ -347,7 +347,7 @@ class Entity:
         If state is changed more than once before the ha state change task has
         been executed, the intermediate state transitions will be missed.
         """
-        self.opp.async_create_task(self.async_update_ha_state(force_refresh))
+        self.opp.async_create_task(self.async_update_op_state(force_refresh))
 
     async def async_device_update(self, warning=True):
         """Process 'update' or 'async_update' from entity.
@@ -405,7 +405,7 @@ class Entity:
         self.registry_name = new.name
 
         if new.entity_id == self.entity_id:
-            self.async_schedule_update_ha_state()
+            self.async_schedule_update_op_state()
             return
 
         async def readd():

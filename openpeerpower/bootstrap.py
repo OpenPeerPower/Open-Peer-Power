@@ -68,7 +68,7 @@ async def async_from_config_dict(config: Dict[str, Any],
     trusted_networks = config.get('http', {}).get('trusted_networks')
 
     try:
-        await conf_util.async_process_ha_core_config(
+        await conf_util.async_process_op_core_config(
             opp, core_config, api_password, trusted_networks)
     except vol.Invalid as config_err:
         conf_util.async_log_exception(

@@ -8,7 +8,7 @@ import jwt
 
 from openpeerpower.auth.providers import legacy_api_password
 from openpeerpower.auth.util import generate_secret
-from openpeerpower.const import HTTP_HEADER_HA_AUTH
+from openpeerpower.const import HTTP_HEADER_OP_AUTH
 from openpeerpower.core import callback
 from openpeerpower.util import dt as dt_util
 
@@ -167,7 +167,7 @@ def setup_auth(opp, app):
         """Authenticate as middleware."""
         authenticated = False
 
-        if (HTTP_HEADER_HA_AUTH in request.headers or
+        if (HTTP_HEADER_OP_AUTH in request.headers or
                 DATA_API_PASSWORD in request.query):
             if request.path not in old_auth_warning:
                 _LOGGER.log(
@@ -202,9 +202,9 @@ def setup_auth(opp, app):
                 old_auth_warning.add(request.path)
             authenticated = True
 
-        elif (support_legacy and HTTP_HEADER_HA_AUTH in request.headers and
+        elif (support_legacy and HTTP_HEADER_OP_AUTH in request.headers and
               await async_validate_legacy_api_password(
-                  request, request.headers[HTTP_HEADER_HA_AUTH])):
+                  request, request.headers[HTTP_HEADER_OP_AUTH])):
             authenticated = True
 
         elif (support_legacy and DATA_API_PASSWORD in request.query and

@@ -1,10 +1,10 @@
 """The met component."""
-from openpeerpower.core import Config, HomeAssistant
+from openpeerpower.core import Config, OpenPeerPower
 from .config_flow import MetFlowHandler  # noqa
 from .const import DOMAIN # noqa
 
 
-async def async_setup(opp: HomeAssistant, config: Config) -> bool:
+async def async_setup(opp: OpenPeerPower, config: Config) -> bool:
     """Set up configured Met."""
     return True
 

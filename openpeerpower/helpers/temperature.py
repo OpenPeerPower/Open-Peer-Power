@@ -10,7 +10,7 @@ def display_temp(opp: OpenPeerPower, temperature: float, unit: str,
                  precision: float) -> float:
     """Convert temperature into preferred units/precision for display."""
     temperature_unit = unit
-    ha_unit = opp.config.units.temperature_unit
+    op_unit = opp.config.units.temperature_unit
 
     if temperature is None:
         return temperature
@@ -21,9 +21,9 @@ def display_temp(opp: OpenPeerPower, temperature: float, unit: str,
         raise TypeError(
             "Temperature is not a number: {}".format(temperature))
 
-    if temperature_unit != ha_unit:
+    if temperature_unit != op_unit:
         temperature = convert_temperature(
-            temperature, temperature_unit, ha_unit)
+            temperature, temperature_unit, op_unit)
 
     # Round in the units appropriate
     if precision == PRECISION_HALVES:

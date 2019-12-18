@@ -13,9 +13,9 @@ import voluptuous as vol
 
 from openpeerpower.const import (
     ATTR_ENTITY_ID, CONF_DOMAINS, CONF_ENTITIES, CONF_EXCLUDE, CONF_INCLUDE,
-    EVENT_HOMEASSISTANT_START, EVENT_HOMEASSISTANT_STOP, EVENT_STATE_CHANGED,
+    EVENT_OPENPEERPOWER_START, EVENT_OPENPEERPOWER_STOP, EVENT_STATE_CHANGED,
     EVENT_TIME_CHANGED, MATCH_ALL)
-from openpeerpower.core import CoreState, HomeAssistant, callback
+from openpeerpower.core import CoreState, OpenPeerPower, callback
 import openpeerpower.helpers.config_validation as cv
 from openpeerpower.helpers.entityfilter import generate_filter
 from openpeerpower.helpers.typing import ConfigType
@@ -93,7 +93,7 @@ def run_information(opp, point_in_time: Optional[datetime] = None):
         return res
 
 
-async def async_setup(opp: HomeAssistant, config: ConfigType) -> bool:
+async def async_setup(opp: OpenPeerPower, config: ConfigType) -> bool:
     """Set up the recorder."""
     conf = config[DOMAIN]
     keep_days = conf.get(CONF_PURGE_KEEP_DAYS)
@@ -129,7 +129,7 @@ PurgeTask = namedtuple('PurgeTask', ['keep_days', 'repack'])
 class Recorder(threading.Thread):
     """A threaded recorder class."""
 
-    def __init__(self, opp: HomeAssistant, keep_days: int,
+    def __init__(self, opp: OpenPeerPower, keep_days: int,
                  purge_interval: int, uri: str,
                  include: Dict, exclude: Dict) -> None:
         """Initialize the recorder."""
@@ -215,7 +215,7 @@ class Recorder(threading.Thread):
                 self.queue.put(None)
                 self.join()
 
-            self.opp.bus.async_listen_once(EVENT_HOMEASSISTANT_STOP, shutdown)
+            self.opp.bus.async_listen_once(EVENT_OPENPEERPOWER_STOP, shutdown)
 
             if self.opp.state == CoreState.running:
                 opp_started.set_result(None)
@@ -226,7 +226,7 @@ class Recorder(threading.Thread):
                     opp_started.set_result(None)
 
                 self.opp.bus.async_listen_once(
-                    EVENT_HOMEASSISTANT_START, notify_opp_started)
+                    EVENT_OPENPEERPOWER_START, notify_opp_started)
 
         self.opp.add_job(register)
         result = opp_started.result()

@@ -9,7 +9,7 @@ from openpeerpower.components.climate.const import (
 from openpeerpower.const import (
     ATTR_TEMPERATURE, STATE_OFF, TEMP_CELSIUS, TEMP_FAHRENHEIT)
 
-DICT_HA_TO_MYS = {
+DICT_OP_TO_MYS = {
     STATE_AUTO: 'AutoChangeOver',
     STATE_COOL: 'CoolOn',
     STATE_HEAT: 'HeatOn',
@@ -165,7 +165,7 @@ class MySensorsHVAC(mysensors.device.MySensorsEntity, ClimateDevice):
         """Set new target temperature."""
         self.gateway.set_child_value(
             self.node_id, self.child_id, self.value_type,
-            DICT_HA_TO_MYS[operation_mode])
+            DICT_OP_TO_MYS[operation_mode])
         if self.gateway.optimistic:
             # Optimistically assume that device has changed state
             self._values[self.value_type] = operation_mode

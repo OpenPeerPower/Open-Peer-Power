@@ -39,7 +39,7 @@ async def async_update_entity(opp, entity_id):
             'Forced update failed. Entity %s not found.', entity_id)
         return
 
-    await entity.async_update_ha_state(True)
+    await entity.async_update_op_state(True)
 
 
 class EntityComponent:

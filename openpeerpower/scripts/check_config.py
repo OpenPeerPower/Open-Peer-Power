@@ -206,7 +206,7 @@ def check(config_dir, secrets=False):
         opp.config.config_dir = config_dir
 
         res['components'] = opp.loop.run_until_complete(
-            check_ha_config_file(opp))
+            check_op_config_file(opp))
         res['secret_cache'] = OrderedDict(yaml_loader.__SECRET_CACHE)
 
         for err in res['components'].errors:
@@ -286,7 +286,7 @@ class OpenPeerPowerConfig(OrderedDict):
         return self
 
 
-async def check_ha_config_file(opp):
+async def check_op_config_file(opp):
     """Check if Open Peer Power configuration file is valid."""
     config_dir = opp.config.config_dir
     result = OpenPeerPowerConfig()

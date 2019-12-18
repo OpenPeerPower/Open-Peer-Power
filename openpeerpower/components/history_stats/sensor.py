@@ -12,7 +12,7 @@ import openpeerpower.util.dt as dt_util
 from openpeerpower.components.sensor import PLATFORM_SCHEMA
 from openpeerpower.const import (
     CONF_NAME, CONF_ENTITY_ID, CONF_STATE, CONF_TYPE,
-    EVENT_HOMEASSISTANT_START)
+    EVENT_OPENPEERPOWER_START)
 from openpeerpower.exceptions import TemplateError
 from openpeerpower.helpers.entity import Entity
 from openpeerpower.helpers.event import async_track_state_change
@@ -113,7 +113,7 @@ class HistoryStatsSensor(Entity):
             async_track_state_change(self.opp, self._entity_id, force_refresh)
 
         # Delay first refresh to keep startup fast
-        opp.bus.listen_once(EVENT_HOMEASSISTANT_START, start_refresh)
+        opp.bus.listen_once(EVENT_OPENPEERPOWER_START, start_refresh)
 
     @property
     def name(self):

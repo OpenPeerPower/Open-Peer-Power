@@ -362,7 +362,7 @@ class EntityPlatform:
 
         await entity.async_added_to_opp()
 
-        await entity.async_update_ha_state()
+        await entity.async_update_op_state()
 
     async def async_reset(self):
         """Remove all entities and reset data.
@@ -416,7 +416,7 @@ class EntityPlatform:
             for entity in self.entities.values():
                 if not entity.should_poll:
                     continue
-                tasks.append(entity.async_update_ha_state(True))
+                tasks.append(entity.async_update_op_state(True))
 
             if tasks:
                 await asyncio.wait(tasks, loop=self.opp.loop)

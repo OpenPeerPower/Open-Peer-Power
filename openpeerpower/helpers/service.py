@@ -339,7 +339,7 @@ async def _handle_service_platform_call(func, data, entities, context,
             await func(entity, data)
 
         if entity.should_poll:
-            tasks.append(entity.async_update_ha_state(True))
+            tasks.append(entity.async_update_op_state(True))
 
     if tasks:
         done, pending = await asyncio.wait(tasks)

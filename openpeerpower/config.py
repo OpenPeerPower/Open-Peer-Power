@@ -40,7 +40,7 @@ _LOGGER = logging.getLogger(__name__)
 DATA_PERSISTENT_ERRORS = 'bootstrap_persistent_errors'
 RE_YAML_ERROR = re.compile(r"openpeerpower\.util\.yaml")
 RE_ASCII = re.compile(r"\033\[[^m]*m")
-HA_COMPONENT_URL = '[{}](https://open-peer-power.io/components/{}/)'
+OP_COMPONENT_URL = '[{}](https://open-peer-power.io/components/{}/)'
 YAML_CONFIG_FILE = 'configuration.yaml'
 VERSION_FILE = '.OPP_VERSION'
 CONFIG_DIR_NAME = '.openpeerpower'
@@ -401,7 +401,7 @@ def _format_config_error(ex: vol.Invalid, domain: str, config: Dict) -> str:
     return message
 
 
-async def async_process_ha_core_config(
+async def async_process_op_core_config(
         opp: OpenPeerPower, config: Dict,
         api_password: Optional[str] = None,
         trusted_networks: Optional[Any] = None) -> None:
@@ -759,14 +759,14 @@ async def async_process_component_config(
     return config
 
 
-async def async_check_ha_config_file(opp: OpenPeerPower) -> Optional[str]:
+async def async_check_op_config_file(opp: OpenPeerPower) -> Optional[str]:
     """Check if Open Peer Power configuration file is valid.
 
     This method is a coroutine.
     """
-    from openpeerpower.scripts.check_config import check_ha_config_file
+    from openpeerpower.scripts.check_config import check_op_config_file
 
-    res = await check_ha_config_file(opp)  # type: ignore
+    res = await check_op_config_file(opp)  # type: ignore
 
     if not res.errors:
         return None
@@ -794,7 +794,7 @@ def async_notify_setup_error(
 
     for name, link in errors.items():
         if link:
-            part = HA_COMPONENT_URL.format(name.replace('_', '-'), name)
+            part = OP_COMPONENT_URL.format(name.replace('_', '-'), name)
         else:
             part = name
 
