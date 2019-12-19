@@ -7,8 +7,10 @@ import openpeerpower.core
 
 GPSType = Tuple[float, float]
 ConfigType = Dict[str, Any]
+ContextType = openpeerpower.core.Context
 EventType = openpeerpower.core.Event
 OpenPeerPowerType = openpeerpower.core.OpenPeerPower
+ServiceCallType = openpeerpower.core.ServiceCall
 ServiceDataType = Dict[str, Any]
 TemplateVarsType = Optional[Dict[str, Any]]
 

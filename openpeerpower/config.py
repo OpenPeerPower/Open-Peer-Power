@@ -51,7 +51,6 @@ from openpeerpower.requirements import (
     RequirementsNotFound,
     async_get_integration_with_requirements,
 )
-from openpeerpower.util.package import is_docker_env
 from openpeerpower.util.unit_system import IMPERIAL_SYSTEM, METRIC_SYSTEM
 from openpeerpower.util.yaml import SECRET_YAML, load_yaml
 
@@ -75,7 +74,7 @@ DEFAULT_CONFIG = f"""
 # Configure a default setup of Open Peer Power (frontend, api, etc)
 default_config:
 
-# Uncomment this if you are using SSL/TLS, running in Docker container, etc.
+# Uncomment this if you are using SSL/TLS,.
 # http:
 #   base_url: example.duckdns.org:8123
 
@@ -398,13 +397,6 @@ def process_op_config_upgrade(opp: OpenPeerPower) -> None:
             except OSError:
                 _LOGGER.exception("Migrating to google_translate tts failed")
                 pass
-
-    if version_obj < LooseVersion("0.94") and is_docker_env():
-        # In 0.94 we no longer install packages inside the deps folder when
-        # running inside a Docker container.
-        lib_path = opp.config.path("deps")
-        if os.path.isdir(lib_path):
-            shutil.rmtree(lib_path)
 
     with open(version_path, "wt") as outp:
         outp.write(__version__)
