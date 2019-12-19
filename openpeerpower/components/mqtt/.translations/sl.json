@@ -23,7 +23,7 @@
                     "discovery": "Omogo\u010di odkrivanje"
                 },
                 "description": "\u017delite konfigurirati Open Power Power-a za povezavo s posrednikom MQTT, ki ga ponuja opp.io add-on {addon} ?",
-                "title": "MQTT Broker prek dodatka Hass.io"
+                "title": "MQTT Broker prek dodatka Opp.io"
             }
         },
         "title": "MQTT"

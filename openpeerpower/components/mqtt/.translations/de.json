@@ -23,7 +23,7 @@
                     "discovery": "Suche aktivieren"
                 },
                 "description": "M\u00f6chtest du Open Power Power so konfigurieren, dass er eine Verbindung mit dem MQTT-Broker herstellt, der vom Add-on opp.io {addon} bereitgestellt wird?",
-                "title": "MQTT Broker per Hass.io add-on"
+                "title": "MQTT Broker per Opp.io add-on"
             }
         },
         "title": "MQTT"

@@ -1,12 +1,9 @@
 {
   "domain": "auth",
   "name": "Auth",
-  "documentation": "https://www.home-assistant.io/components/auth",
+  "documentation": "https://www.open-peer-power.io/integrations/auth",
   "requirements": [],
-  "dependencies": [
-    "http"
-  ],
-  "codeowners": [
-    "@home-assistant/core"
-  ]
+  "dependencies": ["http"],
+  "after_dependencies": ["onboarding"],
+  "codeowners": ["@open-peer-power/core"]
 }

@@ -1,7 +1,7 @@
 {
   "domain": "sensor",
   "name": "Sensor",
-  "documentation": "https://www.open-peer-power.io/components/sensor",
+  "documentation": "https://www.open-peer-power.io/integrations/sensor",
   "requirements": [],
   "dependencies": [],
   "codeowners": []

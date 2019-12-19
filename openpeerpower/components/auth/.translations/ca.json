@@ -21,7 +21,7 @@
         },
         "totp": {
             "error": {
-                "invalid_code": "Codi inv\u00e0lid, si us plau torna a provar-ho. Si obtens aquest error repetidament, assegura't que la data i hora de Home Assistant siguin correctes i acurades."
+                "invalid_code": "Codi inv\u00e0lid, si us plau torna a provar-ho. Si obtens aquest error repetidament, assegura't que la data i hora de Open Peer Power siguin correctes i acurades."
             },
             "step": {
                 "init": {

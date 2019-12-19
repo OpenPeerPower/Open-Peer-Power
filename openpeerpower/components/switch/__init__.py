@@ -4,24 +4,30 @@ import logging
 
 import voluptuous as vol
 
-from openpeerpower.loader import bind_opp
-from openpeerpower.helpers.entity_component import EntityComponent
-from openpeerpower.helpers.entity import ToggleEntity
-from openpeerpower.helpers.config_validation import (  # noqa
-    PLATFORM_SCHEMA, PLATFORM_SCHEMA_BASE)
-import openpeerpower.helpers.config_validation as cv
-from openpeerpower.const import (
-    STATE_ON, SERVICE_TURN_ON, SERVICE_TURN_OFF, SERVICE_TOGGLE,
-    ATTR_ENTITY_ID)
 from openpeerpower.components import group
+from openpeerpower.const import (
+    SERVICE_TOGGLE,
+    SERVICE_TURN_OFF,
+    SERVICE_TURN_ON,
+    STATE_ON,
+)
+from openpeerpower.helpers.config_validation import (  # noqa: F401
+    PLATFORM_SCHEMA,
+    PLATFORM_SCHEMA_BASE,
+)
+from openpeerpower.helpers.entity import ToggleEntity
+from openpeerpower.helpers.entity_component import EntityComponent
+from openpeerpower.loader import bind_opp
 
-DOMAIN = 'switch'
+# mypy: allow-untyped-defs, no-check-untyped-defs
+
+DOMAIN = "switch"
 SCAN_INTERVAL = timedelta(seconds=30)
 
-GROUP_NAME_ALL_SWITCHES = 'all switches'
-ENTITY_ID_ALL_SWITCHES = group.ENTITY_ID_FORMAT.format('all_switches')
+GROUP_NAME_ALL_SWITCHES = "all switches"
+ENTITY_ID_ALL_SWITCHES = group.ENTITY_ID_FORMAT.format("all_switches")
 
-ENTITY_ID_FORMAT = DOMAIN + '.{}'
+ENTITY_ID_FORMAT = DOMAIN + ".{}"
 
 ATTR_TODAY_ENERGY_KWH = "today_energy_kwh"
 ATTR_CURRENT_POWER_W = "current_power_w"
@@ -29,23 +35,16 @@ ATTR_CURRENT_POWER_W = "current_power_w"
 MIN_TIME_BETWEEN_SCANS = timedelta(seconds=10)
 
 PROP_TO_ATTR = {
-    'current_power_w': ATTR_CURRENT_POWER_W,
-    'today_energy_kwh': ATTR_TODAY_ENERGY_KWH,
+    "current_power_w": ATTR_CURRENT_POWER_W,
+    "today_energy_kwh": ATTR_TODAY_ENERGY_KWH,
 }
 
-DEVICE_CLASS_OUTLET = 'outlet'
-DEVICE_CLASS_SWITCH = 'switch'
+DEVICE_CLASS_OUTLET = "outlet"
+DEVICE_CLASS_SWITCH = "switch"
 
-DEVICE_CLASSES = [
-    DEVICE_CLASS_OUTLET,
-    DEVICE_CLASS_SWITCH,
-]
+DEVICE_CLASSES = [DEVICE_CLASS_OUTLET, DEVICE_CLASS_SWITCH]
 
 DEVICE_CLASSES_SCHEMA = vol.All(vol.Lower, vol.In(DEVICE_CLASSES))
-
-SWITCH_SERVICE_SCHEMA = vol.Schema({
-    vol.Optional(ATTR_ENTITY_ID): cv.comp_entity_ids,
-})
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -63,23 +62,13 @@ def is_on(opp, entity_id=None):
 async def async_setup(opp, config):
     """Track states and offer events for switches."""
     component = opp.data[DOMAIN] = EntityComponent(
-        _LOGGER, DOMAIN, opp, SCAN_INTERVAL, GROUP_NAME_ALL_SWITCHES)
+        _LOGGER, DOMAIN, opp, SCAN_INTERVAL, GROUP_NAME_ALL_SWITCHES
+    )
     await component.async_setup(config)
 
-    component.async_register_entity_service(
-        SERVICE_TURN_OFF, SWITCH_SERVICE_SCHEMA,
-        'async_turn_off'
-    )
-
-    component.async_register_entity_service(
-        SERVICE_TURN_ON, SWITCH_SERVICE_SCHEMA,
-        'async_turn_on'
-    )
-
-    component.async_register_entity_service(
-        SERVICE_TOGGLE, SWITCH_SERVICE_SCHEMA,
-        'async_toggle'
-    )
+    component.async_register_entity_service(SERVICE_TURN_OFF, {}, "async_turn_off")
+    component.async_register_entity_service(SERVICE_TURN_ON, {}, "async_turn_on")
+    component.async_register_entity_service(SERVICE_TOGGLE, {}, "async_toggle")
 
     return True
 

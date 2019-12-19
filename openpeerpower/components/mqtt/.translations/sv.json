@@ -23,7 +23,7 @@
                     "discovery": "Aktivera uppt\u00e4ckt"
                 },
                 "description": "Vill du konfigurera Open Power Power f\u00f6r att ansluta till MQTT Broker som tillhandah\u00e5lls av opp.io-till\u00e4gget {addon} ?",
-                "title": "MQTT Broker via Hass.io till\u00e4gg"
+                "title": "MQTT Broker via Opp.io till\u00e4gg"
             }
         },
         "title": "MQTT"

@@ -70,11 +70,11 @@ def _figure_out_source(record, call_stack, opp):
             stack = call_stack[0:index+1]
 
     # Iterate through the stack call (in reverse) and find the last call from
-    # a file in Home Assistant. Try to figure out where error happened.
+    # a file in Open Peer Power. Try to figure out where error happened.
     paths_re = r'(?:{})/(.*)'.format('|'.join([re.escape(x) for x in paths]))
     for pathname in reversed(stack):
 
-        # Try to match with a file within Home Assistant
+        # Try to match with a file within Open Peer Power
         match = re.match(paths_re, pathname)
         if match:
             return match.group(1)
@@ -194,7 +194,7 @@ async def async_setup(opp, config):
             getattr(logger, level)(service.data[CONF_MESSAGE])
 
     async def async_shutdown_handler(event):
-        """Remove logging handler when Home Assistant is shutdown."""
+        """Remove logging handler when Open Peer Power is shutdown."""
         # This is needed as older logger instances will remain
         logging.getLogger().removeHandler(handler)
 

@@ -21,7 +21,7 @@
         },
         "totp": {
             "error": {
-                "invalid_code": "Cod invalid, va rugam incercati din nou. Dac\u0103 primi\u021bi aceast\u0103 eroare \u00een mod consecvent, asigura\u021bi-v\u0103 c\u0103 ceasul sistemului dvs. Home Assistant este corect."
+                "invalid_code": "Cod invalid, va rugam incercati din nou. Dac\u0103 primi\u021bi aceast\u0103 eroare \u00een mod consecvent, asigura\u021bi-v\u0103 c\u0103 ceasul sistemului dvs. Open Peer Power este corect."
             },
             "step": {
                 "init": {

@@ -21,7 +21,7 @@
         },
         "totp": {
             "error": {
-                "invalid_code": "C\u00f3digo inv\u00e1lido, int\u00e9ntalo de nuevo. Si recibes este error de forma consistente, aseg\u00farate de que el reloj de tu sistema Home Assistant es correcto."
+                "invalid_code": "C\u00f3digo inv\u00e1lido, int\u00e9ntalo de nuevo. Si recibes este error de forma consistente, aseg\u00farate de que el reloj de tu sistema Open Peer Power es correcto."
             },
             "step": {
                 "init": {

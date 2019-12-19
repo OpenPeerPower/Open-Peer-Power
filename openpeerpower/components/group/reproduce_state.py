@@ -2,27 +2,29 @@
 from typing import Iterable, Optional
 
 from openpeerpower.core import Context, State
+from openpeerpower.helpers.state import async_reproduce_state
 from openpeerpower.helpers.typing import OpenPeerPowerType
-from openpeerpower.loader import bind_opp
+
+from . import get_entity_ids
 
 
-@bind_opp
-async def async_reproduce_states(opp: OpenPeerPowerType,
-                                 states: Iterable[State],
-                                 context: Optional[Context] = None) -> None:
+async def async_reproduce_states(
+    opp: OpenPeerPowerType, states: Iterable[State], context: Optional[Context] = None
+) -> None:
     """Reproduce component states."""
-    from . import get_entity_ids
-    from openpeerpower.helpers.state import async_reproduce_state
+
     states_copy = []
     for state in states:
         members = get_entity_ids(opp, state.entity_id)
         for member in members:
             states_copy.append(
-                State(member,
-                      state.state,
-                      state.attributes,
-                      last_changed=state.last_changed,
-                      last_updated=state.last_updated,
-                      context=state.context))
-    await async_reproduce_state(opp, states_copy, blocking=True,
-                                context=context)
+                State(
+                    member,
+                    state.state,
+                    state.attributes,
+                    last_changed=state.last_changed,
+                    last_updated=state.last_updated,
+                    context=state.context,
+                )
+            )
+    await async_reproduce_state(opp, states_copy, blocking=True, context=context)

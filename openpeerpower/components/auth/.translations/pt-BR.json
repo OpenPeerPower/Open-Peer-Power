@@ -9,7 +9,7 @@
         },
         "totp": {
             "error": {
-                "invalid_code": "C\u00f3digo inv\u00e1lido, por favor tente novamente. Se voc\u00ea obtiver este erro de forma consistente, certifique-se de que o rel\u00f3gio do sistema Home Assistant esteja correto."
+                "invalid_code": "C\u00f3digo inv\u00e1lido, por favor tente novamente. Se voc\u00ea obtiver este erro de forma consistente, certifique-se de que o rel\u00f3gio do sistema Open Peer Power esteja correto."
             },
             "step": {
                 "init": {

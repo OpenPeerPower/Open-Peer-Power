@@ -21,7 +21,7 @@
         },
         "totp": {
             "error": {
-                "invalid_code": "Ugyldig kode, pr\u00f8v igjen. Hvis du f\u00e5r denne feilen konsekvent, m\u00e5 du s\u00f8rge for at klokken p\u00e5 Home Assistant systemet er riktig."
+                "invalid_code": "Ugyldig kode, pr\u00f8v igjen. Hvis du f\u00e5r denne feilen konsekvent, m\u00e5 du s\u00f8rge for at klokken p\u00e5 Open Peer Power systemet er riktig."
             },
             "step": {
                 "init": {

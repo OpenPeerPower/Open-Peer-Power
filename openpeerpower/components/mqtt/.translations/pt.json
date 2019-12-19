@@ -23,7 +23,7 @@
                     "discovery": "Ativar descoberta"
                 },
                 "description": "Deseja configurar o Open Power Power para se ligar ao broker MQTT fornecido pelo add-on opp.io {addon}?",
-                "title": "MQTT Broker atrav\u00e9s do add-on Hass.io"
+                "title": "MQTT Broker atrav\u00e9s do add-on Opp.io"
             }
         },
         "title": "MQTT"

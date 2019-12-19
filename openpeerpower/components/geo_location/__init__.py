@@ -4,28 +4,44 @@ import logging
 from typing import Optional
 
 from openpeerpower.const import ATTR_LATITUDE, ATTR_LONGITUDE
-from openpeerpower.helpers.config_validation import (  # noqa
-    PLATFORM_SCHEMA, PLATFORM_SCHEMA_BASE)
+from openpeerpower.helpers.config_validation import (  # noqa: F401
+    PLATFORM_SCHEMA,
+    PLATFORM_SCHEMA_BASE,
+)
 from openpeerpower.helpers.entity import Entity
 from openpeerpower.helpers.entity_component import EntityComponent
 
+# mypy: allow-untyped-defs, no-check-untyped-defs
+
 _LOGGER = logging.getLogger(__name__)
 
-ATTR_DISTANCE = 'distance'
-ATTR_SOURCE = 'source'
+ATTR_DISTANCE = "distance"
+ATTR_SOURCE = "source"
 
-DOMAIN = 'geo_location'
+DOMAIN = "geo_location"
 
-ENTITY_ID_FORMAT = DOMAIN + '.{}'
+ENTITY_ID_FORMAT = DOMAIN + ".{}"
 
 SCAN_INTERVAL = timedelta(seconds=60)
 
 
 async def async_setup(opp, config):
     """Set up the Geolocation component."""
-    component = EntityComponent(_LOGGER, DOMAIN, opp, SCAN_INTERVAL)
+    component = opp.data[DOMAIN] = EntityComponent(
+        _LOGGER, DOMAIN, opp, SCAN_INTERVAL
+    )
     await component.async_setup(config)
     return True
+
+
+async def async_setup_entry(opp, entry):
+    """Set up a config entry."""
+    return await opp.data[DOMAIN].async_setup_entry(entry)
+
+
+async def async_unload_entry(opp, entry):
+    """Unload a config entry."""
+    return await opp.data[DOMAIN].async_unload_entry(entry)
 
 
 class GeolocationEvent(Entity):

@@ -21,7 +21,7 @@
         },
         "totp": {
             "error": {
-                "invalid_code": "Ong\u00ebltege Login, prob\u00e9iert w.e.g. nach emol. Falls d\u00ebse Feeler Message \u00ebmmer er\u00ebm optr\u00ebtt dann iwwerpr\u00e9ift op d'Z\u00e4it vum Home Assistant System richteg ass."
+                "invalid_code": "Ong\u00ebltege Login, prob\u00e9iert w.e.g. nach emol. Falls d\u00ebse Feeler Message \u00ebmmer er\u00ebm optr\u00ebtt dann iwwerpr\u00e9ift op d'Z\u00e4it vum Open Peer Power System richteg ass."
             },
             "step": {
                 "init": {

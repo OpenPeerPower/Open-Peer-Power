@@ -21,7 +21,7 @@
         },
         "totp": {
             "error": {
-                "invalid_code": "\u00c9rv\u00e9nytelen k\u00f3d, pr\u00f3b\u00e1ld \u00fajra. Ha ez a hiba folyamatosan el\u0151fordul, akkor gy\u0151z\u0151dj meg r\u00f3la, hogy a Home Assistant rendszered \u00f3r\u00e1ja pontosan j\u00e1r."
+                "invalid_code": "\u00c9rv\u00e9nytelen k\u00f3d, pr\u00f3b\u00e1ld \u00fajra. Ha ez a hiba folyamatosan el\u0151fordul, akkor gy\u0151z\u0151dj meg r\u00f3la, hogy a Open Peer Power rendszered \u00f3r\u00e1ja pontosan j\u00e1r."
             },
             "step": {
                 "init": {

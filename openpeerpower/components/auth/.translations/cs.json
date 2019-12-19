@@ -20,7 +20,7 @@
         },
         "totp": {
             "error": {
-                "invalid_code": "Neplatn\u00fd k\u00f3d, zkuste to znovu. Pokud se tato chyba opakuje, ujist\u011bte se, \u017ee hodiny syst\u00e9mu Home Assistant jsou spr\u00e1vn\u011b nastaveny."
+                "invalid_code": "Neplatn\u00fd k\u00f3d, zkuste to znovu. Pokud se tato chyba opakuje, ujist\u011bte se, \u017ee hodiny syst\u00e9mu Open Peer Power jsou spr\u00e1vn\u011b nastaveny."
             },
             "step": {
                 "init": {

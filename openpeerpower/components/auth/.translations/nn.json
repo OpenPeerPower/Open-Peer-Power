@@ -2,7 +2,7 @@
     "mfa_setup": {
         "totp": {
             "error": {
-                "invalid_code": "Ugyldig kode, pr\u00f8v igjen. Dersom du heile tida f\u00e5r denne feilen, m\u00e5 du s\u00f8rge for at klokka p\u00e5 Home Assistant-systemet ditt er n\u00f8yaktig."
+                "invalid_code": "Ugyldig kode, pr\u00f8v igjen. Dersom du heile tida f\u00e5r denne feilen, m\u00e5 du s\u00f8rge for at klokka p\u00e5 Open Peer Power-systemet ditt er n\u00f8yaktig."
             },
             "step": {
                 "init": {

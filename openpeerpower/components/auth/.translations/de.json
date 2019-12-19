@@ -21,7 +21,7 @@
         },
         "totp": {
             "error": {
-                "invalid_code": "Ung\u00fcltiger Code, bitte versuche es erneut. Wenn du diesen Fehler regelm\u00e4\u00dfig erhalten, stelle sicher, dass die Uhr deines Home Assistant-Systems korrekt ist."
+                "invalid_code": "Ung\u00fcltiger Code, bitte versuche es erneut. Wenn du diesen Fehler regelm\u00e4\u00dfig erhalten, stelle sicher, dass die Uhr deines Open Peer Power-Systems korrekt ist."
             },
             "step": {
                 "init": {

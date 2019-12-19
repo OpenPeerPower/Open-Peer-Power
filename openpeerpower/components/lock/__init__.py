@@ -5,43 +5,48 @@ import logging
 
 import voluptuous as vol
 
-from openpeerpower.loader import bind_opp
-from openpeerpower.helpers.entity_component import EntityComponent
-from openpeerpower.helpers.entity import Entity
-from openpeerpower.helpers.config_validation import (  # noqa
-    PLATFORM_SCHEMA, PLATFORM_SCHEMA_BASE)
-import openpeerpower.helpers.config_validation as cv
-from openpeerpower.const import (
-    ATTR_CODE, ATTR_CODE_FORMAT, ATTR_ENTITY_ID, STATE_LOCKED, STATE_UNLOCKED,
-    SERVICE_LOCK, SERVICE_UNLOCK, SERVICE_OPEN)
 from openpeerpower.components import group
+from openpeerpower.const import (
+    ATTR_CODE,
+    ATTR_CODE_FORMAT,
+    SERVICE_LOCK,
+    SERVICE_OPEN,
+    SERVICE_UNLOCK,
+    STATE_LOCKED,
+    STATE_UNLOCKED,
+)
+import openpeerpower.helpers.config_validation as cv
+from openpeerpower.helpers.config_validation import (  # noqa: F401
+    PLATFORM_SCHEMA,
+    PLATFORM_SCHEMA_BASE,
+    make_entity_service_schema,
+)
+from openpeerpower.helpers.entity import Entity
+from openpeerpower.helpers.entity_component import EntityComponent
+from openpeerpower.loader import bind_opp
 
-ATTR_CHANGED_BY = 'changed_by'
+# mypy: allow-untyped-defs, no-check-untyped-defs
 
-DOMAIN = 'lock'
+ATTR_CHANGED_BY = "changed_by"
+
+DOMAIN = "lock"
 SCAN_INTERVAL = timedelta(seconds=30)
 
-ENTITY_ID_ALL_LOCKS = group.ENTITY_ID_FORMAT.format('all_locks')
-ENTITY_ID_FORMAT = DOMAIN + '.{}'
+ENTITY_ID_ALL_LOCKS = group.ENTITY_ID_FORMAT.format("all_locks")
+ENTITY_ID_FORMAT = DOMAIN + ".{}"
 
-GROUP_NAME_ALL_LOCKS = 'all locks'
+GROUP_NAME_ALL_LOCKS = "all locks"
 
 MIN_TIME_BETWEEN_SCANS = timedelta(seconds=10)
 
-LOCK_SERVICE_SCHEMA = vol.Schema({
-    vol.Optional(ATTR_ENTITY_ID): cv.comp_entity_ids,
-    vol.Optional(ATTR_CODE): cv.string,
-})
+LOCK_SERVICE_SCHEMA = make_entity_service_schema({vol.Optional(ATTR_CODE): cv.string})
 
 # Bitfield of features supported by the lock entity
 SUPPORT_OPEN = 1
 
 _LOGGER = logging.getLogger(__name__)
 
-PROP_TO_ATTR = {
-    'changed_by': ATTR_CHANGED_BY,
-    'code_format': ATTR_CODE_FORMAT,
-}
+PROP_TO_ATTR = {"changed_by": ATTR_CHANGED_BY, "code_format": ATTR_CODE_FORMAT}
 
 
 @bind_opp
@@ -54,21 +59,19 @@ def is_locked(opp, entity_id=None):
 async def async_setup(opp, config):
     """Track states and offer events for locks."""
     component = opp.data[DOMAIN] = EntityComponent(
-        _LOGGER, DOMAIN, opp, SCAN_INTERVAL, GROUP_NAME_ALL_LOCKS)
+        _LOGGER, DOMAIN, opp, SCAN_INTERVAL, GROUP_NAME_ALL_LOCKS
+    )
 
     await component.async_setup(config)
 
     component.async_register_entity_service(
-        SERVICE_UNLOCK, LOCK_SERVICE_SCHEMA,
-        'async_unlock'
+        SERVICE_UNLOCK, LOCK_SERVICE_SCHEMA, "async_unlock"
     )
     component.async_register_entity_service(
-        SERVICE_LOCK, LOCK_SERVICE_SCHEMA,
-        'async_lock'
+        SERVICE_LOCK, LOCK_SERVICE_SCHEMA, "async_lock"
     )
     component.async_register_entity_service(
-        SERVICE_OPEN, LOCK_SERVICE_SCHEMA,
-        'async_open'
+        SERVICE_OPEN, LOCK_SERVICE_SCHEMA, "async_open"
     )
 
     return True

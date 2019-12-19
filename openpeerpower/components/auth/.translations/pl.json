@@ -21,7 +21,7 @@
         },
         "totp": {
             "error": {
-                "invalid_code": "Nieprawid\u0142owy kod, spr\u00f3buj ponownie. Je\u015bli b\u0142\u0105d b\u0119dzie si\u0119 powtarza\u0142, upewnij si\u0119, \u017ce czas zegara systemu Home Assistant jest prawid\u0142owy."
+                "invalid_code": "Nieprawid\u0142owy kod, spr\u00f3buj ponownie. Je\u015bli b\u0142\u0105d b\u0119dzie si\u0119 powtarza\u0142, upewnij si\u0119, \u017ce czas zegara systemu Open Peer Power jest prawid\u0142owy."
             },
             "step": {
                 "init": {

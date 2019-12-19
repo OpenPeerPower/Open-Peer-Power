@@ -64,7 +64,7 @@ class FlowHandler(config_entries.ConfigFlow):
         return self.async_create_entry(title='configuration.yaml', data={})
 
     async def async_step_oppio(self, user_input=None):
-        """Receive a Hass.io discovery."""
+        """Receive a Opp.io discovery."""
         if self._async_current_entries():
             return self.async_abort(reason='single_instance_allowed')
 
@@ -73,7 +73,7 @@ class FlowHandler(config_entries.ConfigFlow):
         return await self.async_step_oppio_confirm()
 
     async def async_step_oppio_confirm(self, user_input=None):
-        """Confirm a Hass.io discovery."""
+        """Confirm a Opp.io discovery."""
         errors = {}
 
         if user_input is not None:

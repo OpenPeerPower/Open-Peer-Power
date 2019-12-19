@@ -3,29 +3,35 @@ import logging
 
 import voluptuous as vol
 
-from openpeerpower.core import callback
 from openpeerpower.const import CONF_PLATFORM
+from openpeerpower.core import callback
 import openpeerpower.helpers.config_validation as cv
-import openpeerpower.util.dt as dt_util
 from openpeerpower.helpers.event import track_point_in_utc_time
+import openpeerpower.util.dt as dt_util
+
+# mypy: allow-untyped-defs, no-check-untyped-defs
 
 _LOGGER = logging.getLogger(__name__)
 
-CONF_NUMBER = 'number'
-CONF_HELD_MORE_THAN = 'held_more_than'
-CONF_HELD_LESS_THAN = 'held_less_than'
+CONF_NUMBER = "number"
+CONF_HELD_MORE_THAN = "held_more_than"
+CONF_HELD_LESS_THAN = "held_less_than"
 
-TRIGGER_SCHEMA = vol.Schema({
-    vol.Required(CONF_PLATFORM): 'litejet',
-    vol.Required(CONF_NUMBER): cv.positive_int,
-    vol.Optional(CONF_HELD_MORE_THAN):
-        vol.All(cv.time_period, cv.positive_timedelta),
-    vol.Optional(CONF_HELD_LESS_THAN):
-        vol.All(cv.time_period, cv.positive_timedelta)
-})
+TRIGGER_SCHEMA = vol.Schema(
+    {
+        vol.Required(CONF_PLATFORM): "litejet",
+        vol.Required(CONF_NUMBER): cv.positive_int,
+        vol.Optional(CONF_HELD_MORE_THAN): vol.All(
+            cv.time_period, cv.positive_timedelta
+        ),
+        vol.Optional(CONF_HELD_LESS_THAN): vol.All(
+            cv.time_period, cv.positive_timedelta
+        ),
+    }
+)
 
 
-async def async_trigger(opp, config, action, automation_info):
+async def async_attach_trigger(opp, config, action, automation_info):
     """Listen for events based on configuration."""
     number = config.get(CONF_NUMBER)
     held_more_than = config.get(CONF_HELD_MORE_THAN)
@@ -36,14 +42,17 @@ async def async_trigger(opp, config, action, automation_info):
     @callback
     def call_action():
         """Call action with right context."""
-        opp.async_run_job(action, {
-            'trigger': {
-                CONF_PLATFORM: 'litejet',
-                CONF_NUMBER: number,
-                CONF_HELD_MORE_THAN: held_more_than,
-                CONF_HELD_LESS_THAN: held_less_than
+        opp.async_run_job(
+            action,
+            {
+                "trigger": {
+                    CONF_PLATFORM: "litejet",
+                    CONF_NUMBER: number,
+                    CONF_HELD_MORE_THAN: held_more_than,
+                    CONF_HELD_LESS_THAN: held_less_than,
+                }
             },
-        })
+        )
 
     # held_more_than and held_less_than: trigger on released (if in time range)
     # held_more_than: trigger after pressed with calculation
@@ -64,9 +73,8 @@ async def async_trigger(opp, config, action, automation_info):
             opp.add_job(call_action)
         if held_more_than is not None and held_less_than is None:
             cancel_pressed_more_than = track_point_in_utc_time(
-                opp,
-                pressed_more_than_satisfied,
-                dt_util.utcnow() + held_more_than)
+                opp, pressed_more_than_satisfied, dt_util.utcnow() + held_more_than
+            )
 
     def released():
         """Handle the release of the LiteJet switch's button."""
@@ -81,8 +89,8 @@ async def async_trigger(opp, config, action, automation_info):
             if held_more_than is None or held_time > held_more_than:
                 opp.add_job(call_action)
 
-    opp.data['litejet_system'].on_switch_pressed(number, pressed)
-    opp.data['litejet_system'].on_switch_released(number, released)
+    opp.data["litejet_system"].on_switch_pressed(number, pressed)
+    opp.data["litejet_system"].on_switch_released(number, released)
 
     def async_remove():
         """Remove all subscriptions used for this trigger."""

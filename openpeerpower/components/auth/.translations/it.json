@@ -21,7 +21,7 @@
         },
         "totp": {
             "error": {
-                "invalid_code": "Codice non valido, per favore riprovare. Se riscontri spesso questo errore, assicurati che l'orologio del sistema Home Assistant sia accurato."
+                "invalid_code": "Codice non valido, per favore riprovare. Se riscontri spesso questo errore, assicurati che l'orologio del sistema Open Peer Power sia accurato."
             },
             "step": {
                 "init": {

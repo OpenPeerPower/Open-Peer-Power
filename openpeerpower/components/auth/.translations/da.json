@@ -21,7 +21,7 @@
         },
         "totp": {
             "error": {
-                "invalid_code": "Ugyldig kode, pr\u00f8v venligst igen. Hvis du konsekvent f\u00e5r denne fejl skal du s\u00f8rge for at uret p\u00e5 dit Home Assistant system er g\u00e5r n\u00f8jagtigt."
+                "invalid_code": "Ugyldig kode, pr\u00f8v venligst igen. Hvis du konsekvent f\u00e5r denne fejl skal du s\u00f8rge for at uret p\u00e5 dit Open Peer Power system er g\u00e5r n\u00f8jagtigt."
             },
             "step": {
                 "init": {

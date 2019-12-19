@@ -21,7 +21,7 @@
         },
         "totp": {
             "error": {
-                "invalid_code": "Ongeldige code, probeer het opnieuw. Als u deze fout blijft krijgen, controleer dan of de klok van uw Home Assistant systeem correct is ingesteld."
+                "invalid_code": "Ongeldige code, probeer het opnieuw. Als u deze fout blijft krijgen, controleer dan of de klok van uw Open Peer Power systeem correct is ingesteld."
             },
             "step": {
                 "init": {

@@ -21,7 +21,7 @@
         },
         "totp": {
             "error": {
-                "invalid_code": "Invalid code, please try again. If you get this error consistently, please make sure the clock of your Home Assistant system is accurate."
+                "invalid_code": "Invalid code, please try again. If you get this error consistently, please make sure the clock of your Open Peer Power system is accurate."
             },
             "step": {
                 "init": {

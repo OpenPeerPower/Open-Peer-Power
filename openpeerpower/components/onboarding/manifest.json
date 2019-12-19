@@ -1,13 +1,13 @@
 {
   "domain": "onboarding",
   "name": "Onboarding",
-  "documentation": "https://www.home-assistant.io/components/onboarding",
+  "documentation": "https://www.open-peer-power.io/components/onboarding",
   "requirements": [],
   "dependencies": [
     "auth",
     "http"
   ],
   "codeowners": [
-    "@home-assistant/core"
+    "@open-peer-power/core"
   ]
 }

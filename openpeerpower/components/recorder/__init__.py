@@ -40,7 +40,7 @@ SERVICE_PURGE_SCHEMA = vol.Schema({
 })
 
 DEFAULT_URL = 'sqlite:///{opp_config_path}'
-DEFAULT_DB_FILE = 'home-assistant_v2.db'
+DEFAULT_DB_FILE = 'open-peer-power_v2.db'
 
 CONF_DB_URL = 'db_url'
 CONF_PURGE_KEEP_DAYS = 'purge_keep_days'
@@ -231,7 +231,7 @@ class Recorder(threading.Thread):
         self.opp.add_job(register)
         result = opp_started.result()
 
-        # If shutdown happened before Home Assistant finished starting
+        # If shutdown happened before Open Peer Power finished starting
         if result is shutdown_task:
             return
 

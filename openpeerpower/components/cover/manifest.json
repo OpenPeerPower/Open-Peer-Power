@@ -1,7 +1,7 @@
 {
   "domain": "cover",
   "name": "Cover",
-  "documentation": "https://www.open-peer-power.io/components/cover",
+  "documentation": "https://www.open-peer-power.io/integrations/cover",
   "requirements": [],
   "dependencies": [
     "group"

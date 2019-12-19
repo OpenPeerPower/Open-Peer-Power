@@ -2,7 +2,7 @@
     "mfa_setup": {
         "totp": {
             "error": {
-                "invalid_code": "Kode salah, coba lagi. Jika Anda mendapatkan kesalahan ini secara konsisten, pastikan jam pada sistem Home Assistant anda akurat."
+                "invalid_code": "Kode salah, coba lagi. Jika Anda mendapatkan kesalahan ini secara konsisten, pastikan jam pada sistem Open Peer Power anda akurat."
             },
             "step": {
                 "init": {
