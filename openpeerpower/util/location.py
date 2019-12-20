@@ -29,9 +29,20 @@ CONVERGENCE_THRESHOLD = 1e-12
 
 LocationInfo = collections.namedtuple(
     "LocationInfo",
-    ['ip', 'country_code', 'country_name', 'region_code', 'region_name',
-     'city', 'zip_code', 'time_zone', 'latitude', 'longitude',
-     'use_metric'])
+    [
+        "ip",
+        "country_code",
+        "country_name",
+        "region_code",
+        "region_name",
+        "city",
+        "zip_code",
+        "time_zone",
+        "latitude",
+        "longitude",
+        "use_metric",
+    ],
+)
 
 
 async def async_detect_location_info(session: aiohttp.ClientSession) \
@@ -64,29 +75,6 @@ def distance(lat1: Optional[float], lon1: Optional[float],
         return None
     return result * 1000
 
-
-async def async_get_elevation(session: aiohttp.ClientSession, latitude: float,
-                              longitude: float) -> int:
-    """Return elevation for given latitude and longitude."""
-    try:
-        resp = await session.get(ELEVATION_URL, params={
-            'locations': '{},{}'.format(latitude, longitude),
-        }, timeout=5)
-    except (aiohttp.ClientError, asyncio.TimeoutError):
-        return 0
-
-    if resp.status != 200:
-        return 0
-
-    try:
-        raw_info = await resp.json()
-    except (aiohttp.ClientError, ValueError):
-        return 0
-
-    try:
-        return int(float(raw_info['results'][0]['elevation']))
-    except (ValueError, KeyError, IndexError):
-        return 0
 
 
 # Author: https://github.com/maurycyp
@@ -148,12 +136,23 @@ def vincenty(point1: Tuple[float, float], point2: Tuple[float, float],
     uSq = cosSqAlpha * (AXIS_A ** 2 - AXIS_B ** 2) / (AXIS_B ** 2)
     A = 1 + uSq / 16384 * (4096 + uSq * (-768 + uSq * (320 - 175 * uSq)))
     B = uSq / 1024 * (256 + uSq * (-128 + uSq * (74 - 47 * uSq)))
-    deltaSigma = B * sinSigma * (cos2SigmaM +
-                                 B / 4 * (cosSigma * (-1 + 2 *
-                                                      cos2SigmaM ** 2) -
-                                          B / 6 * cos2SigmaM *
-                                          (-3 + 4 * sinSigma ** 2) *
-                                          (-3 + 4 * cos2SigmaM ** 2)))
+    deltaSigma = (
+        B
+        * sinSigma
+        * (
+            cos2SigmaM
+            + B
+            / 4
+            * (
+                cosSigma * (-1 + 2 * cos2SigmaM ** 2)
+                - B
+                / 6
+                * cos2SigmaM
+                * (-3 + 4 * sinSigma ** 2)
+                * (-3 + 4 * cos2SigmaM ** 2)
+            )
+        )
+    )
     s = AXIS_B * A * (sigma - deltaSigma)
 
     s /= 1000  # Conversion of meters to kilometers
@@ -177,16 +176,16 @@ async def _get_ipapi(session: aiohttp.ClientSession) \
         return None
 
     return {
-        'ip': raw_info.get('ip'),
-        'country_code': raw_info.get('country'),
-        'country_name': raw_info.get('country_name'),
-        'region_code': raw_info.get('region_code'),
-        'region_name': raw_info.get('region'),
-        'city': raw_info.get('city'),
-        'zip_code': raw_info.get('postal'),
-        'time_zone': raw_info.get('timezone'),
-        'latitude': raw_info.get('latitude'),
-        'longitude': raw_info.get('longitude'),
+        "ip": raw_info.get("ip"),
+        "country_code": raw_info.get("country"),
+        "country_name": raw_info.get("country_name"),
+        "region_code": raw_info.get("region_code"),
+        "region_name": raw_info.get("region"),
+        "city": raw_info.get("city"),
+        "zip_code": raw_info.get("postal"),
+        "time_zone": raw_info.get("timezone"),
+        "latitude": raw_info.get("latitude"),
+        "longitude": raw_info.get("longitude"),
     }
 
 
@@ -203,14 +202,14 @@ async def _get_ip_api(session: aiohttp.ClientSession) \
     except (aiohttp.ClientError, ValueError):
         return None
     return {
-        'ip': raw_info.get('query'),
-        'country_code': raw_info.get('countryCode'),
-        'country_name': raw_info.get('country'),
-        'region_code': raw_info.get('region'),
-        'region_name': raw_info.get('regionName'),
-        'city': raw_info.get('city'),
-        'zip_code': raw_info.get('zip'),
-        'time_zone': raw_info.get('timezone'),
-        'latitude': raw_info.get('lat'),
-        'longitude': raw_info.get('lon'),
+        "ip": raw_info.get("query"),
+        "country_code": raw_info.get("countryCode"),
+        "country_name": raw_info.get("country"),
+        "region_code": raw_info.get("region"),
+        "region_name": raw_info.get("regionName"),
+        "city": raw_info.get("city"),
+        "zip_code": raw_info.get("zip"),
+        "time_zone": raw_info.get("timezone"),
+        "latitude": raw_info.get("lat"),
+        "longitude": raw_info.get("lon"),
     }

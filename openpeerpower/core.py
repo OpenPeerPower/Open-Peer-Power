@@ -192,7 +192,7 @@ class OpenPeerPower:
         return self.state in (CoreState.starting, CoreState.running)
 
     def start(self) -> int:
-        """Start open peer power.
+        """Start Open Peer Power.
 
         Note: This function is only used for testing.
         For regular use, use "await opp.run()".
@@ -1134,6 +1134,8 @@ class ServiceRegistry:
 
         self._services[domain].pop(service)
 
+        if not self._services[domain]:
+            self._services.pop(domain)
         self._opp.bus.async_fire(
             EVENT_SERVICE_REMOVED, {ATTR_DOMAIN: domain, ATTR_SERVICE: service}
         )

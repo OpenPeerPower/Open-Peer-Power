@@ -1,7 +1,7 @@
 {
   "domain": "http",
   "name": "HTTP",
-  "documentation": "https://www.open-peer-power.io/components/http",
+  "documentation": "https://www.open-peer-power.io/integrations/http",
   "requirements": [
     "aiohttp_cors==0.7.0"
   ],

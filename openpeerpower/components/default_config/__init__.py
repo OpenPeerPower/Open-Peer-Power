@@ -6,7 +6,7 @@ except ImportError:
 
 from openpeerpower.setup import async_setup_component
 
-DOMAIN = 'default_config'
+DOMAIN = "default_config"
 
 
 async def async_setup(opp, config):
@@ -14,4 +14,4 @@ async def async_setup(opp, config):
     if av is None:
         return True
 
-    return await async_setup_component(opp, 'stream', config)
+    return await async_setup_component(opp, "stream", config)

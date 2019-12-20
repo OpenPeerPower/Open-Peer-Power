@@ -92,7 +92,7 @@ async def _async_setup_component(
     This method is a coroutine.
     """
 
-    def log_error(msg: str, link: bool = True) -> None:
+    def log_error(msg: str, link: Optional[str] = None) -> None:
         """Log helper."""
         _LOGGER.error("Setup failed for %s: %s", domain, msg)
         async_notify_setup_error(opp, domain, link)
@@ -127,7 +127,7 @@ async def _async_setup_component(
     try:
         await async_process_deps_reqs(opp, config, integration)
     except OpenPeerPowerError as err:
-        log_error(str(err))
+        log_error(str(err), integration.documentation)
         return False
 
     # Some integrations fail on import because they call functions incorrectly.
@@ -135,7 +135,7 @@ async def _async_setup_component(
     try:
         component = integration.get_component()
     except ImportError:
-        log_error("Unable to import component", False)
+        log_error("Unable to import component", integration.documentation)
         return False
     except Exception:  # pylint: disable=broad-except
         _LOGGER.exception("Setup failed for %s: unknown error", domain)
@@ -146,7 +146,7 @@ async def _async_setup_component(
     )
 
     if processed_config is None:
-        log_error("Invalid config.")
+        log_error("Invalid config.", integration.documentation)
         return False
 
     start = timer()
@@ -178,7 +178,7 @@ async def _async_setup_component(
             return False
     except Exception:  # pylint: disable=broad-except
         _LOGGER.exception("Error during setup of component %s", domain)
-        async_notify_setup_error(opp, domain, True)
+        async_notify_setup_error(opp, domain, integration.documentation)
         return False
     finally:
         end = timer()

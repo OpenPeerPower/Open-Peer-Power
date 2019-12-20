@@ -1,6 +1,6 @@
 """Classes to help gather user submissions."""
 import logging
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional, cast
 import uuid
 
 import voluptuous as vol
@@ -44,6 +44,8 @@ class AbortFlow(FlowError):
         super().__init__(f"Flow aborted: {reason}")
         self.reason = reason
         self.description_placeholders = description_placeholders
+
+
 class FlowManager:
     """Manage all the flows that are in progress."""
 
@@ -140,7 +142,7 @@ class FlowManager:
             )
 
         try:
-          result: Dict = await getattr(flow, method)(user_input)
+            result: Dict = await getattr(flow, method)(user_input)
         except AbortFlow as err:
             result = _create_abort_data(
                 flow.flow_id, flow.handler, err.reason, err.description_placeholders

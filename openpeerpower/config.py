@@ -59,7 +59,6 @@ _LOGGER = logging.getLogger(__name__)
 DATA_PERSISTENT_ERRORS = "bootstrap_persistent_errors"
 RE_YAML_ERROR = re.compile(r"openpeerpower\.util\.yaml")
 RE_ASCII = re.compile(r"\033\[[^m]*m")
-OP_COMPONENT_URL = "[{}](https://open-peer-power.io/integrations/{}/)"
 YAML_CONFIG_FILE = "configuration.yaml"
 VERSION_FILE = ".OP_VERSION"
 CONFIG_DIR_NAME = ".openpeerpower"
@@ -404,19 +403,25 @@ def process_op_config_upgrade(opp: OpenPeerPower) -> None:
 
 @callback
 def async_log_exception(
-    ex: Exception, domain: str, config: Dict, opp: OpenPeerPower
+    ex: Exception,
+    domain: str,
+    config: Dict,
+    opp: OpenPeerPower,
+    link: Optional[str] = None,
 ) -> None:
     """Log an error for configuration validation.
 
     This method must be run in the event loop.
     """
     if opp is not None:
-        async_notify_setup_error(opp, domain, True)
-    _LOGGER.error(_format_config_error(ex, domain, config))
+        async_notify_setup_error(opp, domain, link)
+    _LOGGER.error(_format_config_error(ex, domain, config, link))
 
 
 @callback
-def _format_config_error(ex: Exception, domain: str, config: Dict) -> str:
+def _format_config_error(
+    ex: Exception, domain: str, config: Dict, link: Optional[str] = None
+) -> str:
     """Generate log exception for configuration validation.
 
     This method must be run in the event loop.
@@ -447,12 +452,8 @@ def _format_config_error(ex: Exception, domain: str, config: Dict) -> str:
         getattr(domain_config, "__line__", "?"),
     )
 
-    if domain != CONF_CORE:
-        integration = domain.split(".")[-1]
-        message += (
-            "Please check the docs at "
-            f"https://open-peer-power.io/integrations/{integration}/"
-        )
+    if domain != CONF_CORE and link:
+        message += f"Please check the docs at {link}"
 
     return message
 
@@ -709,7 +710,7 @@ async def async_process_component_config(
                 opp, config
             )
         except (vol.Invalid, OpenPeerPowerError) as ex:
-            async_log_exception(ex, domain, config, opp)
+            async_log_exception(ex, domain, config, opp, integration.documentation)
             return None
 
     # No custom config validator, proceed with schema validation
@@ -762,7 +763,13 @@ async def async_process_component_config(
                     p_config
                 )
             except vol.Invalid as ex:
-                async_log_exception(ex, f"{domain}.{p_name}", p_config, opp)
+                async_log_exception(
+                    ex,
+                    f"{domain}.{p_name}",
+                    p_config,
+                    opp,
+                    p_integration.documentation,
+                )
                 continue
 
         platforms.append(p_validated)
@@ -798,7 +805,7 @@ async def async_check_op_config_file(opp: OpenPeerPower) -> Optional[str]:
 
 @callback
 def async_notify_setup_error(
-    opp: OpenPeerPower, component: str, display_link: bool = False
+    opp: OpenPeerPower, component: str, display_link: Optional[str] = None
 ) -> None:
     """Print a persistent notification.
 
@@ -813,11 +820,11 @@ def async_notify_setup_error(
 
     errors[component] = errors.get(component) or display_link
 
-    message = "The following components and platforms could not be set up:\n\n"
+    message = "The following integrations and platforms could not be set up:\n\n"
 
     for name, link in errors.items():
         if link:
-            part = OP_COMPONENT_URL.format(name.replace("_", "-"), name)
+            part = f"[{name}]({link})"
         else:
             part = name
 

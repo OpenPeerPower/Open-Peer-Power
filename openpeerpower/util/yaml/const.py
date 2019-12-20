@@ -1,4 +1,4 @@
 """Constants."""
-SECRET_YAML = 'secrets.yaml'
+SECRET_YAML = "secrets.yaml"
 
 _SECRET_NAMESPACE = 'openpeerpower'

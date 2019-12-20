@@ -58,8 +58,11 @@ def set_loop() -> None:
 def validate_python() -> None:
     """Validate that the right Python version is running."""
     if sys.version_info[:3] < REQUIRED_PYTHON_VER:
-        print("Open Peer Power requires at least Python {}.{}.{}".format(
-            *REQUIRED_PYTHON_VER))
+        print(
+            "Open Peer Power requires at least Python {}.{}.{}".format(
+                *REQUIRED_PYTHON_VER
+            )
+        )
         sys.exit(1)
 
 
@@ -78,8 +81,12 @@ def ensure_config_path(config_dir: str) -> None:
         try:
             os.mkdir(config_dir)
         except OSError:
-            print(('Fatal Error: Unable to create default configuration '
-                   'directory {} ').format(config_dir))
+            print(
+                (
+                    "Fatal Error: Unable to create default configuration "
+                    "directory {} "
+                ).format(config_dir)
+            )
             sys.exit(1)
 
     # Test if library directory exists
@@ -87,20 +94,22 @@ def ensure_config_path(config_dir: str) -> None:
         try:
             os.mkdir(lib_dir)
         except OSError:
-            print(('Fatal Error: Unable to create library '
-                   'directory {} ').format(lib_dir))
+            print(
+                ("Fatal Error: Unable to create library " "directory {} ").format(
+                    lib_dir
+                )
+            )
             sys.exit(1)
 
 
-async def ensure_config_file(opp: 'core.OpenPeerPower', config_dir: str) \
-        -> str:
+async def ensure_config_file(opp: "core.OpenPeerPower", config_dir: str) -> str:
     """Ensure configuration file exists."""
     import openpeerpower.config as config_util
     config_path = await config_util.async_ensure_config_exists(
         opp, config_dir)
 
     if config_path is None:
-        print('Error getting configuration path')
+        print("Error getting configuration path")
         sys.exit(1)
 
     return config_path
@@ -111,11 +120,14 @@ def get_arguments() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Open Peer Power: Observe, Control, Automate.")
     parser.add_argument('--version', action='version', version=__version__)
+    parser.add_argument("--version", action="version", version=__version__)
     parser.add_argument(
-        '-c', '--config',
-        metavar='path_to_config_dir',
+        "-c",
+        "--config",
+        metavar="path_to_config_dir",
         default=config_util.get_default_config_dir(),
-        help="Directory that contains the Open Peer Power configuration")
+        help="Directory that contains the Open Peer Power configuration",
+    )
     parser.add_argument(
         '--demo-mode',
         action='store_true',
@@ -193,8 +205,8 @@ def daemonize() -> None:
         sys.exit(0)
 
     # redirect standard file descriptors to devnull
-    infd = open(os.devnull, 'r')
-    outfd = open(os.devnull, 'a+')
+    infd = open(os.devnull, "r")
+    outfd = open(os.devnull, "a+")
     sys.stdout.flush()
     sys.stderr.flush()
     os.dup2(infd.fileno(), sys.stdin.fileno())
@@ -206,9 +218,9 @@ def check_pid(pid_file: str) -> None:
     """Check that Open Peer Power is not already running."""
     # Check pid file
     try:
-        with open(pid_file, 'r') as file:
+        with open(pid_file, "r") as file:
             pid = int(file.readline())
-    except IOError:
+    except OSError:
         # PID File does not exist
         return
 
@@ -221,7 +233,7 @@ def check_pid(pid_file: str) -> None:
     except OSError:
         # PID does not exist
         return
-    print('Fatal Error: OpenPeerPower is already running.')
+    print("Fatal Error: OpenPeerPower is already running.")
     sys.exit(1)
 
 
@@ -229,10 +241,10 @@ def write_pid(pid_file: str) -> None:
     """Create a PID File."""
     pid = os.getpid()
     try:
-        with open(pid_file, 'w') as file:
+        with open(pid_file, "w") as file:
             file.write(str(pid))
-    except IOError:
-        print('Fatal Error: Unable to write pid file {}'.format(pid_file))
+    except OSError:
+        print(f"Fatal Error: Unable to write pid file {pid_file}")
         sys.exit(1)
 
 
@@ -250,19 +262,19 @@ def closefds_osx(min_fd: int, max_fd: int) -> None:
             val = fcntl(_fd, F_GETFD)
             if not val & FD_CLOEXEC:
                 fcntl(_fd, F_SETFD, val | FD_CLOEXEC)
-        except IOError:
+        except OSError:
             pass
 
 
 def cmdline() -> List[str]:
     """Collect path and arguments to re-execute the current opp instance."""
-    if os.path.basename(sys.argv[0]) == '__main__.py':
+    if os.path.basename(sys.argv[0]) == "__main__.py":
         modulepath = os.path.dirname(sys.argv[0])
-        os.environ['PYTHONPATH'] = os.path.dirname(modulepath)
-        return [sys.executable] + [arg for arg in sys.argv if
-                                   arg != '--daemon']
+        os.environ["PYTHONPATH"] = os.path.dirname(modulepath)
+        return [sys.executable] + [arg for arg in sys.argv if arg != "--daemon"]
 
-    return [arg for arg in sys.argv if arg != '--daemon']
+    return [arg for arg in sys.argv if arg != "--daemon"]
+
 
 def appliance_string():
     print(appliance_list)
@@ -329,17 +341,17 @@ def try_to_restart() -> None:
     """Attempt to clean up state and start a new Open Peer Power instance."""
     # Things should be mostly shut down already at this point, now just try
     # to clean up things that may have been left behind.
-    sys.stderr.write('Open Peer Power attempting to restart.\n')
+    sys.stderr.write("Open Peer Power attempting to restart.\n")
 
     # Count remaining threads, ideally there should only be one non-daemonized
     # thread left (which is us). Nothing we really do with it, but it might be
     # useful when debugging shutdown/restart issues.
     try:
-        nthreads = sum(thread.is_alive() and not thread.daemon
-                       for thread in threading.enumerate())
+        nthreads = sum(
+            thread.is_alive() and not thread.daemon for thread in threading.enumerate()
+        )
         if nthreads > 1:
-            sys.stderr.write(
-                "Found {} non-daemonic threads.\n".format(nthreads))
+            sys.stderr.write(f"Found {nthreads} non-daemonic threads.\n")
 
     # Somehow we sometimes seem to trigger an assertion in the python threading
     # module. It seems we find threads that have no associated OS level thread
@@ -353,7 +365,7 @@ def try_to_restart() -> None:
     except ValueError:
         max_fd = 256
 
-    if platform.system() == 'Darwin':
+    if platform.system() == "Darwin":
         closefds_osx(3, max_fd)
     else:
         os.closerange(3, max_fd)
@@ -374,8 +386,8 @@ def main() -> int:
     set_loop()
 
     # Run a simple daemon runner process on Windows to handle restarts
-    if os.name == 'xt' and '--runner' not in sys.argv:
-        nt_args = cmdline() + ['--runner']
+    if os.name == "xt" and "--runner" not in sys.argv:
+        nt_args = cmdline() + ["--runner"]
         while True:
             try:
                 subprocess.check_call(nt_args)
