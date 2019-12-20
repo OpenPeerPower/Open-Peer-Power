@@ -18,7 +18,6 @@ async def async_get_system_info(opp: OpenPeerPowerType) -> Dict:
         'oppio': opp.components.oppio.is_oppio(),
         'virtualenv': is_virtual_env(),
         'python_version': platform.python_version(),
-        'docker': False,
         'arch': platform.machine(),
         'timezone': str(opp.config.time_zone),
         'os_name': platform.system(),
@@ -30,7 +29,5 @@ async def async_get_system_info(opp: OpenPeerPowerType) -> Dict:
         info_object['os_version'] = platform.mac_ver()[0]
     elif platform.system() == 'FreeBSD':
         info_object['os_version'] = platform.release()
-    elif platform.system() == 'Linux':
-        info_object['docker'] = os.path.isfile('/.dockerenv')
 
     return info_object
