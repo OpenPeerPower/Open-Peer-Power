@@ -119,7 +119,6 @@ def get_arguments() -> argparse.Namespace:
     import openpeerpower.config as config_util
     parser = argparse.ArgumentParser(
         description="Open Peer Power: Observe, Control, Automate.")
-    parser.add_argument('--version', action='version', version=__version__)
     parser.add_argument("--version", action="version", version=__version__)
     parser.add_argument(
         "-c",
@@ -415,12 +414,11 @@ def main() -> int:
     if args.pid_file:
         write_pid(args.pid_file)
 
-    from openpeerpower.util.async_ import asyncio_run
-    exit_code = asyncio_run(setup_and_run_opp(config_dir, args))
+    exit_code = asyncio.run(setup_and_run_opp(config_dir, args))
     if exit_code == RESTART_EXIT_CODE and not args.runner:
         try_to_restart()
 
-    return exit_code  # type: ignore
+    return exit_code
 
 
 if __name__ == "__main__":
