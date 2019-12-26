@@ -14,26 +14,20 @@ from openpeerpower.util import dt as dt_util
 
 from . import auth_store, models
 from .const import GROUP_ID_ADMIN
-from .mfa_modules import auth_mfa_module_from_config, MultiFactorAuthModule
 from .providers import auth_provider_from_config, AuthProvider, LoginFlow
 
 EVENT_USER_ADDED = 'user_added'
 EVENT_USER_REMOVED = 'user_removed'
 
 _LOGGER = logging.getLogger(__name__)
-_MfaModuleDict = Dict[str, MultiFactorAuthModule]
 _ProviderKey = Tuple[str, Optional[str]]
 _ProviderDict = Dict[_ProviderKey, AuthProvider]
 
 
 async def auth_manager_from_config(
         opp: OpenPeerPower,
-        provider_configs: List[Dict[str, Any]],
-        module_configs: List[Dict[str, Any]]) -> 'AuthManager':
+        provider_configs: List[Dict[str, Any]]) -> 'AuthManager':
     """Initialize an auth manager from config.
-
-    CORE_CONFIG_SCHEMA will make sure do duplicated auth providers or
-    mfa modules exist in configs.
     """
     store = auth_store.AuthStore(opp)
     if provider_configs:
@@ -48,18 +42,7 @@ async def auth_manager_from_config(
         key = (provider.type, provider.id)
         provider_hash[key] = provider
 
-    if module_configs:
-        modules = await asyncio.gather(
-            *[auth_mfa_module_from_config(opp, config)
-              for config in module_configs])
-    else:
-        modules = ()
-    # So returned auth modules are in same order as config
-    module_hash = OrderedDict()  # type: _MfaModuleDict
-    for module in modules:
-        module_hash[module.id] = module
-
-    manager = AuthManager(opp, store, provider_hash, module_hash)
+    manager = AuthManager(opp, store, provider_hash)
     return manager
 
 
@@ -67,13 +50,12 @@ class AuthManager:
     """Manage the authentication for Open Peer Power."""
 
     def __init__(self, opp: OpenPeerPower, store: auth_store.AuthStore,
-                 providers: _ProviderDict, mfa_modules: _MfaModuleDict) \
+                 providers: _ProviderDict) \
             -> None:
         """Initialize the auth manager."""
         self.opp = opp
         self._store = store
         self._providers = providers
-        self._mfa_modules = mfa_modules
         self.login_flow = data_entry_flow.FlowManager(
             opp, self._async_create_login_flow,
             self._async_finish_login_flow)
@@ -95,11 +77,6 @@ class AuthManager:
         """Return a list of available auth providers."""
         return list(self._providers.values())
 
-    @property
-    def auth_mfa_modules(self) -> List[MultiFactorAuthModule]:
-        """Return a list of available auth modules."""
-        return list(self._mfa_modules.values())
-
     def get_auth_provider(self, provider_type: str, provider_id: str) \
             -> Optional[AuthProvider]:
         """Return an auth provider, None if not found."""
@@ -111,11 +88,6 @@ class AuthManager:
         return [provider
                 for (p_type, _), provider in self._providers.items()
                 if p_type == provider_type]
-
-    def get_auth_mfa_module(self, module_id: str) \
-            -> Optional[MultiFactorAuthModule]:
-        """Return a multi-factor auth module, None if not found."""
-        return self._mfa_modules.get(module_id)
 
     async def async_get_users(self) -> List[models.User]:
         """Retrieve all users."""
@@ -265,42 +237,6 @@ class AuthManager:
 
         await self._store.async_remove_credentials(credentials)
 
-    async def async_enable_user_mfa(self, user: models.User,
-                                    mfa_module_id: str, data: Any) -> None:
-        """Enable a multi-factor auth module for user."""
-        if user.system_generated:
-            raise ValueError('System generated users cannot enable '
-                             'multi-factor auth module.')
-
-        module = self.get_auth_mfa_module(mfa_module_id)
-        if module is None:
-            raise ValueError('Unable find multi-factor auth module: {}'
-                             .format(mfa_module_id))
-
-        await module.async_setup_user(user.id, data)
-
-    async def async_disable_user_mfa(self, user: models.User,
-                                     mfa_module_id: str) -> None:
-        """Disable a multi-factor auth module for user."""
-        if user.system_generated:
-            raise ValueError('System generated users cannot disable '
-                             'multi-factor auth module.')
-
-        module = self.get_auth_mfa_module(mfa_module_id)
-        if module is None:
-            raise ValueError('Unable find multi-factor auth module: {}'
-                             .format(mfa_module_id))
-
-        await module.async_depose_user(user.id)
-
-    async def async_get_enabled_mfa(self, user: models.User) -> Dict[str, str]:
-        """List enabled mfa modules for user."""
-        modules = OrderedDict()  # type: Dict[str, str]
-        for module_id, module in self._mfa_modules.items():
-            if await module.async_is_user_setup(user.id):
-                modules[module_id] = module.name
-        return modules
-
     async def async_create_refresh_token(
             self, user: models.User, client_id: Optional[str] = None,
             client_name: Optional[str] = None,
@@ -439,18 +375,6 @@ class AuthManager:
         if flow.context is not None and flow.context.get('credential_only'):
             result['result'] = credentials
             return result
-
-        # multi-factor module cannot enabled for new credential
-        # which has not linked to a user yet
-        if auth_provider.support_mfa and not credentials.is_new:
-            user = await self.async_get_user_by_credentials(credentials)
-            if user is not None:
-                modules = await self.async_get_enabled_mfa(user)
-
-                if modules:
-                    flow.user = user
-                    flow.available_mfa_modules = modules
-                    return await flow.async_step_select_mfa_module()
 
         result['result'] = await self.async_get_or_create_user(credentials)
         return result

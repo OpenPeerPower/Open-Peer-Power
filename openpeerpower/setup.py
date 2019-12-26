@@ -100,7 +100,7 @@ async def _async_setup_component(
     try:
         integration = await loader.async_get_integration(opp, domain)
     except loader.IntegrationNotFound:
-        log_error("Integration not found.", False)
+        log_error("Integration not found.")
         return False
 
     # Validate all dependencies exist and there are no circular dependencies

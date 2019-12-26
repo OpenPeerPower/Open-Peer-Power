@@ -74,8 +74,12 @@ def ensure_config_path(config_dir: str) -> None:
     # Test if configuration directory exists
     if not os.path.isdir(config_dir):
         if config_dir != config_util.get_default_config_dir():
-            print(('Fatal Error: Specified configuration directory does '
-                   'not exist {} ').format(config_dir))
+            print(
+                (
+                    "Fatal Error: Specified configuration directory does "
+                    "not exist {} "
+                ).format(config_dir)
+            )
             sys.exit(1)
 
         try:
@@ -183,7 +187,7 @@ def get_arguments() -> argparse.Namespace:
 
     arguments = parser.parse_args()
     if os.name != "posix" or arguments.debug or arguments.runner:
-        setattr(arguments, 'daemon', False)
+        setattr(arguments, "daemon", False)
 
     return arguments
 

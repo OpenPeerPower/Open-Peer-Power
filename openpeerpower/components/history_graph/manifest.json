@@ -1,7 +1,7 @@
 {
   "domain": "history_graph",
   "name": "History graph",
-  "documentation": "https://www.open-peer-power.io/components/history_graph",
+  "documentation": "https://www.open-peer-power.io/integrations/history_graph",
   "requirements": [],
   "dependencies": [
     "history"

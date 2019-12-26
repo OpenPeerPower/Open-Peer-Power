@@ -22,7 +22,7 @@
                 "data": {
                     "discovery": "Detectie inschakelen"
                 },
-                "description": "Wilt u Open Power Power configureren om verbinding te maken met de MQTT-broker die wordt aangeboden door de opp.io add-on {addon} ?",
+                "description": "Wilt u Open Peer Power configureren om verbinding te maken met de MQTT-broker die wordt aangeboden door de opp.io add-on {addon} ?",
                 "title": "MQTTT Broker via Opp.io add-on"
             }
         },

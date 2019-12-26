@@ -314,7 +314,7 @@ class AuthStore:
         group_without_policy = None
 
         # When creating objects we mention each attribute explicitly. This
-        # prevents crashing if user rolls back HA version after a new property
+        # prevents crashing if user rolls back OP version after a new property
         # was added.
 
         for group_dict in data.get('groups', []):

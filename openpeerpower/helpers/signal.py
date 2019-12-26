@@ -4,8 +4,8 @@ import signal
 import sys
 from types import FrameType
 
-from openpeerpower.core import callback, OpenPeerPower
 from openpeerpower.const import RESTART_EXIT_CODE
+from openpeerpower.core import OpenPeerPower, callback
 from openpeerpower.loader import bind_opp
 
 _LOGGER = logging.getLogger(__name__)
@@ -15,7 +15,8 @@ _LOGGER = logging.getLogger(__name__)
 @bind_opp
 def async_register_signal_handling(opp: OpenPeerPower) -> None:
     """Register system signal handler for core."""
-    if sys.platform != 'win32':
+    if sys.platform != "win32":
+
         @callback
         def async_signal_handle(exit_code: int) -> None:
             """Wrap signal handling.
@@ -28,20 +29,19 @@ def async_register_signal_handling(opp: OpenPeerPower) -> None:
             opp.async_create_task(opp.async_stop(exit_code))
 
         try:
-            opp.loop.add_signal_handler(
-                signal.SIGTERM, async_signal_handle, 0)
+            opp.loop.add_signal_handler(signal.SIGTERM, async_signal_handle, 0)
         except ValueError:
             _LOGGER.warning("Could not bind to SIGTERM")
 
         try:
-            opp.loop.add_signal_handler(
-                signal.SIGINT, async_signal_handle, 0)
+            opp.loop.add_signal_handler(signal.SIGINT, async_signal_handle, 0)
         except ValueError:
             _LOGGER.warning("Could not bind to SIGINT")
 
         try:
             opp.loop.add_signal_handler(
-                signal.SIGHUP, async_signal_handle, RESTART_EXIT_CODE)
+                signal.SIGHUP, async_signal_handle, RESTART_EXIT_CODE
+            )
         except ValueError:
             _LOGGER.warning("Could not bind to SIGHUP")
 

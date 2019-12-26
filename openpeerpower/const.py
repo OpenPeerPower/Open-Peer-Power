@@ -35,7 +35,6 @@ CONF_API_KEY = "api_key"
 CONF_API_VERSION = "api_version"
 CONF_AT = "at"
 CONF_AUTHENTICATION = "authentication"
-CONF_AUTH_MFA_MODULES = "auth_mfa_modules"
 CONF_AUTH_PROVIDERS = "auth_providers"
 CONF_BASE = "base"
 CONF_BEFORE = "before"
@@ -457,7 +456,7 @@ HTTP_SERVICE_UNAVAILABLE = 503
 
 HTTP_BASIC_AUTHENTICATION = "basic"
 HTTP_DIGEST_AUTHENTICATION = "digest"
-
+HTTP_HEADER_OP_AUTH = "X-OP-access"
 HTTP_HEADER_X_REQUESTED_WITH = "X-Requested-With"
 
 CONTENT_TYPE_JSON = "application/json"

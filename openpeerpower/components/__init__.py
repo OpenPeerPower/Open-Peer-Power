@@ -1,5 +1,5 @@
 """
-This package contains components that can be plugged into Open Power Power.
+This package contains components that can be plugged into Open Peer Power.
 
 Component design guidelines:
 - Each component defines a constant DOMAIN that is equal to its filename.
@@ -10,6 +10,8 @@ Component design guidelines:
 import logging
 
 from openpeerpower.core import split_entity_id
+
+# mypy: allow-untyped-defs
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -31,12 +33,11 @@ def is_on(opp, entity_id=None):
             component = getattr(opp.components, domain)
 
         except ImportError:
-            _LOGGER.error('Failed to call %s.is_on: component not found',
-                          domain)
+            _LOGGER.error("Failed to call %s.is_on: component not found", domain)
             continue
 
-        if not hasattr(component, 'is_on'):
-            _LOGGER.warning("Component %s has no is_on method.", domain)
+        if not hasattr(component, "is_on"):
+            _LOGGER.warning("Integration %s has no is_on method.", domain)
             continue
 
         if component.is_on(ent_id):

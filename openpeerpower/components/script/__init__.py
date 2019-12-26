@@ -5,44 +5,63 @@ import logging
 import voluptuous as vol
 
 from openpeerpower.const import (
-    ATTR_ENTITY_ID, SERVICE_TURN_OFF, SERVICE_TURN_ON,
-    SERVICE_TOGGLE, SERVICE_RELOAD, STATE_ON, CONF_ALIAS,
-    EVENT_SCRIPT_STARTED, ATTR_NAME)
-from openpeerpower.loader import bind_opp
+    ATTR_ENTITY_ID,
+    ATTR_NAME,
+    CONF_ALIAS,
+    EVENT_SCRIPT_STARTED,
+    SERVICE_RELOAD,
+    SERVICE_TOGGLE,
+    SERVICE_TURN_OFF,
+    SERVICE_TURN_ON,
+    STATE_ON,
+)
+import openpeerpower.helpers.config_validation as cv
+from openpeerpower.helpers.config_validation import make_entity_service_schema
 from openpeerpower.helpers.entity import ToggleEntity
 from openpeerpower.helpers.entity_component import EntityComponent
-import openpeerpower.helpers.config_validation as cv
-
 from openpeerpower.helpers.script import Script
+from openpeerpower.helpers.service import async_set_service_schema
+from openpeerpower.loader import bind_opp
 
 _LOGGER = logging.getLogger(__name__)
 
-DOMAIN = 'script'
-ATTR_CAN_CANCEL = 'can_cancel'
-ATTR_LAST_ACTION = 'last_action'
-ATTR_LAST_TRIGGERED = 'last_triggered'
-ATTR_VARIABLES = 'variables'
+DOMAIN = "script"
+ATTR_CAN_CANCEL = "can_cancel"
+ATTR_LAST_ACTION = "last_action"
+ATTR_LAST_TRIGGERED = "last_triggered"
+ATTR_VARIABLES = "variables"
 
-CONF_SEQUENCE = 'sequence'
+CONF_DESCRIPTION = "description"
+CONF_EXAMPLE = "example"
+CONF_FIELDS = "fields"
+CONF_SEQUENCE = "sequence"
 
-ENTITY_ID_FORMAT = DOMAIN + '.{}'
+ENTITY_ID_FORMAT = DOMAIN + ".{}"
 
-GROUP_NAME_ALL_SCRIPTS = 'all scripts'
+GROUP_NAME_ALL_SCRIPTS = "all scripts"
 
-SCRIPT_ENTRY_SCHEMA = vol.Schema({
-    CONF_ALIAS: cv.string,
-    vol.Required(CONF_SEQUENCE): cv.SCRIPT_SCHEMA,
-})
+SCRIPT_ENTRY_SCHEMA = vol.Schema(
+    {
+        CONF_ALIAS: cv.string,
+        vol.Required(CONF_SEQUENCE): cv.SCRIPT_SCHEMA,
+        vol.Optional(CONF_DESCRIPTION, default=""): cv.string,
+        vol.Optional(CONF_FIELDS, default={}): {
+            cv.string: {
+                vol.Optional(CONF_DESCRIPTION): cv.string,
+                vol.Optional(CONF_EXAMPLE): cv.string,
+            }
+        },
+    }
+)
 
-CONFIG_SCHEMA = vol.Schema({
-    DOMAIN: cv.schema_with_slug_keys(SCRIPT_ENTRY_SCHEMA)
-}, extra=vol.ALLOW_EXTRA)
+CONFIG_SCHEMA = vol.Schema(
+    {DOMAIN: cv.schema_with_slug_keys(SCRIPT_ENTRY_SCHEMA)}, extra=vol.ALLOW_EXTRA
+)
 
 SCRIPT_SERVICE_SCHEMA = vol.Schema(dict)
-SCRIPT_TURN_ONOFF_SCHEMA = vol.Schema({
-    vol.Optional(ATTR_ENTITY_ID): cv.entity_ids,
-    vol.Optional(ATTR_VARIABLES): dict,
-})
+SCRIPT_TURN_ONOFF_SCHEMA = make_entity_service_schema(
+    {vol.Optional(ATTR_VARIABLES): dict}
+)
 RELOAD_SERVICE_SCHEMA = vol.Schema({})
 
 
@@ -55,7 +74,8 @@ def is_on(opp, entity_id):
 async def async_setup(opp, config):
     """Load the scripts from the configuration."""
     component = EntityComponent(
-        _LOGGER, DOMAIN, opp, group_name=GROUP_NAME_ALL_SCRIPTS)
+        _LOGGER, DOMAIN, opp, group_name=GROUP_NAME_ALL_SCRIPTS
+    )
 
     await _async_process_config(opp, config, component)
 
@@ -73,36 +93,44 @@ async def async_setup(opp, config):
         # one way to do it. Otherwise no easy way to detect invocations.
         var = service.data.get(ATTR_VARIABLES)
         for script in await component.async_extract_from_service(service):
-            await opp.services.async_call(DOMAIN, script.object_id, var,
-                                           context=service.context)
+            await opp.services.async_call(
+                DOMAIN, script.object_id, var, context=service.context
+            )
 
     async def turn_off_service(service):
         """Cancel a script."""
         # Stopping a script is ok to be done in parallel
-        await asyncio.wait([
-            script.async_turn_off() for script
-            in await component.async_extract_from_service(service)
-        ], loop=opp.loop)
+        scripts = await component.async_extract_from_service(service)
+
+        if not scripts:
+            return
+
+        await asyncio.wait([script.async_turn_off() for script in scripts])
 
     async def toggle_service(service):
         """Toggle a script."""
         for script in await component.async_extract_from_service(service):
             await script.async_toggle(context=service.context)
 
-    opp.services.async_register(DOMAIN, SERVICE_RELOAD, reload_service,
-                                 schema=RELOAD_SERVICE_SCHEMA)
-    opp.services.async_register(DOMAIN, SERVICE_TURN_ON, turn_on_service,
-                                 schema=SCRIPT_TURN_ONOFF_SCHEMA)
-    opp.services.async_register(DOMAIN, SERVICE_TURN_OFF, turn_off_service,
-                                 schema=SCRIPT_TURN_ONOFF_SCHEMA)
-    opp.services.async_register(DOMAIN, SERVICE_TOGGLE, toggle_service,
-                                 schema=SCRIPT_TURN_ONOFF_SCHEMA)
+    opp.services.async_register(
+        DOMAIN, SERVICE_RELOAD, reload_service, schema=RELOAD_SERVICE_SCHEMA
+    )
+    opp.services.async_register(
+        DOMAIN, SERVICE_TURN_ON, turn_on_service, schema=SCRIPT_TURN_ONOFF_SCHEMA
+    )
+    opp.services.async_register(
+        DOMAIN, SERVICE_TURN_OFF, turn_off_service, schema=SCRIPT_TURN_ONOFF_SCHEMA
+    )
+    opp.services.async_register(
+        DOMAIN, SERVICE_TOGGLE, toggle_service, schema=SCRIPT_TURN_ONOFF_SCHEMA
+    )
 
     return True
 
 
 async def _async_process_config(opp, config, component):
     """Process script configuration."""
+
     async def service_handler(service):
         """Execute a service call to script.<script name>."""
         entity_id = ENTITY_ID_FORMAT.format(service.service)
@@ -110,8 +138,7 @@ async def _async_process_config(opp, config, component):
         if script.is_on:
             _LOGGER.warning("Script %s already running.", entity_id)
             return
-        await script.async_turn_on(variables=service.data,
-                                   context=service.context)
+        await script.async_turn_on(variables=service.data, context=service.context)
 
     scripts = []
 
@@ -120,7 +147,15 @@ async def _async_process_config(opp, config, component):
         script = ScriptEntity(opp, object_id, alias, cfg[CONF_SEQUENCE])
         scripts.append(script)
         opp.services.async_register(
-            DOMAIN, object_id, service_handler, schema=SCRIPT_SERVICE_SCHEMA)
+            DOMAIN, object_id, service_handler, schema=SCRIPT_SERVICE_SCHEMA
+        )
+
+        # Register the service description
+        service_desc = {
+            CONF_DESCRIPTION: cfg[CONF_DESCRIPTION],
+            CONF_FIELDS: cfg[CONF_FIELDS],
+        }
+        async_set_service_schema(opp, DOMAIN, object_id, service_desc)
 
     await component.async_add_entities(scripts)
 
@@ -162,14 +197,20 @@ class ScriptEntity(ToggleEntity):
 
     async def async_turn_on(self, **kwargs):
         """Turn the script on."""
-        context = kwargs.get('context')
+        context = kwargs.get("context")
         self.async_set_context(context)
-        self.opp.bus.async_fire(EVENT_SCRIPT_STARTED, {
-            ATTR_NAME: self.script.name,
-            ATTR_ENTITY_ID: self.entity_id,
-        }, context=context)
-        await self.script.async_run(
-            kwargs.get(ATTR_VARIABLES), context)
+        self.opp.bus.async_fire(
+            EVENT_SCRIPT_STARTED,
+            {ATTR_NAME: self.script.name, ATTR_ENTITY_ID: self.entity_id},
+            context=context,
+        )
+        try:
+            await self.script.async_run(kwargs.get(ATTR_VARIABLES), context)
+        except Exception as err:
+            self.script.async_log_exception(
+                _LOGGER, f"Error executing script {self.entity_id}", err
+            )
+            raise err
 
     async def async_turn_off(self, **kwargs):
         """Turn script off."""

@@ -15,7 +15,7 @@
       },
       "oppio_confirm": {
         "title": "MQTT Broker via Opp.io add-on",
-        "description": "Do you want to configure Open Power Power to connect to the MQTT broker provided by the opp.io add-on {addon}?",
+        "description": "Do you want to configure Open Peer Power to connect to the MQTT broker provided by the opp.io add-on {addon}?",
         "data": {
           "discovery": "Enable discovery"
         }

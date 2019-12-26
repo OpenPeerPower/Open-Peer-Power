@@ -1,10 +1,10 @@
 {
   "domain": "sun",
   "name": "Sun",
-  "documentation": "https://www.open-peer-power.io/components/sun",
+  "documentation": "https://www.open-peer-power.io/integrations/sun",
   "requirements": [],
   "dependencies": [],
   "codeowners": [
-    "@open-peer-power/core"
+    "@Swamp-Ig"
   ]
 }

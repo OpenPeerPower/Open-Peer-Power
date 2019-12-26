@@ -1,7 +1,7 @@
 {
   "domain": "history_stats",
   "name": "History stats",
-  "documentation": "https://www.open-peer-power.io/components/history_stats",
+  "documentation": "https://www.open-peer-power.io/integrations/history_stats",
   "requirements": [],
   "dependencies": [
     "history"

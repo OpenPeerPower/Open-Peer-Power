@@ -1,7 +1,7 @@
 {
   "domain": "script",
   "name": "Script",
-  "documentation": "https://www.open-peer-power.io/components/script",
+  "documentation": "https://www.open-peer-power.io/integrations/script",
   "requirements": [],
   "dependencies": [
     "group"

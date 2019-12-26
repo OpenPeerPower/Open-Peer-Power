@@ -246,6 +246,10 @@ class ConfigEntry:
 
         Returns if unload is possible and was successful.
         """
+        if self.source == SOURCE_IGNORE:
+            self.state = ENTRY_STATE_NOT_LOADED
+            return True
+
         if integration is None:
             integration = await loader.async_get_integration(opp, self.domain)
 
@@ -292,6 +296,9 @@ class ConfigEntry:
 
     async def async_remove(self, opp: OpenPeerPower) -> None:
         """Invoke remove callback on component."""
+        if self.source == SOURCE_IGNORE:
+            return
+
         integration = await loader.async_get_integration(opp, self.domain)
         component = integration.get_component()
         if not hasattr(component, "async_remove_entry"):
@@ -645,6 +652,7 @@ class ConfigEntries:
             and existing_entry.state not in UNRECOVERABLE_STATES
         ):
             await self.async_unload(existing_entry.entry_id)
+
         entry = ConfigEntry(
             version=result["version"],
             domain=result["handler"],
@@ -751,6 +759,7 @@ class ConfigFlow(data_entry_flow.FlowHandler):
             return None
 
         return cast(Optional[str], self.context.get("unique_id"))
+
     @staticmethod
     @callback
     def async_get_options_flow(config_entry: ConfigEntry) -> "OptionsFlow":

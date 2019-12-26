@@ -1,4 +1,4 @@
-"""Script to install/uninstall HA into OS X."""
+"""Script to install/uninstall OP into OS X."""
 import os
 import time
 

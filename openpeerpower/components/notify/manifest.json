@@ -1,7 +1,7 @@
 {
   "domain": "notify",
   "name": "Notify",
-  "documentation": "https://www.open-peer-power.io/components/notify",
+  "documentation": "https://www.open-peer-power.io/integrations/notify",
   "requirements": [],
   "dependencies": [],
   "codeowners": [

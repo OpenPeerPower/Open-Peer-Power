@@ -136,7 +136,7 @@ def catch_log_exception(
         else:
             # If Python is unable to access the sources files, the call stack frame
             # will be missing information, so let's guard.
-            # https://github.com/home-assistant/home-assistant/issues/24982
+            # https://github.com/open-peer-power/open-peer-power/issues/24982
             module_name = __name__
 
         # Do not print the wrapper in the traceback
@@ -192,7 +192,7 @@ def catch_log_coro_exception(
             else:
                 # If Python is unable to access the sources files, the frame
                 # will be missing information, so let's guard.
-                # https://github.com/home-assistant/home-assistant/issues/24982
+                # https://github.com/open-peer-power/open-peer-power/issues/24982
                 module_name = __name__
 
             # Do not print the wrapper in the traceback

@@ -22,7 +22,7 @@
                 "data": {
                     "discovery": "Habilitar descubrimiento"
                 },
-                "description": "\u00bfDesea configurar Open Power Power para conectarse al agente MQTT provisto por el complemento opp.io {addon} ?",
+                "description": "\u00bfDesea configurar Open Peer Power para conectarse al agente MQTT provisto por el complemento opp.io {addon} ?",
                 "title": "MQTT Broker a trav\u00e9s del complemento Opp.io"
             }
         },

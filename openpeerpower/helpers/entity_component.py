@@ -5,38 +5,47 @@ from itertools import chain
 import logging
 
 from openpeerpower import config as conf_util
-from openpeerpower.setup import async_prepare_setup_platform
 from openpeerpower.const import (
-    ATTR_ENTITY_ID, CONF_SCAN_INTERVAL, CONF_ENTITY_NAMESPACE,
-    ENTITY_MATCH_ALL)
+    ATTR_ENTITY_ID,
+    CONF_ENTITY_NAMESPACE,
+    CONF_SCAN_INTERVAL,
+    ENTITY_MATCH_ALL,
+)
 from openpeerpower.core import callback
 from openpeerpower.exceptions import OpenPeerPowerError
 from openpeerpower.helpers import config_per_platform, discovery
+from openpeerpower.helpers.config_validation import make_entity_service_schema
 from openpeerpower.helpers.service import async_extract_entity_ids
-from openpeerpower.loader import bind_opp, async_get_integration
+from openpeerpower.loader import async_get_integration, bind_opp
+from openpeerpower.setup import async_prepare_setup_platform
 from openpeerpower.util import slugify
+
 from .entity_platform import EntityPlatform
 
+# mypy: allow-untyped-defs, no-check-untyped-defs
+
 DEFAULT_SCAN_INTERVAL = timedelta(seconds=15)
-DATA_INSTANCES = 'entity_components'
+DATA_INSTANCES = "entity_components"
 
 
 @bind_opp
 async def async_update_entity(opp, entity_id):
     """Trigger an update for an entity."""
-    domain = entity_id.split('.', 1)[0]
+    domain = entity_id.split(".", 1)[0]
     entity_comp = opp.data.get(DATA_INSTANCES, {}).get(domain)
 
     if entity_comp is None:
         logging.getLogger(__name__).warning(
-            'Forced update failed. Component for %s not loaded.', entity_id)
+            "Forced update failed. Component for %s not loaded.", entity_id
+        )
         return
 
     entity = entity_comp.get_entity(entity_id)
 
     if entity is None:
         logging.getLogger(__name__).warning(
-            'Forced update failed. Entity %s not found.', entity_id)
+            "Forced update failed. Entity %s not found.", entity_id
+        )
         return
 
     await entity.async_update_op_state(True)
@@ -53,8 +62,9 @@ class EntityComponent:
      - Listen for discovery events for platforms related to the domain.
     """
 
-    def __init__(self, logger, domain, opp,
-                 scan_interval=DEFAULT_SCAN_INTERVAL, group_name=None):
+    def __init__(
+        self, logger, domain, opp, scan_interval=DEFAULT_SCAN_INTERVAL, group_name=None
+    ):
         """Initialize an entity component."""
         self.logger = logger
         self.opp = opp
@@ -64,9 +74,7 @@ class EntityComponent:
 
         self.config = None
 
-        self._platforms = {
-            domain: self._async_init_entity_platform(domain, None)
-        }
+        self._platforms = {domain: self._async_init_entity_platform(domain, None)}
         self.async_add_entities = self._platforms[domain].async_add_entities
         self.add_entities = self._platforms[domain].add_entities
 
@@ -75,8 +83,9 @@ class EntityComponent:
     @property
     def entities(self):
         """Return an iterable that returns all entities."""
-        return chain.from_iterable(platform.entities.values() for platform
-                                   in self._platforms.values())
+        return chain.from_iterable(
+            platform.entities.values() for platform in self._platforms.values()
+        )
 
     def get_entity(self, entity_id):
         """Get an entity."""
@@ -106,19 +115,20 @@ class EntityComponent:
         # Look in config for Domain, Domain 2, Domain 3 etc and load them
         tasks = []
         for p_type, p_config in config_per_platform(config, self.domain):
-            tasks.append(self._async_setup_platform(p_type, p_config))
+            tasks.append(self.async_setup_platform(p_type, p_config))
 
         if tasks:
-            await asyncio.wait(tasks, loop=self.opp.loop)
+            await asyncio.wait(tasks)
 
         # Generic discovery listener for loading platform dynamically
         # Refer to: openpeerpower.components.discovery.load_platform()
         async def component_platform_discovered(platform, info):
             """Handle the loading of a platform."""
-            await self._async_setup_platform(platform, {}, info)
+            await self.async_setup_platform(platform, {}, info)
 
         discovery.async_listen_platform(
-            self.opp, self.domain, component_platform_discovered)
+            self.opp, self.domain, component_platform_discovered
+        )
 
     async def async_setup_entry(self, config_entry):
         """Set up a config entry."""
@@ -128,7 +138,9 @@ class EntityComponent:
             # In future PR we should make opp_config part of the constructor
             # params.
             self.config or {},
-            self.domain, platform_type)
+            self.domain,
+            platform_type,
+        )
 
         if platform is None:
             return False
@@ -136,11 +148,12 @@ class EntityComponent:
         key = config_entry.entry_id
 
         if key in self._platforms:
-            raise ValueError('Config entry has already been setup!')
+            raise ValueError("Config entry has already been setup!")
 
         self._platforms[key] = self._async_init_entity_platform(
-            platform_type, platform,
-            scan_interval=getattr(platform, 'SCAN_INTERVAL', None),
+            platform_type,
+            platform,
+            scan_interval=getattr(platform, "SCAN_INTERVAL", None),
         )
 
         return await self._platforms[key].async_setup_entry(config_entry)
@@ -152,7 +165,7 @@ class EntityComponent:
         platform = self._platforms.pop(key, None)
 
         if platform is None:
-            raise ValueError('Config entry was never loaded!')
+            raise ValueError("Config entry was never loaded!")
 
         await platform.async_reset()
         return True
@@ -160,55 +173,58 @@ class EntityComponent:
     async def async_extract_from_service(self, service, expand_group=True):
         """Extract all known and available entities from a service call.
 
-        Will return all entities if no entities specified in call.
         Will return an empty list if entities specified but unknown.
 
         This method must be run in the event loop.
         """
         data_ent_id = service.data.get(ATTR_ENTITY_ID)
 
-        if data_ent_id in (None, ENTITY_MATCH_ALL):
-            if data_ent_id is None:
-                self.logger.warning(
-                    'Not passing an entity ID to a service to target all '
-                    'entities is deprecated. Update your call to %s.%s to be '
-                    'instead: entity_id: %s', service.domain, service.service,
-                    ENTITY_MATCH_ALL)
+        if data_ent_id is None:
+            return []
 
+        if data_ent_id == ENTITY_MATCH_ALL:
             return [entity for entity in self.entities if entity.available]
 
-        entity_ids = await async_extract_entity_ids(
-            self.opp, service, expand_group)
-        return [entity for entity in self.entities
-                if entity.available and entity.entity_id in entity_ids]
+        entity_ids = await async_extract_entity_ids(self.opp, service, expand_group)
+        return [
+            entity
+            for entity in self.entities
+            if entity.available and entity.entity_id in entity_ids
+        ]
 
     @callback
-    def async_register_entity_service(self, name, schema, func,
-                                      required_features=None):
+    def async_register_entity_service(self, name, schema, func, required_features=None):
         """Register an entity service."""
+        if isinstance(schema, dict):
+            schema = make_entity_service_schema(schema)
+
         async def handle_service(call):
             """Handle the service."""
-            service_name = "{}.{}".format(self.domain, name)
+            service_name = f"{self.domain}.{name}"
             await self.opp.helpers.service.entity_service_call(
-                self._platforms.values(), func, call, service_name,
-                required_features
+                self._platforms.values(), func, call, service_name, required_features
             )
 
-        self.opp.services.async_register(
-            self.domain, name, handle_service, schema)
+        self.opp.services.async_register(self.domain, name, handle_service, schema)
 
-    async def _async_setup_platform(self, platform_type, platform_config,
-                                    discovery_info=None):
+    async def async_setup_platform(
+        self, platform_type, platform_config, discovery_info=None
+    ):
         """Set up a platform for this component."""
+        if self.config is None:
+            raise RuntimeError("async_setup needs to be called first")
+
         platform = await async_prepare_setup_platform(
-            self.opp, self.config, self.domain, platform_type)
+            self.opp, self.config, self.domain, platform_type
+        )
 
         if platform is None:
             return
 
         # Use config scan interval, fallback to platform if none set
         scan_interval = platform_config.get(
-            CONF_SCAN_INTERVAL, getattr(platform, 'SCAN_INTERVAL', None))
+            CONF_SCAN_INTERVAL, getattr(platform, "SCAN_INTERVAL", None)
+        )
         entity_namespace = platform_config.get(CONF_ENTITY_NAMESPACE)
 
         key = (platform_type, scan_interval, entity_namespace)
@@ -229,38 +245,43 @@ class EntityComponent:
         if self.group_name is None:
             return
 
-        ids = [entity.entity_id for entity in
-               sorted(self.entities,
-                      key=lambda entity: entity.name or entity.entity_id)]
+        ids = [
+            entity.entity_id
+            for entity in sorted(
+                self.entities, key=lambda entity: entity.name or entity.entity_id
+            )
+        ]
 
         self.opp.async_create_task(
             self.opp.services.async_call(
-                'group', 'set', dict(
+                "group",
+                "set",
+                dict(
                     object_id=slugify(self.group_name),
                     name=self.group_name,
                     visible=False,
-                    entities=ids)))
+                    entities=ids,
+                ),
+            )
+        )
 
     async def _async_reset(self):
         """Remove entities and reset the entity component to initial values.
 
         This method must be run in the event loop.
         """
-        tasks = [platform.async_reset() for platform
-                 in self._platforms.values()]
+        tasks = [platform.async_reset() for platform in self._platforms.values()]
 
         if tasks:
-            await asyncio.wait(tasks, loop=self.opp.loop)
+            await asyncio.wait(tasks)
 
-        self._platforms = {
-            self.domain: self._platforms[self.domain]
-        }
+        self._platforms = {self.domain: self._platforms[self.domain]}
         self.config = None
 
         if self.group_name is not None:
             await self.opp.services.async_call(
-                'group', 'remove', dict(
-                    object_id=slugify(self.group_name)))
+                "group", "remove", dict(object_id=slugify(self.group_name))
+            )
 
     async def async_remove_entity(self, entity_id):
         """Remove an entity managed by one of the platforms."""
@@ -274,8 +295,7 @@ class EntityComponent:
         This method must be run in the event loop.
         """
         try:
-            conf = await \
-                conf_util.async_opp_config_yaml(self.opp)
+            conf = await conf_util.async_opp_config_yaml(self.opp)
         except OpenPeerPowerError as err:
             self.logger.error(err)
             return None
@@ -283,7 +303,8 @@ class EntityComponent:
         integration = await async_get_integration(self.opp, self.domain)
 
         conf = await conf_util.async_process_component_config(
-            self.opp, conf, integration)
+            self.opp, conf, integration
+        )
 
         if conf is None:
             return None
@@ -291,8 +312,9 @@ class EntityComponent:
         await self._async_reset()
         return conf
 
-    def _async_init_entity_platform(self, platform_type, platform,
-                                    scan_interval=None, entity_namespace=None):
+    def _async_init_entity_platform(
+        self, platform_type, platform, scan_interval=None, entity_namespace=None
+    ):
         """Initialize an entity platform."""
         if scan_interval is None:
             scan_interval = self.scan_interval

@@ -1,10 +1,10 @@
 {
-    "domain": "weather",
-    "name": "Weather",
-    "documentation": "https://www.open-peer-power.io/integrations/weather",
-    "requirements": [],
-    "dependencies": [],
-    "codeowners": [
-      "@fabaff"
-    ]
-  }
+  "domain": "weather",
+  "name": "Weather",
+  "documentation": "https://www.open-peer-power.io/integrations/weather",
+  "requirements": [],
+  "dependencies": [],
+  "codeowners": [
+    "@fabaff"
+  ]
+}

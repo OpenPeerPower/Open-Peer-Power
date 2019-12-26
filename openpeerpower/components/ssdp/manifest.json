@@ -1,0 +1,13 @@
+{
+  "domain": "ssdp",
+  "name": "SSDP",
+  "documentation": "https://www.open-peer-power.io/integrations/ssdp",
+  "requirements": [
+    "defusedxml==0.6.0",
+    "netdisco==2.6.0"
+  ],
+  "dependencies": [
+  ],
+  "codeowners": [
+  ]
+}

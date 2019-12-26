@@ -33,7 +33,7 @@ import uuid
 from async_timeout import timeout
 import attr
 import voluptuous as vol
-
+from openpeerpower import loader
 from openpeerpower import loader, util
 from openpeerpower.const import (
     ATTR_DOMAIN,

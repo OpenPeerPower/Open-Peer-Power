@@ -22,7 +22,7 @@
                 "data": {
                     "discovery": "Habilitar descobriment autom\u00e0tic"
                 },
-                "description": "Vols configurar Open Power Power perqu\u00e8 es connecti amb el broker MQTT proporcionat pel complement de opp.io {addon}?",
+                "description": "Vols configurar Open Peer Power perqu\u00e8 es connecti amb el broker MQTT proporcionat pel complement de Opp.io: {addon}?",
                 "title": "Broker MQTT a trav\u00e9s del complement de Opp.io"
             }
         },

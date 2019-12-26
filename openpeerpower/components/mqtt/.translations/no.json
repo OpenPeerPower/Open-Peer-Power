@@ -1,7 +1,7 @@
 {
     "config": {
         "abort": {
-            "single_instance_allowed": "Kun en enkelt konfigurasjon av MQTT er tillatt."
+            "single_instance_allowed": "Kun en konfigurasjon av MQTT er tillatt."
         },
         "error": {
             "cannot_connect": "Kan ikke koble til megleren."
@@ -22,7 +22,7 @@
                 "data": {
                     "discovery": "Aktiver oppdagelse"
                 },
-                "description": "Vil du konfigurere Open Power Power til \u00e5 koble til MQTT megler gitt av opp.io tillegget {addon}?",
+                "description": "Vil du konfigurere Open Peer Power til \u00e5 koble til MQTT megler gitt av opp.io tillegget {addon}?",
                 "title": "MQTT megler via Opp.io tillegg"
             }
         },

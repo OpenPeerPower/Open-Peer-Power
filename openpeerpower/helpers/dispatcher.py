@@ -6,19 +6,21 @@ from openpeerpower.core import callback
 from openpeerpower.loader import bind_opp
 from openpeerpower.util.async_ import run_callback_threadsafe
 from openpeerpower.util.logging import catch_log_exception
+
 from .typing import OpenPeerPowerType
 
-
 _LOGGER = logging.getLogger(__name__)
-DATA_DISPATCHER = 'dispatcher'
+DATA_DISPATCHER = "dispatcher"
 
 
 @bind_opp
-def dispatcher_connect(opp: OpenPeerPowerType, signal: str,
-                       target: Callable[..., None]) -> Callable[[], None]:
+def dispatcher_connect(
+    opp: OpenPeerPowerType, signal: str, target: Callable[..., None]
+) -> Callable[[], None]:
     """Connect a callable function to a signal."""
     async_unsub = run_callback_threadsafe(
-        opp.loop, async_dispatcher_connect, opp, signal, target).result()
+        opp.loop, async_dispatcher_connect, opp, signal, target
+    ).result()
 
     def remove_dispatcher() -> None:
         """Remove signal listener."""
@@ -29,8 +31,9 @@ def dispatcher_connect(opp: OpenPeerPowerType, signal: str,
 
 @callback
 @bind_opp
-def async_dispatcher_connect(opp: OpenPeerPowerType, signal: str,
-                             target: Callable[..., Any]) -> Callable[[], None]:
+def async_dispatcher_connect(
+    opp: OpenPeerPowerType, signal: str, target: Callable[..., Any]
+) -> Callable[[], None]:
     """Connect a callable function to a signal.
 
     This method must be run in the event loop.
@@ -42,9 +45,11 @@ def async_dispatcher_connect(opp: OpenPeerPowerType, signal: str,
         opp.data[DATA_DISPATCHER][signal] = []
 
     wrapped_target = catch_log_exception(
-        target, lambda *args:
-        "Exception in {} when dispatching '{}': {}".format(
-            target.__name__, signal, args))
+        target,
+        lambda *args: "Exception in {} when dispatching '{}': {}".format(
+            target.__name__, signal, args
+        ),
+    )
 
     opp.data[DATA_DISPATCHER][signal].append(wrapped_target)
 
@@ -56,8 +61,7 @@ def async_dispatcher_connect(opp: OpenPeerPowerType, signal: str,
         except (KeyError, ValueError):
             # KeyError is key target listener did not exist
             # ValueError if listener did not exist within signal
-            _LOGGER.warning(
-                "Unable to remove unknown dispatcher %s", target)
+            _LOGGER.warning("Unable to remove unknown dispatcher %s", target)
 
     return async_remove_dispatcher
 
@@ -70,8 +74,7 @@ def dispatcher_send(opp: OpenPeerPowerType, signal: str, *args: Any) -> None:
 
 @callback
 @bind_opp
-def async_dispatcher_send(
-        opp: OpenPeerPowerType, signal: str, *args: Any) -> None:
+def async_dispatcher_send(opp: OpenPeerPowerType, signal: str, *args: Any) -> None:
     """Send signal and data.
 
     This method must be run in the event loop.

@@ -4,7 +4,6 @@
   "documentation": "https://www.open-peer-power.io/integrations/default_config",
   "requirements": [],
   "dependencies": [
-    "automation",
     "script",
     "sun",
     "api",

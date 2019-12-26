@@ -1,7 +1,7 @@
 {
     "config": {
         "abort": {
-            "single_instance_allowed": "Det er berre lov \u00e5 ha \u00e9in MQTT-konfigurasjon"
+            "single_instance_allowed": "Det er berre lov \u00e5 OP \u00e9in MQTT-konfigurasjon"
         },
         "error": {
             "cannot_connect": "Klarte ikkje \u00e5 kople til meglaren."

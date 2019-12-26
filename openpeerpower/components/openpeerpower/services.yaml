@@ -1,14 +1,24 @@
 check_config:
-  description: Check the Open Power Power configuration files for errors. Errors will be displayed in the Open Power Power log.
+  description: Check the Open Peer Power configuration files for errors. Errors will be displayed in the Open Peer Power log.
 
 reload_core_config:
   description: Reload the core configuration.
 
 restart:
-  description: Restart the Open Power Power service.
+  description: Restart the Open Peer Power service.
+
+set_location:
+  description: Update the Open Peer Power location.
+  fields:
+    latitude:
+      description: Latitude of your location
+      example: 32.87336
+    longitude:
+      description: Longitude of your location
+      example: 117.22743
 
 stop:
-  description: Stop the Open Power Power service.
+  description: Stop the Open Peer Power service.
 
 toggle:
   description: Generic service to toggle devices on/off under any domain. Same usage as the light.turn_on, switch.turn_on, etc. services.

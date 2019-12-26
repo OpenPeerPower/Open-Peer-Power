@@ -15,7 +15,6 @@ from openpeerpower.util import dt as dt_util
 from openpeerpower.util.decorator import Registry
 
 from ..auth_store import AuthStore
-from ..const import MFA_SESSION_EXPIRATION
 from ..models import Credentials, User, UserMeta  # noqa: F401
 
 _LOGGER = logging.getLogger(__name__)
@@ -60,11 +59,6 @@ class AuthProvider:
     def name(self) -> str:
         """Return the name of the auth provider."""
         return self.config.get(CONF_NAME, self.DEFAULT_TITLE)
-
-    @property
-    def support_mfa(self) -> bool:
-        """Return whether multi-factor auth supported by the auth provider."""
-        return True
 
     async def async_credentials(self) -> List[Credentials]:
         """Return all credentials of this provider."""
@@ -169,9 +163,7 @@ class LoginFlow(data_entry_flow.FlowHandler):
         self._auth_provider = auth_provider
         self._auth_module_id = None  # type: Optional[str]
         self._auth_manager = auth_provider.opp.auth  # type: ignore
-        self.available_mfa_modules = {}  # type: Dict[str, str]
         self.created_at = dt_util.utcnow()
-        self.invalid_mfa_times = 0
         self.user = None  # type: Optional[User]
 
     async def async_step_init(
@@ -183,86 +175,6 @@ class LoginFlow(data_entry_flow.FlowHandler):
         Return await self.async_finish(flow_result) if login init step pass.
         """
         raise NotImplementedError
-
-    async def async_step_select_mfa_module(
-            self, user_input: Optional[Dict[str, str]] = None) \
-            -> Dict[str, Any]:
-        """Handle the step of select mfa module."""
-        errors = {}
-
-        if user_input is not None:
-            auth_module = user_input.get('multi_factor_auth_module')
-            if auth_module in self.available_mfa_modules:
-                self._auth_module_id = auth_module
-                return await self.async_step_mfa()
-            errors['base'] = 'invalid_auth_module'
-
-        if len(self.available_mfa_modules) == 1:
-            self._auth_module_id = list(self.available_mfa_modules.keys())[0]
-            return await self.async_step_mfa()
-
-        return self.async_show_form(
-            step_id='select_mfa_module',
-            data_schema=vol.Schema({
-                'multi_factor_auth_module': vol.In(self.available_mfa_modules)
-            }),
-            errors=errors,
-        )
-
-    async def async_step_mfa(
-            self, user_input: Optional[Dict[str, str]] = None) \
-            -> Dict[str, Any]:
-        """Handle the step of mfa validation."""
-        assert self.user
-
-        errors = {}
-
-        auth_module = self._auth_manager.get_auth_mfa_module(
-            self._auth_module_id)
-        if auth_module is None:
-            # Given an invalid input to async_step_select_mfa_module
-            # will show invalid_auth_module error
-            return await self.async_step_select_mfa_module(user_input={})
-
-        if user_input is None and hasattr(auth_module,
-                                          'async_initialize_login_mfa_step'):
-            try:
-                await auth_module.async_initialize_login_mfa_step(self.user.id)
-            except OpenPeerPowerError:
-                _LOGGER.exception('Error initializing MFA step')
-                return self.async_abort(reason='unknown_error')
-
-        if user_input is not None:
-            expires = self.created_at + MFA_SESSION_EXPIRATION
-            if dt_util.utcnow() > expires:
-                return self.async_abort(
-                    reason='login_expired'
-                )
-
-            result = await auth_module.async_validate(
-                self.user.id, user_input)
-            if not result:
-                errors['base'] = 'invalid_code'
-                self.invalid_mfa_times += 1
-                if self.invalid_mfa_times >= auth_module.MAX_RETRY_TIME > 0:
-                    return self.async_abort(
-                        reason='too_many_retry'
-                    )
-
-            if not errors:
-                return await self.async_finish(self.user)
-
-        description_placeholders = {
-            'mfa_module_name': auth_module.name,
-            'mfa_module_id': auth_module.id,
-        }  # type: Dict[str, Optional[str]]
-
-        return self.async_show_form(
-            step_id='mfa',
-            data_schema=auth_module.input_schema,
-            description_placeholders=description_placeholders,
-            errors=errors,
-        )
 
     async def async_finish(self, flow_result: Any) -> Dict:
         """Handle the pass of login flow."""

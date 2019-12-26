@@ -20,9 +20,9 @@ from .const import (
 
 _LOGGER = logging.getLogger(__name__)
 
-DATA_API_PASSWORD = 'api_password'
-DATA_SIGN_SECRET = 'http.auth.sign_secret'
-SIGN_QUERY_PARAM = 'authSig'
+DATA_API_PASSWORD = "api_password"
+DATA_SIGN_SECRET = "http.auth.sign_secret"
+SIGN_QUERY_PARAM = "authSig"
 
 
 @callback

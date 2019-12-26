@@ -1,14 +1,9 @@
 {
   "domain": "tts",
   "name": "Tts",
-  "documentation": "https://www.open-peer-power.io/components/tts",
-  "requirements": [
-    "mutagen==1.42.0"
-  ],
-  "dependencies": [
-    "http"
-  ],
-  "codeowners": [
-    "@robbiet480"
-  ]
+  "documentation": "https://www.open-peer-power.io/integrations/tts",
+  "requirements": ["mutagen==1.43.0"],
+  "dependencies": ["http"],
+  "after_dependencies": ["media_player"],
+  "codeowners": ["@robbiet480"]
 }
