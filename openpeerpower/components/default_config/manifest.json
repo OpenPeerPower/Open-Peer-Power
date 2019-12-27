@@ -4,11 +4,14 @@
   "documentation": "https://www.open-peer-power.io/integrations/default_config",
   "requirements": [],
   "dependencies": [
+    "automation",
+    "config",
+    "history",
+    "person",
     "script",
     "sun",
-    "api",
-    "auth",
-    "websocket_api"
+    "system_health",
+    "updater"
   ],
   "codeowners": []
 }

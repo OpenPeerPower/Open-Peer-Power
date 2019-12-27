@@ -16,8 +16,7 @@ CONSTRAINT_FILE = "package_constraints.txt"
 PROGRESS_FILE = ".pip_progress"
 _LOGGER = logging.getLogger(__name__)
 DISCOVERY_INTEGRATIONS: Dict[str, Iterable[str]] = {
-    "ssdp": ("ssdp",),
-    "zeroconf": ("zeroconf", "homekit"),
+    "ssdp": ("ssdp",)
 }
 
 

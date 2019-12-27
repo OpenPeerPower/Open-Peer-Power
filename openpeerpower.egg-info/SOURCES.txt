@@ -145,6 +145,7 @@ openpeerpower/components/lock/device_condition.py
 openpeerpower/components/lock/device_trigger.py
 openpeerpower/components/lock/reproduce_state.py
 openpeerpower/components/logbook/__init__.py
+openpeerpower/components/lovelace/__init__.py
 openpeerpower/components/map/__init__.py
 openpeerpower/components/media_player/__init__.py
 openpeerpower/components/media_player/const.py
@@ -154,6 +155,18 @@ openpeerpower/components/met/__init__.py
 openpeerpower/components/met/config_flow.py
 openpeerpower/components/met/const.py
 openpeerpower/components/met/weather.py
+openpeerpower/components/mobile_app/__init__.py
+openpeerpower/components/mobile_app/binary_sensor.py
+openpeerpower/components/mobile_app/config_flow.py
+openpeerpower/components/mobile_app/const.py
+openpeerpower/components/mobile_app/device_tracker.py
+openpeerpower/components/mobile_app/entity.py
+openpeerpower/components/mobile_app/helpers.py
+openpeerpower/components/mobile_app/http_api.py
+openpeerpower/components/mobile_app/notify.py
+openpeerpower/components/mobile_app/sensor.py
+openpeerpower/components/mobile_app/webhook.py
+openpeerpower/components/mobile_app/websocket_api.py
 openpeerpower/components/mqtt/__init__.py
 openpeerpower/components/mqtt/abbreviations.py
 openpeerpower/components/mqtt/alarm_control_panel.py
@@ -206,6 +219,7 @@ openpeerpower/components/onboarding/views.py
 openpeerpower/components/openpeerpower/__init__.py
 openpeerpower/components/openpeerpower/scene.py
 openpeerpower/components/persistent_notification/__init__.py
+openpeerpower/components/person/__init__.py
 openpeerpower/components/recorder/__init__.py
 openpeerpower/components/recorder/const.py
 openpeerpower/components/recorder/migration.py
@@ -234,8 +248,11 @@ openpeerpower/components/switch/device_condition.py
 openpeerpower/components/switch/device_trigger.py
 openpeerpower/components/switch/light.py
 openpeerpower/components/switch/reproduce_state.py
+openpeerpower/components/system_health/__init__.py
 openpeerpower/components/system_log/__init__.py
 openpeerpower/components/tts/__init__.py
+openpeerpower/components/updater/__init__.py
+openpeerpower/components/updater/binary_sensor.py
 openpeerpower/components/vacuum/__init__.py
 openpeerpower/components/vacuum/device_action.py
 openpeerpower/components/vacuum/device_condition.py
@@ -256,6 +273,7 @@ openpeerpower/components/websocket_api/permissions.py
 openpeerpower/components/websocket_api/sensor.py
 openpeerpower/components/yr/__init__.py
 openpeerpower/components/yr/sensor.py
+openpeerpower/components/zeroconf/__init__.py
 openpeerpower/components/zone/__init__.py
 openpeerpower/components/zone/config_flow.py
 openpeerpower/components/zone/const.py

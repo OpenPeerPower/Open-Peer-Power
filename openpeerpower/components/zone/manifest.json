@@ -1,7 +1,8 @@
 {
   "domain": "zone",
   "name": "Zone",
-  "documentation": "https://www.open-peer-power.io/components/zone",
+  "config_flow": true,
+  "documentation": "https://www.open-peer-power.io/integrations/zone",
   "requirements": [],
   "dependencies": [],
   "codeowners": [

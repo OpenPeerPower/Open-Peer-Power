@@ -32,9 +32,6 @@ ON_DEMAND = ("zwave",)
 
 async def async_setup(opp, config):
     """Set up the config component."""
-    opp.components.frontend.async_register_built_in_panel(
-        "config", "config", "opp:settings", require_admin=True
-    )
 
     async def setup_panel(panel_name):
         """Set up a panel."""

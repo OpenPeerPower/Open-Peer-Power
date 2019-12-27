@@ -7,6 +7,8 @@ Author: Paul Caston
 Author-email: paul@caston.id.au
 License: UNKNOWN
 Download-URL: https://github.com/open-peer-power/open-peer-power/archive/0.104.0.dev0.zip
+Project-URL: Bug Reports, https://github.com/open-peer-power/open-peer-power/issues
+Project-URL: Forum, https://community.open-peer-power.io/
 Description: UNKNOWN
 Platform: UNKNOWN
 Requires-Python: >=3.7.0

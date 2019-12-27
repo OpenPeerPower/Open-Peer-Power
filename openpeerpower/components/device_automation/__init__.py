@@ -14,7 +14,7 @@ from openpeerpower.helpers import config_validation as cv
 from openpeerpower.helpers.entity_registry import async_entries_for_device
 from openpeerpower.loader import IntegrationNotFound, async_get_integration
 
-from openpeerpower.exceptions import InvalidDeviceAutomationConfig
+from openpeerpower.components.device_automation.exceptions import InvalidDeviceAutomationConfig
 
 # mypy: allow-untyped-calls, allow-untyped-defs
 

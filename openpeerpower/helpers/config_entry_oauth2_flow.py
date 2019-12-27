@@ -261,7 +261,6 @@ class AbstractOAuth2FlowHandler(config_entries.ConfigFlow, metaclass=ABCMeta):
 
     async_step_user = async_step_pick_implementation
     async_step_ssdp = async_step_pick_implementation
-    async_step_zeroconf = async_step_pick_implementation
     async_step_homekit = async_step_pick_implementation
 
     @classmethod

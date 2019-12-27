@@ -13,16 +13,17 @@ PROJECT_COPYRIGHT = ' 2018-{}, {}'.format(dt.now().year, PROJECT_AUTHOR)
 PROJECT_URL = 'https://OpenPeerPower.io/'
 PROJECT_EMAIL = 'paul@caston.id.au'
 
-PROJECT_GITHUB_USERNAME = 'open-peer-power'
-PROJECT_GITHUB_REPOSITORY = 'open-peer-power'
+PROJECT_GITHUB_USERNAME = "open-peer-power"
+PROJECT_GITHUB_REPOSITORY = "open-peer-power"
 
 PYPI_URL = "https://pypi.python.org/pypi/{}".format(PROJECT_PACKAGE_NAME)
-GITHUB_PATH = '{}/{}'.format(
-    PROJECT_GITHUB_USERNAME, PROJECT_GITHUB_REPOSITORY)
-GITHUB_URL = 'https://github.com/{}'.format(GITHUB_PATH)
+GITHUB_PATH = "{}/{}".format(PROJECT_GITHUB_USERNAME, PROJECT_GITHUB_REPOSITORY)
+GITHUB_URL = "https://github.com/{}".format(GITHUB_PATH)
 
-DOWNLOAD_URL = '{}/archive/{}.zip'.format(GITHUB_URL, opp_const.__version__)
+DOWNLOAD_URL = "{}/archive/{}.zip".format(GITHUB_URL, opp_const.__version__)
 PROJECT_URLS = {
+    "Bug Reports": "{}/issues".format(GITHUB_URL),
+    "Forum": "https://community.open-peer-power.io/",
 }
 
 PACKAGES = find_packages(exclude=["tests", "tests.*"])
