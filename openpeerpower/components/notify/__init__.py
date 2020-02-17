@@ -1,47 +1,53 @@
 """Provides functionality to notify people."""
 import asyncio
-import logging
 from functools import partial
+import logging
+from typing import Optional
 
 import voluptuous as vol
 
-from openpeerpower.setup import async_prepare_setup_platform
-from openpeerpower.exceptions import OpenPeerPowerError
-import openpeerpower.helpers.config_validation as cv
 from openpeerpower.const import CONF_NAME, CONF_PLATFORM
+from openpeerpower.exceptions import OpenPeerPowerError
 from openpeerpower.helpers import config_per_platform, discovery
+import openpeerpower.helpers.config_validation as cv
+from openpeerpower.helpers.typing import OpenPeerPowerType
+from openpeerpower.setup import async_prepare_setup_platform
 from openpeerpower.util import slugify
+
+# mypy: allow-untyped-defs, no-check-untyped-defs
 
 _LOGGER = logging.getLogger(__name__)
 
 # Platform specific data
-ATTR_DATA = 'data'
+ATTR_DATA = "data"
 
 # Text to notify user of
-ATTR_MESSAGE = 'message'
+ATTR_MESSAGE = "message"
 
 # Target of the notification (user, device, etc)
-ATTR_TARGET = 'target'
+ATTR_TARGET = "target"
 
 # Title of notification
-ATTR_TITLE = 'title'
-ATTR_TITLE_DEFAULT = "Open Power Power"
+ATTR_TITLE = "title"
+ATTR_TITLE_DEFAULT = "Open Peer Power"
 
-DOMAIN = 'notify'
+DOMAIN = "notify"
 
-SERVICE_NOTIFY = 'notify'
+SERVICE_NOTIFY = "notify"
 
-PLATFORM_SCHEMA = vol.Schema({
-    vol.Required(CONF_PLATFORM): cv.string,
-    vol.Optional(CONF_NAME): cv.string,
-}, extra=vol.ALLOW_EXTRA)
+PLATFORM_SCHEMA = vol.Schema(
+    {vol.Required(CONF_PLATFORM): cv.string, vol.Optional(CONF_NAME): cv.string},
+    extra=vol.ALLOW_EXTRA,
+)
 
-NOTIFY_SERVICE_SCHEMA = vol.Schema({
-    vol.Required(ATTR_MESSAGE): cv.template,
-    vol.Optional(ATTR_TITLE): cv.template,
-    vol.Optional(ATTR_TARGET): vol.All(cv.ensure_list, [cv.string]),
-    vol.Optional(ATTR_DATA): dict,
-})
+NOTIFY_SERVICE_SCHEMA = vol.Schema(
+    {
+        vol.Required(ATTR_MESSAGE): cv.template,
+        vol.Optional(ATTR_TITLE): cv.template,
+        vol.Optional(ATTR_TARGET): vol.All(cv.ensure_list, [cv.string]),
+        vol.Optional(ATTR_DATA): dict,
+    }
+)
 
 
 async def async_setup(opp, config):
@@ -53,8 +59,7 @@ async def async_setup(opp, config):
         if p_config is None:
             p_config = {}
 
-        platform = await async_prepare_setup_platform(
-            opp, config, DOMAIN, p_type)
+        platform = await async_prepare_setup_platform(opp, config, DOMAIN, p_type)
 
         if platform is None:
             _LOGGER.error("Unknown notification service specified")
@@ -63,12 +68,14 @@ async def async_setup(opp, config):
         _LOGGER.info("Setting up %s.%s", DOMAIN, p_type)
         notify_service = None
         try:
-            if hasattr(platform, 'async_get_service'):
-                notify_service = await \
-                    platform.async_get_service(opp, p_config, discovery_info)
-            elif hasattr(platform, 'get_service'):
+            if hasattr(platform, "async_get_service"):
+                notify_service = await platform.async_get_service(
+                    opp, p_config, discovery_info
+                )
+            elif hasattr(platform, "get_service"):
                 notify_service = await opp.async_add_job(
-                    platform.get_service, opp, p_config, discovery_info)
+                    platform.get_service, opp, p_config, discovery_info
+                )
             else:
                 raise OpenPeerPowerError("Invalid notify platform.")
 
@@ -77,12 +84,12 @@ async def async_setup(opp, config):
                 # on discovery data.
                 if discovery_info is None:
                     _LOGGER.error(
-                        "Failed to initialize notification service %s",
-                        p_type)
+                        "Failed to initialize notification service %s", p_type
+                    )
                 return
 
         except Exception:  # pylint: disable=broad-except
-            _LOGGER.exception('Error setting up platform %s', p_type)
+            _LOGGER.exception("Error setting up platform %s", p_type)
             return
 
         notify_service.opp = opp
@@ -111,35 +118,43 @@ async def async_setup(opp, config):
 
             await notify_service.async_send_message(**kwargs)
 
-        if hasattr(notify_service, 'targets'):
+        if hasattr(notify_service, "targets"):
             platform_name = (
-                p_config.get(CONF_NAME) or discovery_info.get(CONF_NAME) or
-                p_type)
+                p_config.get(CONF_NAME) or discovery_info.get(CONF_NAME) or p_type
+            )
             for name, target in notify_service.targets.items():
-                target_name = slugify('{}_{}'.format(platform_name, name))
+                target_name = slugify(f"{platform_name}_{name}")
                 targets[target_name] = target
                 opp.services.async_register(
-                    DOMAIN, target_name, async_notify_message,
-                    schema=NOTIFY_SERVICE_SCHEMA)
+                    DOMAIN,
+                    target_name,
+                    async_notify_message,
+                    schema=NOTIFY_SERVICE_SCHEMA,
+                )
 
         platform_name = (
-            p_config.get(CONF_NAME) or discovery_info.get(CONF_NAME) or
-            SERVICE_NOTIFY)
+            p_config.get(CONF_NAME) or discovery_info.get(CONF_NAME) or SERVICE_NOTIFY
+        )
         platform_name_slug = slugify(platform_name)
 
         opp.services.async_register(
-            DOMAIN, platform_name_slug, async_notify_message,
-            schema=NOTIFY_SERVICE_SCHEMA)
+            DOMAIN,
+            platform_name_slug,
+            async_notify_message,
+            schema=NOTIFY_SERVICE_SCHEMA,
+        )
 
-        opp.config.components.add('{}.{}'.format(DOMAIN, p_type))
+        opp.config.components.add(f"{DOMAIN}.{p_type}")
 
         return True
 
-    setup_tasks = [async_setup_platform(p_type, p_config) for p_type, p_config
-                   in config_per_platform(config, DOMAIN)]
+    setup_tasks = [
+        async_setup_platform(p_type, p_config)
+        for p_type, p_config in config_per_platform(config, DOMAIN)
+    ]
 
     if setup_tasks:
-        await asyncio.wait(setup_tasks, loop=opp.loop)
+        await asyncio.wait(setup_tasks)
 
     async def async_platform_discovered(platform, info):
         """Handle for discovered platform."""
@@ -153,7 +168,7 @@ async def async_setup(opp, config):
 class BaseNotificationService:
     """An abstract class for notification services."""
 
-    opp = None
+    opp: Optional[OpenPeerPowerType] = None
 
     def send_message(self, message, **kwargs):
         """Send a message.
@@ -168,5 +183,4 @@ class BaseNotificationService:
         kwargs can contain ATTR_TITLE to specify a title.
         This method must be run in the event loop and returns a coroutine.
         """
-        return self.opp.async_add_job(
-            partial(self.send_message, message, **kwargs))
+        return self.opp.async_add_job(partial(self.send_message, message, **kwargs))

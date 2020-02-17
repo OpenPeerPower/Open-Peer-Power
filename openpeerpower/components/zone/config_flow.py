@@ -1,22 +1,36 @@
 """Config flow to configure zone component."""
 
+from typing import Set
+
 import voluptuous as vol
 
-import openpeerpower.helpers.config_validation as cv
 from openpeerpower import config_entries
 from openpeerpower.const import (
-    CONF_NAME, CONF_LATITUDE, CONF_LONGITUDE, CONF_ICON, CONF_RADIUS)
+    CONF_ICON,
+    CONF_LATITUDE,
+    CONF_LONGITUDE,
+    CONF_NAME,
+    CONF_RADIUS,
+)
 from openpeerpower.core import callback
+import openpeerpower.helpers.config_validation as cv
+from openpeerpower.helpers.typing import OpenPeerPowerType
 from openpeerpower.util import slugify
 
 from .const import CONF_PASSIVE, DOMAIN, HOME_ZONE
 
+# mypy: allow-untyped-defs, no-check-untyped-defs
+
 
 @callback
-def configured_zones(opp):
+def configured_zones(opp: OpenPeerPowerType) -> Set[str]:
     """Return a set of the configured zones."""
-    return set((slugify(entry.data[CONF_NAME])) for
-               entry in opp.config_entries.async_entries(DOMAIN))
+    return set(
+        (slugify(entry.data[CONF_NAME]))
+        for entry in (
+            opp.config_entries.async_entries(DOMAIN) if opp.config_entries else []
+        )
+    )
 
 
 @config_entries.HANDLERS.register(DOMAIN)
@@ -41,20 +55,21 @@ class ZoneFlowHandler(config_entries.ConfigFlow):
             name = slugify(user_input[CONF_NAME])
             if name not in configured_zones(self.opp) and name != HOME_ZONE:
                 return self.async_create_entry(
-                    title=user_input[CONF_NAME],
-                    data=user_input,
+                    title=user_input[CONF_NAME], data=user_input
                 )
-            errors['base'] = 'name_exists'
+            errors["base"] = "name_exists"
 
         return self.async_show_form(
-            step_id='init',
-            data_schema=vol.Schema({
-                vol.Required(CONF_NAME): str,
-                vol.Required(CONF_LATITUDE): cv.latitude,
-                vol.Required(CONF_LONGITUDE): cv.longitude,
-                vol.Optional(CONF_RADIUS): vol.Coerce(float),
-                vol.Optional(CONF_ICON): str,
-                vol.Optional(CONF_PASSIVE): bool,
-            }),
+            step_id="init",
+            data_schema=vol.Schema(
+                {
+                    vol.Required(CONF_NAME): str,
+                    vol.Required(CONF_LATITUDE): cv.latitude,
+                    vol.Required(CONF_LONGITUDE): cv.longitude,
+                    vol.Optional(CONF_RADIUS): vol.Coerce(float),
+                    vol.Optional(CONF_ICON): str,
+                    vol.Optional(CONF_PASSIVE): bool,
+                }
+            ),
             errors=errors,
         )

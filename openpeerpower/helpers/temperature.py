@@ -1,13 +1,15 @@
 """Temperature helpers for Open Peer Power."""
 from numbers import Number
+from typing import Optional
 
+from openpeerpower.const import PRECISION_HALVES, PRECISION_TENTHS
 from openpeerpower.core import OpenPeerPower
 from openpeerpower.util.temperature import convert as convert_temperature
-from openpeerpower.const import PRECISION_HALVES, PRECISION_TENTHS
 
 
-def display_temp(opp: OpenPeerPower, temperature: float, unit: str,
-                 precision: float) -> float:
+def display_temp(
+    opp: OpenPeerPower, temperature: Optional[float], unit: str, precision: float
+) -> Optional[float]:
     """Convert temperature into preferred units/precision for display."""
     temperature_unit = unit
     op_unit = opp.config.units.temperature_unit
@@ -18,12 +20,11 @@ def display_temp(opp: OpenPeerPower, temperature: float, unit: str,
     # If the temperature is not a number this can cause issues
     # with Polymer components, so bail early there.
     if not isinstance(temperature, Number):
-        raise TypeError(
-            "Temperature is not a number: {}".format(temperature))
+        raise TypeError(f"Temperature is not a number: {temperature}")
 
-    if temperature_unit != op_unit:
-        temperature = convert_temperature(
-            temperature, temperature_unit, op_unit)
+    # type ignore: https://github.com/python/mypy/issues/7207
+    if temperature_unit != op_unit:  # type: ignore
+        temperature = convert_temperature(temperature, temperature_unit, op_unit)
 
     # Round in the units appropriate
     if precision == PRECISION_HALVES:

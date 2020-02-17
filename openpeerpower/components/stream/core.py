@@ -2,17 +2,17 @@
 import asyncio
 from collections import deque
 import io
-from typing import List, Any
+from typing import Any, List
 
-import attr
 from aiohttp import web
+import attr
 
-from openpeerpower.core import callback
 from openpeerpower.components.http import OpenPeerPowerView
+from openpeerpower.core import callback
 from openpeerpower.helpers.event import async_call_later
 from openpeerpower.util.decorator import Registry
 
-from .const import DOMAIN, ATTR_STREAMS
+from .const import ATTR_STREAMS, DOMAIN
 
 PROVIDERS = Registry()
 
@@ -22,8 +22,8 @@ class StreamBuffer:
     """Represent a segment."""
 
     segment = attr.ib(type=io.BytesIO)
-    output = attr.ib()               # type=av.OutputContainer
-    vstream = attr.ib()              # type=av.VideoStream
+    output = attr.ib()  # type=av.OutputContainer
+    vstream = attr.ib()  # type=av.VideoStream
     astream = attr.ib(default=None)  # type=av.AudioStream
 
 
@@ -88,8 +88,7 @@ class StreamOutput:
         # Reset idle timeout
         if self._unsub is not None:
             self._unsub()
-        self._unsub = async_call_later(
-            self._stream.opp, self.timeout, self._timeout)
+        self._unsub = async_call_later(self._stream.opp, self.timeout, self._timeout)
 
         if not sequence:
             return self._segments
@@ -115,10 +114,11 @@ class StreamOutput:
     @callback
     def put(self, segment: Segment) -> None:
         """Store output."""
-        # Start idle timeout when we start recieving data
+        # Start idle timeout when we start receiving data
         if self._unsub is None:
             self._unsub = async_call_later(
-                self._stream.opp, self.timeout, self._timeout)
+                self._stream.opp, self.timeout, self._timeout
+            )
 
         if segment is None:
             self._event.set()
@@ -161,11 +161,16 @@ class StreamView(OpenPeerPowerView):
 
     async def get(self, request, token, sequence=None):
         """Start a GET request."""
-        opp = request.app['opp']
+        opp = request.app["opp"]
 
-        stream = next((
-            s for s in opp.data[DOMAIN][ATTR_STREAMS].values()
-            if s.access_token == token), None)
+        stream = next(
+            (
+                s
+                for s in opp.data[DOMAIN][ATTR_STREAMS].values()
+                if s.access_token == token
+            ),
+            None,
+        )
 
         if not stream:
             raise web.HTTPNotFound()

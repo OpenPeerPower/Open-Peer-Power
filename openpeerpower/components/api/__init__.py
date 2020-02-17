@@ -31,7 +31,7 @@ from openpeerpower.const import (
     URL_API_TEMPLATE,
     __version__,
 )
-import openpeerpower.core as ha
+import openpeerpower.core as op
 from openpeerpower.exceptions import ServiceNotFound, TemplateError, Unauthorized
 from openpeerpower.helpers import template
 from openpeerpower.helpers.json import JSONEncoder
@@ -77,7 +77,7 @@ class APIStatusView(OpenPeerPowerView):
     url = URL_API
     name = "api:status"
 
-    @ha.callback
+    @op.callback
     def get(self, request):
         """Retrieve if API is running."""
         return self.json_message("API running.")
@@ -160,7 +160,7 @@ class APIConfigView(OpenPeerPowerView):
     url = URL_API_CONFIG
     name = "api:config"
 
-    @ha.callback
+    @op.callback
     def get(self, request):
         """Get current configuration."""
         return self.json(request.app["opp"].config.as_dict())
@@ -173,7 +173,7 @@ class APIDiscoveryView(OpenPeerPowerView):
     url = URL_API_DISCOVERY_INFO
     name = "api:discovery"
 
-    @ha.callback
+    @op.callback
     def get(self, request):
         """Get discovery information."""
         opp = request.app["opp"]
@@ -194,7 +194,7 @@ class APIStatesView(OpenPeerPowerView):
     url = URL_API_STATES
     name = "api:states"
 
-    @ha.callback
+    @op.callback
     def get(self, request):
         """Get current states."""
         user = request["opp_user"]
@@ -213,7 +213,7 @@ class APIEntityStateView(OpenPeerPowerView):
     url = "/api/states/{entity_id}"
     name = "api:entity-state"
 
-    @ha.callback
+    @op.callback
     def get(self, request, entity_id):
         """Retrieve state of entity."""
         user = request["opp_user"]
@@ -258,7 +258,7 @@ class APIEntityStateView(OpenPeerPowerView):
 
         return resp
 
-    @ha.callback
+    @op.callback
     def delete(self, request, entity_id):
         """Remove entity."""
         if not request["opp_user"].is_admin:
@@ -274,7 +274,7 @@ class APIEventListenersView(OpenPeerPowerView):
     url = URL_API_EVENTS
     name = "api:event-listeners"
 
-    @ha.callback
+    @op.callback
     def get(self, request):
         """Get event listeners."""
         return self.json(async_events_json(request.app["opp"]))
@@ -305,15 +305,15 @@ class APIEventView(OpenPeerPowerView):
 
         # Special case handling for event STATE_CHANGED
         # We will try to convert state dicts back to State objects
-        if event_type == ha.EVENT_STATE_CHANGED and event_data:
+        if event_type == op.EVENT_STATE_CHANGED and event_data:
             for key in ("old_state", "new_state"):
-                state = ha.State.from_dict(event_data.get(key))
+                state = op.State.from_dict(event_data.get(key))
 
                 if state:
                     event_data[key] = state
 
         request.app["opp"].bus.async_fire(
-            event_type, event_data, ha.EventOrigin.remote, self.context(request)
+            event_type, event_data, op.EventOrigin.remote, self.context(request)
         )
 
         return self.json_message(f"Event {event_type} fired.")
@@ -366,7 +366,7 @@ class APIComponentsView(OpenPeerPowerView):
     url = URL_API_COMPONENTS
     name = "api:components"
 
-    @ha.callback
+    @op.callback
     def get(self, request):
         """Get current loaded components."""
         return self.json(request.app["opp"].config.components)

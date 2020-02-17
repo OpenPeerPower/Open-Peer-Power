@@ -1,7 +1,7 @@
 {
   "domain": "mqtt_room",
   "name": "Mqtt room",
-  "documentation": "https://www.open-peer-power.io/components/mqtt_room",
+  "documentation": "https://www.open-peer-power.io/integrations/mqtt_room",
   "requirements": [],
   "dependencies": [
     "mqtt"

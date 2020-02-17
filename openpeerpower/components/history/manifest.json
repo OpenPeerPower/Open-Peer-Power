@@ -1,0 +1,13 @@
+{
+  "domain": "history",
+  "name": "History",
+  "documentation": "https://www.open-peer-power.io/integrations/history",
+  "requirements": [],
+  "dependencies": [
+    "http",
+    "recorder"
+  ],
+  "codeowners": [
+    "@open-peer-power/core"
+  ]
+}

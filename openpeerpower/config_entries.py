@@ -23,7 +23,6 @@ SOURCE_DISCOVERY = "discovery"
 SOURCE_IMPORT = "import"
 SOURCE_SSDP = "ssdp"
 SOURCE_USER = "user"
-SOURCE_ZEROCONF = "zeroconf"
 SOURCE_IGNORE = "ignore"
 
 HANDLERS = Registry()
@@ -52,7 +51,7 @@ ENTRY_STATE_FAILED_UNLOAD = "failed_unload"
 UNRECOVERABLE_STATES = (ENTRY_STATE_MIGRATION_ERROR, ENTRY_STATE_FAILED_UNLOAD)
 
 DISCOVERY_NOTIFICATION_ID = "config_entry_discovery"
-DISCOVERY_SOURCES = (SOURCE_SSDP, SOURCE_ZEROCONF, SOURCE_DISCOVERY, SOURCE_IMPORT)
+DISCOVERY_SOURCES = (SOURCE_SSDP, SOURCE_DISCOVERY, SOURCE_IMPORT)
 
 EVENT_FLOW_DISCOVERED = "config_entry_discovered"
 
@@ -246,6 +245,10 @@ class ConfigEntry:
 
         Returns if unload is possible and was successful.
         """
+        if self.source == SOURCE_IGNORE:
+            self.state = ENTRY_STATE_NOT_LOADED
+            return True
+
         if integration is None:
             integration = await loader.async_get_integration(opp, self.domain)
 
@@ -292,6 +295,9 @@ class ConfigEntry:
 
     async def async_remove(self, opp: OpenPeerPower) -> None:
         """Invoke remove callback on component."""
+        if self.source == SOURCE_IGNORE:
+            return
+
         integration = await loader.async_get_integration(opp, self.domain)
         component = integration.get_component()
         if not hasattr(component, "async_remove_entry"):
@@ -645,6 +651,7 @@ class ConfigEntries:
             and existing_entry.state not in UNRECOVERABLE_STATES
         ):
             await self.async_unload(existing_entry.entry_id)
+
         entry = ConfigEntry(
             version=result["version"],
             domain=result["handler"],
@@ -751,6 +758,7 @@ class ConfigFlow(data_entry_flow.FlowHandler):
             return None
 
         return cast(Optional[str], self.context.get("unique_id"))
+
     @staticmethod
     @callback
     def async_get_options_flow(config_entry: ConfigEntry) -> "OptionsFlow":

@@ -1,5 +1,5 @@
 """Typing Helpers for Open Peer Power."""
-from typing import Dict, Any, Tuple, Optional
+from typing import Any, Dict, Optional, Tuple
 
 import openpeerpower.core
 

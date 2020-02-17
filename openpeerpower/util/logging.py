@@ -8,8 +8,6 @@ import threading
 import traceback
 from typing import Any, Callable, Coroutine, Optional
 
-from .async_ import run_coroutine_threadsafe
-
 
 class HideSensitiveDataFilter(logging.Filter):
     """Filter API password calls."""
@@ -21,7 +19,7 @@ class HideSensitiveDataFilter(logging.Filter):
 
     def filter(self, record: logging.LogRecord) -> bool:
         """Hide sensitive data in messages."""
-        record.msg = record.msg.replace(self.text, '*******')
+        record.msg = record.msg.replace(self.text, "*******")
 
         return True
 
@@ -30,12 +28,11 @@ class HideSensitiveDataFilter(logging.Filter):
 class AsyncHandler:
     """Logging handler wrapper to add an async layer."""
 
-    def __init__(
-            self, loop: AbstractEventLoop, handler: logging.Handler) -> None:
+    def __init__(self, loop: AbstractEventLoop, handler: logging.Handler) -> None:
         """Initialize async logging handler wrapper."""
         self.handler = handler
         self.loop = loop
-        self._queue = asyncio.Queue(loop=loop)  # type: asyncio.Queue
+        self._queue: asyncio.Queue = asyncio.Queue(loop=loop)
         self._thread = threading.Thread(target=self._process)
 
         # Delegate from handler
@@ -64,7 +61,7 @@ class AsyncHandler:
 
         if blocking:
             while self._thread.is_alive():
-                await asyncio.sleep(0, loop=self.loop)
+                await asyncio.sleep(0)
 
     def emit(self, record: Optional[logging.LogRecord]) -> None:
         """Process a record."""
@@ -84,8 +81,9 @@ class AsyncHandler:
     def _process(self) -> None:
         """Process log in a thread."""
         while True:
-            record = run_coroutine_threadsafe(
-                self._queue.get(), self.loop).result()
+            record = asyncio.run_coroutine_threadsafe(
+                self._queue.get(), self.loop
+            ).result()
 
             if record is None:
                 self.handler.close()
@@ -138,7 +136,7 @@ def catch_log_exception(
         else:
             # If Python is unable to access the sources files, the call stack frame
             # will be missing information, so let's guard.
-            # https://github.com/home-assistant/home-assistant/issues/24982
+            # https://github.com/open-peer-power/open-peer-power/issues/24982
             module_name = __name__
 
         # Do not print the wrapper in the traceback
@@ -154,6 +152,7 @@ def catch_log_exception(
 
     wrapper_func = None
     if asyncio.iscoroutinefunction(check_func):
+
         @wraps(func)
         async def async_wrapper(*args: Any) -> None:
             """Catch and log exception."""
@@ -161,8 +160,10 @@ def catch_log_exception(
                 await func(*args)
             except Exception:  # pylint: disable=broad-except
                 log_exception(*args)
+
         wrapper_func = async_wrapper
     else:
+
         @wraps(func)
         def wrapper(*args: Any) -> None:
             """Catch and log exception."""
@@ -170,6 +171,7 @@ def catch_log_exception(
                 func(*args)
             except Exception:  # pylint: disable=broad-except
                 log_exception(*args)
+
         wrapper_func = wrapper
     return wrapper_func
 
@@ -190,7 +192,7 @@ def catch_log_coro_exception(
             else:
                 # If Python is unable to access the sources files, the frame
                 # will be missing information, so let's guard.
-                # https://github.com/home-assistant/home-assistant/issues/24982
+                # https://github.com/open-peer-power/open-peer-power/issues/24982
                 module_name = __name__
 
             # Do not print the wrapper in the traceback

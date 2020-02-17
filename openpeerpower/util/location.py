@@ -6,13 +6,13 @@ detect_location_info and elevation are mocked by default during tests.
 import asyncio
 import collections
 import math
-from typing import Any, Optional, Tuple, Dict
+from typing import Any, Dict, Optional, Tuple
 
 import aiohttp
 
-ELEVATION_URL = 'https://api.open-elevation.com/api/v1/lookup'
-IP_API = 'http://ip-api.com/json'
-IPAPI = 'https://ipapi.co/json/'
+ELEVATION_URL = "https://api.open-elevation.com/api/v1/lookup"
+IP_API = "http://ip-api.com/json"
+IPAPI = "https://ipapi.co/json/"
 
 # Constants from https://github.com/maurycyp/vincenty
 # Earth ellipsoid according to WGS 84
@@ -45,8 +45,9 @@ LocationInfo = collections.namedtuple(
 )
 
 
-async def async_detect_location_info(session: aiohttp.ClientSession) \
-        -> Optional[LocationInfo]:
+async def async_detect_location_info(
+    session: aiohttp.ClientSession,
+) -> Optional[LocationInfo]:
     """Detect location information."""
     data = await _get_ipapi(session)
 
@@ -56,14 +57,14 @@ async def async_detect_location_info(session: aiohttp.ClientSession) \
     if data is None:
         return None
 
-    data['use_metric'] = data['country_code'] not in (
-        'US', 'MM', 'LR')
+    data["use_metric"] = data["country_code"] not in ("US", "MM", "LR")
 
     return LocationInfo(**data)
 
 
-def distance(lat1: Optional[float], lon1: Optional[float],
-             lat2: float, lon2: float) -> Optional[float]:
+def distance(
+    lat1: Optional[float], lon1: Optional[float], lat2: float, lon2: float
+) -> Optional[float]:
     """Calculate the distance in meters between two points.
 
     Async friendly.
@@ -76,13 +77,13 @@ def distance(lat1: Optional[float], lon1: Optional[float],
     return result * 1000
 
 
-
 # Author: https://github.com/maurycyp
 # Source: https://github.com/maurycyp/vincenty
 # License: https://github.com/maurycyp/vincenty/blob/master/LICENSE
 # pylint: disable=invalid-name
-def vincenty(point1: Tuple[float, float], point2: Tuple[float, float],
-             miles: bool = False) -> Optional[float]:
+def vincenty(
+    point1: Tuple[float, float], point2: Tuple[float, float], miles: bool = False
+) -> Optional[float]:
     """
     Vincenty formula (inverse method) to calculate the distance.
 
@@ -108,8 +109,9 @@ def vincenty(point1: Tuple[float, float], point2: Tuple[float, float],
     for _ in range(MAX_ITERATIONS):
         sinLambda = math.sin(Lambda)
         cosLambda = math.cos(Lambda)
-        sinSigma = math.sqrt((cosU2 * sinLambda) ** 2 +
-                             (cosU1 * sinU2 - sinU1 * cosU2 * cosLambda) ** 2)
+        sinSigma = math.sqrt(
+            (cosU2 * sinLambda) ** 2 + (cosU1 * sinU2 - sinU1 * cosU2 * cosLambda) ** 2
+        )
         if sinSigma == 0.0:
             return 0.0  # coincident points
         cosSigma = sinU1 * sinU2 + cosU1 * cosU2 * cosLambda
@@ -120,14 +122,12 @@ def vincenty(point1: Tuple[float, float], point2: Tuple[float, float],
             cos2SigmaM = cosSigma - 2 * sinU1 * sinU2 / cosSqAlpha
         except ZeroDivisionError:
             cos2SigmaM = 0
-        C = FLATTENING / 16 * cosSqAlpha * (4 + FLATTENING * (4 - 3 *
-                                                              cosSqAlpha))
+        C = FLATTENING / 16 * cosSqAlpha * (4 + FLATTENING * (4 - 3 * cosSqAlpha))
         LambdaPrev = Lambda
-        Lambda = L + (1 - C) * FLATTENING * sinAlpha * (sigma + C * sinSigma *
-                                                        (cos2SigmaM + C *
-                                                         cosSigma *
-                                                         (-1 + 2 *
-                                                          cos2SigmaM ** 2)))
+        Lambda = L + (1 - C) * FLATTENING * sinAlpha * (
+            sigma
+            + C * sinSigma * (cos2SigmaM + C * cosSigma * (-1 + 2 * cos2SigmaM ** 2))
+        )
         if abs(Lambda - LambdaPrev) < CONVERGENCE_THRESHOLD:
             break  # successful convergence
     else:
@@ -162,8 +162,7 @@ def vincenty(point1: Tuple[float, float], point2: Tuple[float, float],
     return round(s, 6)
 
 
-async def _get_ipapi(session: aiohttp.ClientSession) \
-        -> Optional[Dict[str, Any]]:
+async def _get_ipapi(session: aiohttp.ClientSession) -> Optional[Dict[str, Any]]:
     """Query ipapi.co for location data."""
     try:
         resp = await session.get(IPAPI, timeout=5)
@@ -189,8 +188,7 @@ async def _get_ipapi(session: aiohttp.ClientSession) \
     }
 
 
-async def _get_ip_api(session: aiohttp.ClientSession) \
-        -> Optional[Dict[str, Any]]:
+async def _get_ip_api(session: aiohttp.ClientSession) -> Optional[Dict[str, Any]]:
     """Query ip-api.com for location data."""
     try:
         resp = await session.get(IP_API, timeout=5)

@@ -5,11 +5,13 @@
   "requirements": [],
   "dependencies": [
     "automation",
+    "config",
+    "history",
+    "person",
     "script",
     "sun",
-    "api",
-    "auth",
-    "websocket_api"
+    "system_health",
+    "updater"
   ],
   "codeowners": []
 }

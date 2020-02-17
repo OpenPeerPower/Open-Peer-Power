@@ -1,10 +1,10 @@
 """Support to help onboard new users."""
 from openpeerpower.core import callback
-from openpeerpower.loader import bind_opp
 from openpeerpower.helpers.storage import Store
+from openpeerpower.loader import bind_opp
 
-from .const import (
-    DOMAIN, STEP_USER, STEPS, STEP_INTEGRATION, STEP_CORE_CONFIG)
+from . import views
+from .const import DOMAIN, STEP_CORE_CONFIG, STEP_INTEGRATION, STEP_USER, STEPS
 
 STORAGE_KEY = DOMAIN
 STORAGE_VERSION = 3
@@ -17,9 +17,9 @@ class OnboadingStorage(Store):
         """Migrate to the new version."""
         # From version 1 -> 2, we automatically mark the integration step done
         if old_version < 2:
-            old_data['done'].append(STEP_INTEGRATION)
+            old_data["done"].append(STEP_INTEGRATION)
         if old_version < 3:
-            old_data['done'].append(STEP_CORE_CONFIG)
+            old_data["done"].append(STEP_CORE_CONFIG)
         return old_data
 
 
@@ -35,7 +35,7 @@ def async_is_onboarded(opp):
 @callback
 def async_is_user_onboarded(opp):
     """Return if a user has been created as part of onboarding."""
-    return async_is_onboarded(opp) or STEP_USER in opp.data[DOMAIN]['done']
+    return async_is_onboarded(opp) or STEP_USER in opp.data[DOMAIN]["done"]
 
 
 async def async_setup(opp, config):
@@ -44,11 +44,9 @@ async def async_setup(opp, config):
     data = await store.async_load()
 
     if data is None:
-        data = {
-            'done': []
-        }
+        data = {"done": []}
 
-    if STEP_USER not in data['done']:
+    if STEP_USER not in data["done"]:
         # Users can already have created an owner account via the command line
         # If so, mark the user step as done.
         has_owner = False
@@ -59,15 +57,13 @@ async def async_setup(opp, config):
                 break
 
         if has_owner:
-            data['done'].append(STEP_USER)
+            data["done"].append(STEP_USER)
             await store.async_save(data)
 
-    if set(data['done']) == set(STEPS):
+    if set(data["done"]) == set(STEPS):
         return True
 
     opp.data[DOMAIN] = data
-
-    from . import views
 
     await views.async_setup(opp, data, store)
 

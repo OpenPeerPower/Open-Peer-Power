@@ -102,7 +102,7 @@ class ZWaveTriggerSensor(ZWaveBinarySensor):
 
     @property
     def is_on(self):
-        """Return true if movement has happened within the rearm time."""
+        """Return true if movement has opppened within the rearm time."""
         return self._state and \
             (self.invalidate_after is None or
              self.invalidate_after > dt_util.utcnow())

@@ -5,7 +5,7 @@ from typing import Any, Iterable, List, Optional, cast
 
 import voluptuous as vol
 
-from openpeerpower import core as ha
+from openpeerpower import core as op
 from openpeerpower.const import (
     ATTR_ASSUMED_STATE,
     ATTR_ENTITY_ID,
@@ -137,7 +137,7 @@ def expand_entity_ids(opp: OpenPeerPowerType, entity_ids: Iterable[Any]) -> List
 
         try:
             # If entity_id points at a group, expand it
-            domain, _ = ha.split_entity_id(entity_id)
+            domain, _ = op.split_entity_id(entity_id)
 
             if domain == DOMAIN:
                 child_entities = get_entity_ids(opp, entity_id)

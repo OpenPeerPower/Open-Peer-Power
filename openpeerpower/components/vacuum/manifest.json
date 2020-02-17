@@ -1,7 +1,7 @@
 {
   "domain": "vacuum",
   "name": "Vacuum",
-  "documentation": "https://www.open-peer-power.io/components/vacuum",
+  "documentation": "https://www.open-peer-power.io/integrations/vacuum",
   "requirements": [],
   "dependencies": [
     "group"

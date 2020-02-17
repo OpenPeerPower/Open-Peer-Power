@@ -22,7 +22,7 @@
                 "data": {
                     "discovery": "Aktiv\u00e9r opdagelse"
                 },
-                "description": "Vil du konfigurere Open Power Power til at oprette forbindelse til MQTT brokeren, der leveres af opp.io add-on {addon}?",
+                "description": "Vil du konfigurere Open Peer Power til at oprette forbindelse til MQTT brokeren, der leveres af opp.io add-on {addon}?",
                 "title": "MQTT Broker via Opp.io add-on"
             }
         },

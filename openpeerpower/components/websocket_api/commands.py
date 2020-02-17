@@ -45,7 +45,7 @@ def handle_subscribe_events(opp, connection, msg):
     """
     from .permissions import SUBSCRIBE_WHITELIST
 
-    event_type = msg['event_type']
+    event_type = msg["event_type"]
 
     if (event_type not in SUBSCRIBE_WHITELIST and
             not connection.user.is_admin):

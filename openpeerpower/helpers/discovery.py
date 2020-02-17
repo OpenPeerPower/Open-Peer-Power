@@ -5,16 +5,16 @@ There are two different types of discoveries that can be fired/listened for.
  - listen_platform/discover_platform is for platforms. These are used by
    components to allow discovery of their platforms.
 """
-from openpeerpower import setup, core
-from openpeerpower.loader import bind_opp
-from openpeerpower.const import (
-    ATTR_DISCOVERED, ATTR_SERVICE, EVENT_PLATFORM_DISCOVERED)
+from openpeerpower import core, setup
+from openpeerpower.const import ATTR_DISCOVERED, ATTR_SERVICE, EVENT_PLATFORM_DISCOVERED
 from openpeerpower.exceptions import OpenPeerPowerError
-from openpeerpower.loader import DEPENDENCY_BLACKLIST
+from openpeerpower.loader import DEPENDENCY_BLACKLIST, bind_opp
 from openpeerpower.util.async_ import run_callback_threadsafe
 
-EVENT_LOAD_PLATFORM = 'load_platform.{}'
-ATTR_PLATFORM = 'platform'
+# mypy: allow-untyped-defs, no-check-untyped-defs
+
+EVENT_LOAD_PLATFORM = "load_platform.{}"
+ATTR_PLATFORM = "platform"
 
 
 @bind_opp
@@ -23,8 +23,7 @@ def listen(opp, service, callback):
 
     Service can be a string or a list/tuple.
     """
-    run_callback_threadsafe(
-        opp.loop, async_listen, opp, service, callback).result()
+    run_callback_threadsafe(opp.loop, async_listen, opp, service, callback).result()
 
 
 @core.callback
@@ -43,8 +42,9 @@ def async_listen(opp, service, callback):
     def discovery_event_listener(event):
         """Listen for discovery events."""
         if ATTR_SERVICE in event.data and event.data[ATTR_SERVICE] in service:
-            opp.async_add_job(callback, event.data[ATTR_SERVICE],
-                               event.data.get(ATTR_DISCOVERED))
+            opp.async_add_job(
+                callback, event.data[ATTR_SERVICE], event.data.get(ATTR_DISCOVERED)
+            )
 
     opp.bus.async_listen(EVENT_PLATFORM_DISCOVERED, discovery_event_listener)
 
@@ -52,25 +52,19 @@ def async_listen(opp, service, callback):
 @bind_opp
 def discover(opp, service, discovered, component, opp_config):
     """Fire discovery event. Can ensure a component is loaded."""
-    opp.add_job(
-        async_discover(opp, service, discovered, component, opp_config))
+    opp.add_job(async_discover(opp, service, discovered, component, opp_config))
 
 
 @bind_opp
-async def async_discover(opp, service, discovered, component,
-                         opp_config):
+async def async_discover(opp, service, discovered, component, opp_config):
     """Fire discovery event. Can ensure a component is loaded."""
     if component in DEPENDENCY_BLACKLIST:
-        raise OpenPeerPowerError(
-            'Cannot discover the {} component.'.format(component))
+        raise OpenPeerPowerError("Cannot discover the {} component.".format(component))
 
     if component is not None and component not in opp.config.components:
-        await setup.async_setup_component(
-            opp, component, opp_config)
+        await setup.async_setup_component(opp, component, opp_config)
 
-    data = {
-        ATTR_SERVICE: service
-    }
+    data = {ATTR_SERVICE: service}
 
     if discovered is not None:
         data[ATTR_DISCOVERED] = discovered
@@ -105,12 +99,9 @@ def async_listen_platform(opp, component, callback):
         if not platform:
             return
 
-        opp.async_run_job(
-            callback, platform, event.data.get(ATTR_DISCOVERED)
-        )
+        opp.async_run_job(callback, platform, event.data.get(ATTR_DISCOVERED))
 
-    opp.bus.async_listen(
-        EVENT_PLATFORM_DISCOVERED, discovery_platform_listener)
+    opp.bus.async_listen(EVENT_PLATFORM_DISCOVERED, discovery_platform_listener)
 
 
 @bind_opp
@@ -126,13 +117,12 @@ def load_platform(opp, component, platform, discovered, opp_config):
     Use `listen_platform` to register a callback for these events.
     """
     opp.add_job(
-        async_load_platform(opp, component, platform, discovered,
-                            opp_config))
+        async_load_platform(opp, component, platform, discovered, opp_config)
+    )
 
 
 @bind_opp
-async def async_load_platform(opp, component, platform, discovered,
-                              opp_config):
+async def async_load_platform(opp, component, platform, discovered, opp_config):
     """Load a component and platform dynamically.
 
     Target components will be loaded and an EVENT_PLATFORM_DISCOVERED will be
@@ -148,17 +138,15 @@ async def async_load_platform(opp, component, platform, discovered,
 
     This method is a coroutine.
     """
-    assert opp_config, 'You need to pass in the real opp config'
+    assert opp_config, "You need to pass in the real opp config"
 
     if component in DEPENDENCY_BLACKLIST:
-        raise OpenPeerPowerError(
-            'Cannot discover the {} component.'.format(component))
+        raise OpenPeerPowerError("Cannot discover the {} component.".format(component))
 
     setup_success = True
 
     if component not in opp.config.components:
-        setup_success = await setup.async_setup_component(
-            opp, component, opp_config)
+        setup_success = await setup.async_setup_component(opp, component, opp_config)
 
     # No need to fire event if we could not set up component
     if not setup_success:

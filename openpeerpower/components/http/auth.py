@@ -1,14 +1,13 @@
 """Authentication for HTTP component."""
 import base64
 import logging
+import secrets
 
 from aiohttp import hdrs
 from aiohttp.web import middleware
 import jwt
 
 from openpeerpower.auth.providers import legacy_api_password
-from openpeerpower.auth.util import generate_secret
-from openpeerpower.const import HTTP_HEADER_OP_AUTH
 from openpeerpower.core import callback
 from openpeerpower.util import dt as dt_util
 
@@ -17,12 +16,13 @@ from .const import (
     KEY_OPP_USER,
     KEY_REAL_IP,
 )
+# mypy: allow-untyped-defs, no-check-untyped-defs
 
 _LOGGER = logging.getLogger(__name__)
 
-DATA_API_PASSWORD = 'api_password'
-DATA_SIGN_SECRET = 'http.auth.sign_secret'
-SIGN_QUERY_PARAM = 'authSig'
+DATA_API_PASSWORD = "api_password"
+DATA_SIGN_SECRET = "http.auth.sign_secret"
+SIGN_QUERY_PARAM = "authSig"
 
 
 @callback
@@ -31,16 +31,23 @@ def async_sign_path(opp, refresh_token_id, path, expiration):
     secret = opp.data.get(DATA_SIGN_SECRET)
 
     if secret is None:
-        secret = opp.data[DATA_SIGN_SECRET] = generate_secret()
+        secret = opp.data[DATA_SIGN_SECRET] = secrets.token_hex()
 
     now = dt_util.utcnow()
-    return "{}?{}={}".format(path, SIGN_QUERY_PARAM, jwt.encode({
-        'iss': refresh_token_id,
-        'path': path,
-        'iat': now,
-        'exp': now + expiration,
-    }, secret, algorithm='HS256').decode())
-
+    return "{}?{}={}".format(
+        path,
+        SIGN_QUERY_PARAM,
+        jwt.encode(
+            {
+                "iss": refresh_token_id,
+                "path": path,
+                "iat": now,
+                "exp": now + expiration,
+            },
+            secret,
+            algorithm="HS256",
+        ).decode(),
+    )
 
 @callback
 def setup_auth(opp, app):
@@ -51,10 +58,6 @@ def setup_auth(opp, app):
     if support_legacy:
         _LOGGER.warning("legacy_api_password support has been enabled.")
 
-    trusted_networks = []
-    for prv in opp.auth.auth_providers:
-        if prv.type == 'trusted_networks':
-            trusted_networks += prv.trusted_networks
 
     async def async_validate_auth_header(request):
         """
@@ -69,14 +72,16 @@ def setup_auth(opp, app):
             # If no space in authorization header
             return False
 
-        if auth_type == 'Bearer':
-            refresh_token = await opp.auth.async_validate_access_token(
-                auth_val)
-            if refresh_token is None:
-                return False
+        if auth_type != "Bearer":
+            return False
 
-            request[KEY_OPP_USER] = refresh_token.user
-            return True
+        refresh_token = await opp.auth.async_validate_access_token(auth_val)
+
+        if refresh_token is None:
+            return False
+
+        request[KEY_OPP_USER] = refresh_token.user
+        return True
 
         if auth_type == 'Basic' and support_legacy:
             decoded = base64.b64decode(auth_val).decode('utf-8')
@@ -126,10 +131,10 @@ def setup_auth(opp, app):
         except jwt.InvalidTokenError:
             return False
 
-        if claims['path'] != request.path:
+        if claims["path"] != request.path:
             return False
 
-        refresh_token = await opp.auth.async_get_refresh_token(claims['iss'])
+        refresh_token = await opp.auth.async_get_refresh_token(claims["iss"])
 
         if refresh_token is None:
             return False
@@ -137,20 +142,6 @@ def setup_auth(opp, app):
         request[KEY_OPP_USER] = refresh_token.user
         return True
 
-    async def async_validate_trusted_networks(request):
-        """Test if request is from a trusted ip."""
-        ip_addr = request[KEY_REAL_IP]
-        # Doctored
-        if not any(ip_addr in trusted_network
-                   for trusted_network in trusted_networks):
-            return True
-
-        user = await opp.auth.async_get_owner()
-        if user is None:
-            return False
-
-        request[KEY_OPP_USER] = user
-        return True
 
     async def async_validate_legacy_api_password(request, password):
         """Validate api_password."""
@@ -184,33 +175,24 @@ def setup_auth(opp, app):
 
         # We first start with a string check to avoid parsing query params
         # for every request.
-        elif (request.method == "GET" and SIGN_QUERY_PARAM in request.query and
-              await async_validate_signed_request(request)):
-            authenticated = True
-
-        elif (trusted_networks and
-              await async_validate_trusted_networks(request)):
-            if request.path not in old_auth_warning:
-                # When removing this, don't forget to remove the print logic
-                # in http/view.py
-                request['deprecate_warning_message'] = \
-                    'Access from trusted networks without auth token is ' \
-                    'going to be removed in Open Peer Power 0.96. Configure ' \
-                    'the trusted networks auth provider or use long-lived ' \
-                    'access tokens to access {} from {}'.format(
-                        request.path, request[KEY_REAL_IP])
-                old_auth_warning.add(request.path)
-            authenticated = True
-
-        elif (support_legacy and HTTP_HEADER_OP_AUTH in request.headers and
-              await async_validate_legacy_api_password(
-                  request, request.headers[HTTP_HEADER_OP_AUTH])):
+        elif (
+            request.method == "GET"
+            and SIGN_QUERY_PARAM in request.query
+            and await async_validate_signed_request(request)
+        ):
             authenticated = True
 
         elif (support_legacy and DATA_API_PASSWORD in request.query and
               await async_validate_legacy_api_password(
                   request, request.query[DATA_API_PASSWORD])):
             authenticated = True
+        if authenticated:
+            _LOGGER.debug(
+                "Authenticated %s for %s using %s",
+                request[KEY_REAL_IP],
+                request.path,
+                auth_type,
+            )
 
         request[KEY_AUTHENTICATED] = authenticated
         return await handler(request)

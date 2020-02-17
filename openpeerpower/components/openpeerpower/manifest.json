@@ -1,7 +1,7 @@
 {
   "domain": "openpeerpower",
-  "name": "Open Power Power Core Integration",
-  "documentation": "https://www.open-peer-power.io/components/openpeerpower",
+  "name": "Open Peer Power Core Integration",
+  "documentation": "https://www.open-peer-power.io/integrations/openpeerpower",
   "requirements": [],
   "dependencies": [],
   "codeowners": [

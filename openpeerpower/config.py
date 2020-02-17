@@ -14,14 +14,12 @@ from voluptuous.humanize import humanize_error
 
 from openpeerpower import auth
 from openpeerpower.auth import (
-    mfa_modules as auth_mfa_modules,
     providers as auth_providers,
 )
 from openpeerpower.const import (
     ATTR_ASSUMED_STATE,
     ATTR_FRIENDLY_NAME,
     ATTR_HIDDEN,
-    CONF_AUTH_MFA_MODULES,
     CONF_AUTH_PROVIDERS,
     CONF_CUSTOMIZE,
     CONF_CUSTOMIZE_DOMAIN,
@@ -123,29 +121,6 @@ def _no_duplicate_auth_provider(
         config_keys.add(key)
     return configs
 
-
-def _no_duplicate_auth_mfa_module(
-    configs: Sequence[Dict[str, Any]]
-) -> Sequence[Dict[str, Any]]:
-    """No duplicate auth mfa module item allowed in a list.
-
-    Each type of mfa module can only have one config without optional id.
-    A global unique id is required if same type of mfa module used multiple
-    times.
-    Note: this is different than auth provider
-    """
-    config_keys: Set[str] = set()
-    for config in configs:
-        key = config.get(CONF_ID, config[CONF_TYPE])
-        if key in config_keys:
-            raise vol.Invalid(
-                "Duplicate mfa module {} found. Please add unique IDs if "
-                "you want to have the same mfa module twice".format(config[CONF_TYPE])
-            )
-        config_keys.add(key)
-    return configs
-
-
 PACKAGES_CONFIG_SCHEMA = cv.schema_with_slug_keys(  # Package names are slugs
     vol.Schema({cv.string: vol.Any(dict, list, None)})  # Component config
 )
@@ -200,20 +175,6 @@ CORE_CONFIG_SCHEMA = CUSTOMIZE_CONFIG_SCHEMA.extend(
                 )
             ],
             _no_duplicate_auth_provider,
-        ),
-        vol.Optional(CONF_AUTH_MFA_MODULES): vol.All(
-            cv.ensure_list,
-            [
-                auth_mfa_modules.MULTI_FACTOR_AUTH_MODULE_SCHEMA.extend(
-                    {
-                        CONF_TYPE: vol.NotIn(
-                            ["insecure_example"],
-                            "The insecure_example mfa module" " is for testing only.",
-                        )
-                    }
-                )
-            ],
-            _no_duplicate_auth_mfa_module,
         ),
     }
 )
@@ -472,13 +433,8 @@ async def async_process_op_core_config(opp: OpenPeerPower, config: Dict) -> None
         if auth_conf is None:
             auth_conf = [{"type": "openpeerpower"}]
 
-        mfa_conf = config.get(
-            CONF_AUTH_MFA_MODULES,
-            [{"type": "totp", "id": "totp", "name": "Authenticator app"}],
-        )
-
         setattr(
-            opp, "auth", await auth.auth_manager_from_config(opp, auth_conf, mfa_conf)
+            opp, "auth", await auth.auth_manager_from_config(opp, auth_conf)
         )
 
     await opp.config.async_load()
