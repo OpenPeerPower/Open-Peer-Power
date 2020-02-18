@@ -112,8 +112,6 @@ openpeerpower/components/fan/device_action.py
 openpeerpower/components/fan/device_condition.py
 openpeerpower/components/fan/device_trigger.py
 openpeerpower/components/fan/reproduce_state.py
-openpeerpower/components/frontend/__init__.py
-openpeerpower/components/frontend/storage.py
 openpeerpower/components/geo_location/__init__.py
 openpeerpower/components/group/__init__.py
 openpeerpower/components/group/cover.py
@@ -144,9 +142,7 @@ openpeerpower/components/lock/device_action.py
 openpeerpower/components/lock/device_condition.py
 openpeerpower/components/lock/device_trigger.py
 openpeerpower/components/lock/reproduce_state.py
-openpeerpower/components/logbook/__init__.py
 openpeerpower/components/lovelace/__init__.py
-openpeerpower/components/map/__init__.py
 openpeerpower/components/media_player/__init__.py
 openpeerpower/components/media_player/const.py
 openpeerpower/components/media_player/device_condition.py
@@ -273,7 +269,6 @@ openpeerpower/components/websocket_api/permissions.py
 openpeerpower/components/websocket_api/sensor.py
 openpeerpower/components/yr/__init__.py
 openpeerpower/components/yr/sensor.py
-openpeerpower/components/zeroconf/__init__.py
 openpeerpower/components/zone/__init__.py
 openpeerpower/components/zone/config_flow.py
 openpeerpower/components/zone/const.py
