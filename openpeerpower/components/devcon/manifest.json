@@ -1,0 +1,8 @@
+{
+  "domain": "devcon",
+  "name": "Devcon",
+  "documentation": "https://www.open-peer-power.io/integrations/devcon",
+  "requirements": [],
+  "dependencies": [],
+  "codeowners": ["@open-peer-power/frontend"]
+}

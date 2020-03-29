@@ -1,0 +1,8 @@
+{
+  "domain": "bom",
+  "name": "Australian Bureau of Meteorology (BOM)",
+  "documentation": "https://www.open-peer-power.io/integrations/bom",
+  "requirements": ["bomradarloop==0.1.3"],
+  "dependencies": [],
+  "codeowners": []
+}

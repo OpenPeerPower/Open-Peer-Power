@@ -1,0 +1,8 @@
+{
+  "domain": "smtp",
+  "name": "SMTP",
+  "documentation": "https://www.open-peer-power.io/integrations/smtp",
+  "requirements": [],
+  "dependencies": [],
+  "codeowners": ["@fabaff"]
+}

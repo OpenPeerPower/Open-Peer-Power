@@ -1,0 +1,84 @@
+addon_install:
+  description: Install a Opp.io docker add-on.
+  fields:
+    addon:
+      description: The add-on slug.
+      example: core_ssh
+    version:
+      description: Optional or it will be use the latest version.
+      example: "0.2"
+
+addon_start:
+  description: Start a Opp.io docker add-on.
+  fields:
+    addon:
+      description: The add-on slug.
+      example: core_ssh
+
+addon_restart:
+  description: Restart a Opp.io docker add-on.
+  fields:
+    addon:
+      description: The add-on slug.
+      example: core_ssh
+
+addon_stdin:
+  description: Write data to a Opp.io docker add-on stdin .
+  fields:
+    addon:
+      description: The add-on slug.
+      example: core_ssh
+
+addon_stop:
+  description: Stop a Opp.io docker add-on.
+  fields:
+    addon:
+      description: The add-on slug.
+      example: core_ssh
+
+addon_uninstall:
+  description: Uninstall a Opp.io docker add-on.
+  fields:
+    addon:
+      description: The add-on slug.
+      example: core_ssh
+
+addon_update:
+  description: Update a Opp.io docker add-on.
+  fields:
+    addon:
+      description: The add-on slug.
+      example: core_ssh
+    version:
+      description: Optional or it will be use the latest version.
+      example: "0.2"
+
+openpeerpower_update:
+  description: Update the Open Peer Power docker image.
+  fields:
+    version:
+      description: Optional or it will be use the latest version.
+      example: 0.40.1
+
+host_reboot:
+  description: Reboot the host system.
+
+host_shutdown:
+  description: Poweroff the host system.
+
+host_update:
+  description: Update the host system.
+  fields:
+    version:
+      description: Optional or it will be use the latest version.
+      example: "0.3"
+
+supervisor_reload:
+  description: Reload the Opp.io supervisor.
+
+supervisor_update:
+  description: Update the Opp.io supervisor.
+  fields:
+    version:
+      description: Optional or it will be use the latest version.
+      example: "0.3"

@@ -1,0 +1,8 @@
+{
+  "domain": "oppio",
+  "name": "Opp.io",
+  "documentation": "https://www.open-peer-power.io/oppio",
+  "requirements": [],
+  "dependencies": ["http", "panel_custom"],
+  "codeowners": ["@open-peer-power/opp-io"]
+}

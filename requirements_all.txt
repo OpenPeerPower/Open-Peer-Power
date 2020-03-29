@@ -1,0 +1,2157 @@
+# Open Peer Power core
+aiohttp==3.6.1
+astral==1.10.1
+async_timeout==3.0.1
+attrs==19.3.0
+bcrypt==3.1.7
+certifi>=2019.11.28
+importlib-metadata==1.5.0
+jinja2>=2.10.3
+PyJWT==1.7.1
+cryptography==2.8
+pip>=8.0.3
+python-slugify==4.0.0
+pytz>=2019.03
+pyyaml==5.3
+requests==2.22.0
+ruamel.yaml==0.15.100
+voluptuous==0.11.7
+voluptuous-serialize==2.3.0
+
+# openpeerpower.components.nuimo_controller
+--only-binary=all nuimo==0.1.0
+
+# openpeerpower.components.dht
+# Adafruit-DHT==1.4.0
+
+# openpeerpower.components.sht31
+Adafruit-GPIO==1.0.3
+
+# openpeerpower.components.sht31
+Adafruit-SHT31==1.0.2
+
+# openpeerpower.components.bbb_gpio
+# Adafruit_BBIO==1.1.1
+
+# openpeerpower.components.homekit
+HAP-python==2.7.0
+
+# openpeerpower.components.mastodon
+Mastodon.py==1.5.0
+
+# openpeerpower.components.orangepi_gpio
+OPi.GPIO==0.4.0
+
+# openpeerpower.components.essent
+PyEssent==0.13
+
+# openpeerpower.components.github
+PyGithub==1.43.8
+
+# openpeerpower.components.isy994
+PyISY==1.1.2
+
+# openpeerpower.components.mvglive
+PyMVGLive==1.1.4
+
+# openpeerpower.components.arduino
+PyMata==2.20
+
+# openpeerpower.components.mobile_app
+# openpeerpower.components.owntracks
+PyNaCl==1.3.0
+
+# openpeerpower.auth.mfa_modules.totp
+PyQRCode==1.2.1
+
+# openpeerpower.components.rmvtransport
+PyRMVtransport==0.2.9
+
+# openpeerpower.components.telegram_bot
+PySocks==1.7.1
+
+# openpeerpower.components.switchbot
+# PySwitchbot==0.6.2
+
+# openpeerpower.components.transport_nsw
+PyTransportNSW==0.1.1
+
+# openpeerpower.components.vicare
+PyViCare==0.1.7
+
+# openpeerpower.components.xiaomi_aqara
+PyXiaomiGateway==0.12.4
+
+# openpeerpower.components.mcp23017
+# openpeerpower.components.rpi_gpio
+# RPi.GPIO==0.7.0
+
+# openpeerpower.components.remember_the_milk
+RtmAPI==0.7.2
+
+# openpeerpower.components.travisci
+TravisPy==0.3.5
+
+# openpeerpower.components.twitter
+TwitterAPI==2.5.10
+
+# openpeerpower.components.tof
+# VL53L1X2==0.1.5
+
+# openpeerpower.components.waze_travel_time
+WazeRouteCalculator==0.12
+
+# openpeerpower.components.yessssms
+YesssSMS==0.4.1
+
+# openpeerpower.components.abode
+abodepy==0.17.0
+
+# openpeerpower.components.mcp23017
+adafruit-blinka==3.9.0
+
+# openpeerpower.components.mcp23017
+adafruit-circuitpython-mcp230xx==2.2.2
+
+# openpeerpower.components.androidtv
+adb-shell==0.1.1
+
+# openpeerpower.components.adguard
+adguardhome==0.4.1
+
+# openpeerpower.components.frontier_silicon
+afsapi==0.0.4
+
+# openpeerpower.components.geonetnz_quakes
+aio_geojson_geonetnz_quakes==0.12
+
+# openpeerpower.components.geonetnz_volcano
+aio_geojson_geonetnz_volcano==0.5
+
+# openpeerpower.components.nsw_rural_fire_service_feed
+aio_geojson_nsw_rfs_incidents==0.3
+
+# openpeerpower.components.gdacs
+aio_georss_gdacs==0.3
+
+# openpeerpower.components.ambient_station
+aioambient==1.0.2
+
+# openpeerpower.components.asuswrt
+aioasuswrt==1.1.22
+
+# openpeerpower.components.automatic
+aioautomatic==0.6.5
+
+# openpeerpower.components.aws
+aiobotocore==0.11.1
+
+# openpeerpower.components.dnsip
+aiodns==2.0.0
+
+# openpeerpower.components.esphome
+aioesphomeapi==2.6.1
+
+# openpeerpower.components.freebox
+aiofreepybox==0.0.8
+
+# openpeerpower.components.yi
+aioftp==0.12.0
+
+# openpeerpower.components.harmony
+aioharmony==0.1.13
+
+# openpeerpower.components.emulated_hue
+# openpeerpower.components.http
+aiohttp_cors==0.7.0
+
+# openpeerpower.components.hue
+aiohue==2.0.0
+
+# openpeerpower.components.imap
+aioimaplib==0.7.15
+
+# openpeerpower.components.apache_kafka
+aiokafka==0.5.1
+
+# openpeerpower.components.kef
+aiokef==0.2.7
+
+# openpeerpower.components.lifx
+aiolifx==0.6.7
+
+# openpeerpower.components.lifx
+aiolifx_effects==0.2.2
+
+# openpeerpower.components.keyboard_remote
+aionotify==0.2.0
+
+# openpeerpower.components.notion
+aionotion==1.1.0
+
+# openpeerpower.components.hunterdouglas_powerview
+aiopvapi==1.6.14
+
+# openpeerpower.components.webostv
+aiopylgtv==0.3.3
+
+# openpeerpower.components.switcher_kis
+aioswitcher==2019.4.26
+
+# openpeerpower.components.unifi
+aiounifi==13
+
+# openpeerpower.components.wwlln
+aiowwlln==2.0.2
+
+# openpeerpower.components.airly
+airly==0.0.2
+
+# openpeerpower.components.aladdin_connect
+aladdin_connect==0.3
+
+# openpeerpower.components.alarmdecoder
+alarmdecoder==1.13.2
+
+# openpeerpower.components.alpha_vantage
+alpha_vantage==2.1.3
+
+# openpeerpower.components.ambiclimate
+ambiclimate==0.2.1
+
+# openpeerpower.components.amcrest
+amcrest==1.5.6
+
+# openpeerpower.components.androidtv
+androidtv==0.0.39
+
+# openpeerpower.components.anel_pwrctrl
+anel_pwrctrl-openpeerpower==0.0.1.dev2
+
+# openpeerpower.components.anthemav
+anthemav==1.1.10
+
+# openpeerpower.components.apcupsd
+apcaccess==0.0.13
+
+# openpeerpower.components.apns
+apns2==0.3.0
+
+# openpeerpower.components.apprise
+apprise==0.8.4
+
+# openpeerpower.components.aprs
+aprslib==0.6.46
+
+# openpeerpower.components.aqualogic
+aqualogic==1.0
+
+# openpeerpower.components.arcam_fmj
+arcam-fmj==0.4.3
+
+# openpeerpower.components.ampio
+asmog==0.0.6
+
+# openpeerpower.components.asterisk_mbox
+asterisk_mbox==0.5.0
+
+# openpeerpower.components.dlna_dmr
+# openpeerpower.components.upnp
+async-upnp-client==0.14.12
+
+# openpeerpower.components.aten_pe
+atenpdu==0.3.0
+
+# openpeerpower.components.aurora_abb_powerone
+aurorapy==0.2.6
+
+# openpeerpower.components.stream
+av==6.1.2
+
+# openpeerpower.components.avea
+avea==1.4
+
+# openpeerpower.components.avion
+# avion==0.10
+
+# openpeerpower.components.axis
+axis==25
+
+# openpeerpower.components.azure_event_hub
+azure-eventhub==1.3.1
+
+# openpeerpower.components.azure_service_bus
+azure-servicebus==0.50.1
+
+# openpeerpower.components.baidu
+baidu-aip==1.6.6
+
+# openpeerpower.components.modem_callerid
+basicmodem==0.7
+
+# openpeerpower.components.linux_battery
+batinfo==0.4.2
+
+# openpeerpower.components.eddystone_temperature
+# beacontools[scan]==1.2.3
+
+# openpeerpower.components.scrape
+beautifulsoup4==4.8.2
+
+# openpeerpower.components.beewi_smartclim
+beewi_smartclim==0.0.7
+
+# openpeerpower.components.zha
+bellows-openpeerpower==0.13.2
+
+# openpeerpower.components.bmw_connected_drive
+bimmer_connected==0.7.1
+
+# openpeerpower.components.bizkaibus
+bizkaibus==0.1.1
+
+# openpeerpower.components.blink
+blinkpy==0.14.2
+
+# openpeerpower.components.blinksticklight
+blinkstick==1.1.8
+
+# openpeerpower.components.blinkt
+# blinkt==0.1.0
+
+# openpeerpower.components.bitcoin
+blockchain==1.4.4
+
+# openpeerpower.components.decora
+# openpeerpower.components.miflora
+# bluepy==1.3.0
+
+# openpeerpower.components.bme680
+# bme680==1.0.5
+
+# openpeerpower.components.bom
+bomradarloop==0.1.3
+
+# openpeerpower.components.amazon_polly
+# openpeerpower.components.route53
+boto3==1.9.252
+
+# openpeerpower.components.braviatv
+bravia-tv==1.0
+
+# openpeerpower.components.broadlink
+broadlink==0.12.0
+
+# openpeerpower.components.brother
+brother==0.1.6
+
+# openpeerpower.components.brottsplatskartan
+brottsplatskartan==0.0.1
+
+# openpeerpower.components.brunt
+brunt==0.1.3
+
+# openpeerpower.components.bluetooth_tracker
+bt_proximity==0.2
+
+# openpeerpower.components.bt_home_hub_5
+bthomehub5-devicelist==0.1.1
+
+# openpeerpower.components.bt_smarthub
+btsmarthub_devicelist==0.1.3
+
+# openpeerpower.components.buienradar
+buienradar==1.0.1
+
+# openpeerpower.components.caldav
+caldav==0.6.1
+
+# openpeerpower.components.cisco_mobility_express
+ciscomobilityexpress==0.3.3
+
+# openpeerpower.components.cppm_tracker
+clearpasspy==1.0.2
+
+# openpeerpower.components.sinch
+clx-sdk-xms==1.0.0
+
+# openpeerpower.components.co2signal
+co2signal==0.4.2
+
+# openpeerpower.components.coinbase
+coinbase==2.1.0
+
+# openpeerpower.components.coinmarketcap
+coinmarketcap==5.0.3
+
+# openpeerpower.scripts.check_config
+colorlog==4.1.0
+
+# openpeerpower.components.concord232
+concord232==0.15
+
+# openpeerpower.components.upc_connect
+connect-box==0.2.5
+
+# openpeerpower.components.eddystone_temperature
+# openpeerpower.components.eq3btsmart
+# openpeerpower.components.xiaomi_miio
+construct==2.9.45
+
+# openpeerpower.scripts.credstash
+# credstash==1.15.0
+
+# openpeerpower.components.crimereports
+crimereports==1.0.1
+
+# openpeerpower.components.datadog
+datadog==0.15.0
+
+# openpeerpower.components.metoffice
+datapoint==0.9.5
+
+# openpeerpower.components.decora
+# decora==0.6
+
+# openpeerpower.components.decora_wifi
+# decora_wifi==1.4
+
+# openpeerpower.components.ihc
+# openpeerpower.components.namecheapdns
+# openpeerpower.components.ohmconnect
+# openpeerpower.components.ssdp
+defusedxml==0.6.0
+
+# openpeerpower.components.deluge
+deluge-client==1.7.1
+
+# openpeerpower.components.denonavr
+denonavr==0.7.12
+
+# openpeerpower.components.directv
+directpy==0.6
+
+# openpeerpower.components.discogs
+discogs_client==2.2.2
+
+# openpeerpower.components.discord
+discord.py==1.3.1
+
+# openpeerpower.components.updater
+distro==1.4.0
+
+# openpeerpower.components.digitalloggers
+dlipower==0.7.165
+
+# openpeerpower.components.doorbird
+doorbirdpy==2.0.8
+
+# openpeerpower.components.dovado
+dovado==0.4.1
+
+# openpeerpower.components.dsmr
+dsmr_parser==0.18
+
+# openpeerpower.components.dweet
+dweepy==0.3.0
+
+# openpeerpower.components.dynalite
+dynalite_devices==0.1.22
+
+# openpeerpower.components.rainforest_eagle
+eagle200_reader==0.2.1
+
+# openpeerpower.components.ebusd
+ebusdpy==0.0.16
+
+# openpeerpower.components.ecoal_boiler
+ecoaliface==0.4.0
+
+# openpeerpower.components.ee_brightbox
+eebrightbox==0.0.4
+
+# openpeerpower.components.elgato
+elgato==0.2.0
+
+# openpeerpower.components.eliqonline
+eliqonline==1.2.2
+
+# openpeerpower.components.elkm1
+elkm1-lib==0.7.15
+
+# openpeerpower.components.emulated_roku
+emulated_roku==0.2.1
+
+# openpeerpower.components.enocean
+enocean==0.50
+
+# openpeerpower.components.entur_public_transport
+enturclient==0.2.1
+
+# openpeerpower.components.environment_canada
+env_canada==0.0.34
+
+# openpeerpower.components.envirophat
+# envirophat==0.0.6
+
+# openpeerpower.components.enphase_envoy
+envoy_reader==0.11.0
+
+# openpeerpower.components.season
+ephem==3.7.7.0
+
+# openpeerpower.components.epson
+epson-projector==0.1.3
+
+# openpeerpower.components.epsonworkforce
+epsonprinter==0.0.9
+
+# openpeerpower.components.netgear_lte
+eternalegypt==0.0.11
+
+# openpeerpower.components.keyboard_remote
+# evdev==1.1.2
+
+# openpeerpower.components.evohome
+evohome-async==0.3.5.post1
+
+# openpeerpower.components.dlib_face_detect
+# openpeerpower.components.dlib_face_identify
+# face_recognition==1.2.3
+
+# openpeerpower.components.fastdotcom
+fastdotcom==0.0.3
+
+# openpeerpower.components.feedreader
+feedparser-openpeerpower==5.2.2.dev1
+
+# openpeerpower.components.fibaro
+fiblary3==0.1.7
+
+# openpeerpower.components.fints
+fints==1.0.1
+
+# openpeerpower.components.fitbit
+fitbit==0.3.1
+
+# openpeerpower.components.fixer
+fixerio==1.0.0a0
+
+# openpeerpower.components.flux_led
+flux_led==0.22
+
+# openpeerpower.components.foobot
+foobot_async==0.3.1
+
+# openpeerpower.components.fortios
+fortiosapi==0.10.8
+
+# openpeerpower.components.free_mobile
+freesms==0.1.2
+
+# openpeerpower.components.fritz
+# openpeerpower.components.fritzbox_callmonitor
+# openpeerpower.components.fritzbox_netmonitor
+fritzconnection==1.2.0
+
+# openpeerpower.components.google_translate
+gTTS-token==1.1.3
+
+# openpeerpower.components.garmin_connect
+garminconnect==0.1.8
+
+# openpeerpower.components.gearbest
+gearbest_parser==1.0.7
+
+# openpeerpower.components.geizhals
+geizhals==0.0.9
+
+# openpeerpower.components.geniushub
+geniushub-client==0.6.30
+
+# openpeerpower.components.geo_json_events
+# openpeerpower.components.usgs_earthquakes_feed
+geojson_client==0.4
+
+# openpeerpower.components.aprs
+geopy==1.19.0
+
+# openpeerpower.components.geo_rss_events
+georss_generic_client==0.3
+
+# openpeerpower.components.ign_sismologia
+georss_ign_sismologia_client==0.2
+
+# openpeerpower.components.qld_bushfire
+georss_qld_bushfire_alert_client==0.3
+
+# openpeerpower.components.braviatv
+# openpeerpower.components.huawei_lte
+# openpeerpower.components.kef
+# openpeerpower.components.minecraft_server
+# openpeerpower.components.nmap_tracker
+getmac==0.8.1
+
+# openpeerpower.components.gios
+gios==0.0.3
+
+# openpeerpower.components.gitter
+gitterpy==0.1.7
+
+# openpeerpower.components.glances
+glances_api==0.2.0
+
+# openpeerpower.components.gntp
+gntp==1.0.3
+
+# openpeerpower.components.google
+google-api-python-client==1.6.4
+
+# openpeerpower.components.google_pubsub
+google-cloud-pubsub==0.39.1
+
+# openpeerpower.components.google_cloud
+google-cloud-texttospeech==0.4.0
+
+# openpeerpower.components.google_travel_time
+googlemaps==2.5.1
+
+# openpeerpower.components.slide
+goslide-api==0.5.1
+
+# openpeerpower.components.remote_rpi_gpio
+gpiozero==1.5.1
+
+# openpeerpower.components.gpsd
+gps3==0.33.3
+
+# openpeerpower.components.greeneye_monitor
+greeneye_monitor==2.0
+
+# openpeerpower.components.greenwave
+greenwavereality==0.5.1
+
+# openpeerpower.components.growatt_server
+growattServer==0.0.1
+
+# openpeerpower.components.gstreamer
+gstreamer-player==1.1.2
+
+# openpeerpower.components.ffmpeg
+op-ffmpeg==2.0
+
+# openpeerpower.components.philips_js
+op-philipsjs==0.0.8
+
+# openpeerpower.components.plugwise
+haanna==0.14.3
+
+# openpeerpower.components.habitica
+habitipy==0.2.0
+
+# openpeerpower.components.hangouts
+hangups==0.4.9
+
+# openpeerpower.components.cloud
+opp-nabucasa==0.31
+
+# openpeerpower.components.mqtt
+hbmqtt==0.9.5
+
+# openpeerpower.components.jewish_calendar
+hdate==0.9.5
+
+# openpeerpower.components.heatmiser
+heatmiserV3==1.1.18
+
+# openpeerpower.components.here_travel_time
+herepy==2.0.0
+
+# openpeerpower.components.hikvisioncam
+hikvision==0.4
+
+# openpeerpower.components.harman_kardon_avr
+hkavr==0.0.5
+
+# openpeerpower.components.hlk_sw16
+hlk-sw16==0.0.8
+
+# openpeerpower.components.pi_hole
+hole==0.5.0
+
+# openpeerpower.components.workday
+holidays==0.10.1
+
+# openpeerpower.components.frontend
+open-peer-power-frontend==20200220.4
+
+# openpeerpower.components.zwave
+openpeerpower-pyozw==0.1.8
+
+# openpeerpower.components.homekit_controller
+homekit[IP]==0.15.0
+
+# openpeerpower.components.homematicip_cloud
+homematicip==0.10.17
+
+# openpeerpower.components.horizon
+horimote==0.4.1
+
+# openpeerpower.components.google
+# openpeerpower.components.remember_the_milk
+httplib2==0.10.3
+
+# openpeerpower.components.huawei_lte
+huawei-lte-api==1.4.7
+
+# openpeerpower.components.hydrawise
+hydrawiser==0.1.1
+
+# openpeerpower.components.bh1750
+# openpeerpower.components.bme280
+# openpeerpower.components.htu21d
+# i2csense==0.0.4
+
+# openpeerpower.components.iaqualink
+iaqualink==0.3.1
+
+# openpeerpower.components.watson_tts
+ibm-watson==4.0.1
+
+# openpeerpower.components.watson_iot
+ibmiotf==0.3.4
+
+# openpeerpower.components.iglo
+iglo==1.2.7
+
+# openpeerpower.components.ihc
+ihcsdk==2.6.0
+
+# openpeerpower.components.incomfort
+incomfort-client==0.4.0
+
+# openpeerpower.components.influxdb
+influxdb==5.2.3
+
+# openpeerpower.components.insteon
+insteonplm==0.16.7
+
+# openpeerpower.components.iperf3
+iperf3==0.1.11
+
+# openpeerpower.components.route53
+ipify==1.0.0
+
+# openpeerpower.components.rest
+# openpeerpower.components.verisure
+jsonpath==0.82
+
+# openpeerpower.components.kodi
+jsonrpc-async==0.6
+
+# openpeerpower.components.kodi
+jsonrpc-websocket==0.6
+
+# openpeerpower.components.kaiterra
+kaiterra-async-client==0.0.2
+
+# openpeerpower.components.keba
+keba-kecontact==1.0.0
+
+# openpeerpower.scripts.keyring
+keyring==20.0.0
+
+# openpeerpower.scripts.keyring
+keyrings.alt==3.4.0
+
+# openpeerpower.components.kiwi
+kiwiki-client==0.1.1
+
+# openpeerpower.components.konnected
+konnected==1.1.0
+
+# openpeerpower.components.eufy
+lakeside==0.12
+
+# openpeerpower.components.dyson
+libpurecool==0.6.1
+
+# openpeerpower.components.foscam
+libpyfoscam==1.0
+
+# openpeerpower.components.vivotek
+libpyvivotek==0.4.0
+
+# openpeerpower.components.mikrotik
+librouteros==3.0.0
+
+# openpeerpower.components.soundtouch
+libsoundtouch==0.7.2
+
+# openpeerpower.components.life360
+life360==4.1.1
+
+# openpeerpower.components.lifx_legacy
+liffylights==0.9.4
+
+# openpeerpower.components.osramlightify
+lightify==1.0.7.2
+
+# openpeerpower.components.lightwave
+lightwave==0.17
+
+# openpeerpower.components.limitlessled
+limitlessled==1.1.3
+
+# openpeerpower.components.linode
+linode-api==4.1.9b1
+
+# openpeerpower.components.lametric
+lmnotify==0.0.4
+
+# openpeerpower.components.google_maps
+locationsharinglib==4.1.0
+
+# openpeerpower.components.logi_circle
+logi_circle==0.2.2
+
+# openpeerpower.components.london_underground
+london-tube-status==0.2
+
+# openpeerpower.components.luftdaten
+luftdaten==0.6.3
+
+# openpeerpower.components.lupusec
+lupupy==0.0.18
+
+# openpeerpower.components.lw12wifi
+lw12==0.9.2
+
+# openpeerpower.components.lyft
+lyft_rides==0.2
+
+# openpeerpower.components.magicseaweed
+magicseaweed==1.0.3
+
+# openpeerpower.components.matrix
+matrix-client==0.3.2
+
+# openpeerpower.components.maxcube
+maxcube-api==0.1.0
+
+# openpeerpower.components.mythicbeastsdns
+mbddns==0.1.2
+
+# openpeerpower.components.minecraft_server
+mcstatus==2.3.0
+
+# openpeerpower.components.message_bird
+messagebird==1.2.0
+
+# openpeerpower.components.meteoalarm
+meteoalertapi==0.1.6
+
+# openpeerpower.components.meteo_france
+meteofrance==0.3.7
+
+# openpeerpower.components.mfi
+mficlient==0.3.0
+
+# openpeerpower.components.miflora
+miflora==0.6.0
+
+# openpeerpower.components.mill
+millheater==0.3.4
+
+# openpeerpower.components.minio
+minio==4.0.9
+
+# openpeerpower.components.mitemp_bt
+mitemp_bt==0.0.3
+
+# openpeerpower.components.mopar
+motorparts==1.1.0
+
+# openpeerpower.components.tts
+mutagen==1.43.0
+
+# openpeerpower.components.mychevy
+mychevy==1.2.0
+
+# openpeerpower.components.mycroft
+mycroftapi==2.0
+
+# openpeerpower.components.n26
+n26==0.2.7
+
+# openpeerpower.components.nad
+nad_receiver==0.0.11
+
+# openpeerpower.components.keenetic_ndms2
+ndms2_client==0.0.11
+
+# openpeerpower.components.ness_alarm
+nessclient==0.9.15
+
+# openpeerpower.components.netdata
+netdata==0.1.2
+
+# openpeerpower.components.discovery
+# openpeerpower.components.ssdp
+netdisco==2.6.0
+
+# openpeerpower.components.neurio_energy
+neurio==0.3.1
+
+# openpeerpower.components.niko_home_control
+niko-home-control==0.2.1
+
+# openpeerpower.components.nilu
+niluclient==0.1.2
+
+# openpeerpower.components.nederlandse_spoorwegen
+nsapi==3.0.3
+
+# openpeerpower.components.nsw_fuel_station
+nsw-fuel-api-client==1.0.10
+
+# openpeerpower.components.nuheat
+nuheat==0.3.0
+
+# openpeerpower.components.iqvia
+# openpeerpower.components.opencv
+# openpeerpower.components.tensorflow
+# openpeerpower.components.trend
+numpy==1.18.1
+
+# openpeerpower.components.oasa_telematics
+oasatelematics==0.3
+
+# openpeerpower.components.google
+oauth2client==4.0.0
+
+# openpeerpower.components.oem
+oemthermostat==1.1
+
+# openpeerpower.components.onkyo
+onkyo-eiscp==1.2.7
+
+# openpeerpower.components.onvif
+onvif-zeep-async==0.2.0
+
+# openpeerpower.components.opencv
+# opencv-python-headless==4.1.2.30
+
+# openpeerpower.components.openevse
+openevsewifi==0.4
+
+# openpeerpower.components.openhome
+openhomedevice==0.6.3
+
+# openpeerpower.components.opensensemap
+opensensemap-api==0.1.5
+
+# openpeerpower.components.enigma2
+openwebifpy==3.1.1
+
+# openpeerpower.components.luci
+openwrt-luci-rpc==1.1.2
+
+# openpeerpower.components.oru
+oru==0.1.11
+
+# openpeerpower.components.orvibo
+orvibo==1.1.1
+
+# openpeerpower.components.mqtt
+# openpeerpower.components.shiftr
+paho-mqtt==1.5.0
+
+# openpeerpower.components.panasonic_bluray
+panacotta==0.1
+
+# openpeerpower.components.panasonic_viera
+panasonic_viera==0.3.2
+
+# openpeerpower.components.pcal9535a
+pcal9535a==0.7
+
+# openpeerpower.components.dunehd
+pdunehd==1.3
+
+# openpeerpower.components.pencom
+pencompy==0.0.3
+
+# openpeerpower.components.aruba
+# openpeerpower.components.cisco_ios
+# openpeerpower.components.pandora
+# openpeerpower.components.unifi_direct
+pexpect==4.6.0
+
+# openpeerpower.components.rpi_pfio
+pifacecommon==4.2.2
+
+# openpeerpower.components.rpi_pfio
+pifacedigitalio==3.0.5
+
+# openpeerpower.components.piglow
+piglow==1.2.4
+
+# openpeerpower.components.pilight
+pilight==0.1.1
+
+# openpeerpower.components.doods
+# openpeerpower.components.proxy
+# openpeerpower.components.qrcode
+# openpeerpower.components.seven_segments
+# openpeerpower.components.tensorflow
+pillow==7.0.0
+
+# openpeerpower.components.dominos
+pizzapi==0.0.3
+
+# openpeerpower.components.plex
+plexapi==3.3.0
+
+# openpeerpower.components.plex
+plexauth==0.0.5
+
+# openpeerpower.components.plex
+plexwebsocket==0.0.6
+
+# openpeerpower.components.plum_lightpad
+plumlightpad==0.0.11
+
+# openpeerpower.components.mhz19
+# openpeerpower.components.serial_pm
+pmsensor==0.4
+
+# openpeerpower.components.pocketcasts
+pocketcasts==0.1
+
+# openpeerpower.components.reddit
+praw==6.5.1
+
+# openpeerpower.components.islamic_prayer_times
+prayer_times_calculator==0.0.3
+
+# openpeerpower.components.prezzibenzina
+prezzibenzina-py==1.1.4
+
+# openpeerpower.components.proliphix
+proliphix==0.4.1
+
+# openpeerpower.components.prometheus
+prometheus_client==0.7.1
+
+# openpeerpower.components.tensorflow
+protobuf==3.6.1
+
+# openpeerpower.components.proxmoxve
+proxmoxer==1.0.4
+
+# openpeerpower.components.systemmonitor
+psutil==5.6.7
+
+# openpeerpower.components.ptvsd
+ptvsd==4.2.8
+
+# openpeerpower.components.wink
+pubnubsub-handler==1.0.8
+
+# openpeerpower.components.androidtv
+pure-python-adb==0.2.2.dev0
+
+# openpeerpower.components.pushbullet
+pushbullet.py==0.11.0
+
+# openpeerpower.components.pushetta
+pushetta==1.0.15
+
+# openpeerpower.components.pushover
+pushover_complete==1.1.1
+
+# openpeerpower.components.rpi_gpio_pwm
+pwmled==1.5.0
+
+# openpeerpower.components.august
+py-august==0.14.0
+
+# openpeerpower.components.canary
+py-canary==0.5.0
+
+# openpeerpower.components.cpuspeed
+py-cpuinfo==5.0.0
+
+# openpeerpower.components.melissa
+py-melissa-climate==2.0.0
+
+# openpeerpower.components.synology
+py-synology==0.2.0
+
+# openpeerpower.components.seventeentrack
+py17track==2.2.2
+
+# openpeerpower.components.hdmi_cec
+pyCEC==0.4.13
+
+# openpeerpower.components.tplink
+pyHS100==0.3.5
+
+# openpeerpower.components.met
+# openpeerpower.components.norway_air
+pyMetno==0.4.6
+
+# openpeerpower.components.rfxtrx
+pyRFXtrx==0.25
+
+# openpeerpower.components.switchmate
+# pySwitchmate==0.4.6
+
+# openpeerpower.components.tibber
+pyTibber==0.12.2
+
+# openpeerpower.components.dlink
+pyW215==0.6.0
+
+# openpeerpower.components.w800rf32
+pyW800rf32==0.1
+
+# openpeerpower.components.nextbus
+py_nextbusnext==0.1.4
+
+# openpeerpower.components.noaa_tides
+# py_noaa==0.3.0
+
+# openpeerpower.components.ads
+pyads==3.0.7
+
+# openpeerpower.components.hisense_aehw4a1
+pyaehw4a1==0.3.4
+
+# openpeerpower.components.aftership
+pyaftership==0.1.2
+
+# openpeerpower.components.airvisual
+pyairvisual==3.0.1
+
+# openpeerpower.components.alarmdotcom
+pyalarmdotcom==0.3.2
+
+# openpeerpower.components.almond
+pyalmond==0.0.2
+
+# openpeerpower.components.arlo
+pyarlo==0.2.3
+
+# openpeerpower.components.netatmo
+pyatmo==3.2.4
+
+# openpeerpower.components.atome
+pyatome==0.1.1
+
+# openpeerpower.components.apple_tv
+pyatv==0.3.13
+
+# openpeerpower.components.bbox
+pybbox==0.0.5-alpha
+
+# openpeerpower.components.blackbird
+pyblackbird==0.5
+
+# openpeerpower.components.bluetooth_tracker
+# pybluez==0.22
+
+# openpeerpower.components.neato
+pybotvac==0.0.17
+
+# openpeerpower.components.nissan_leaf
+pycarwings2==2.9
+
+# openpeerpower.components.cloudflare
+pycfdns==0.0.1
+
+# openpeerpower.components.channels
+pychannels==1.0.0
+
+# openpeerpower.components.cast
+pychromecast==4.1.1
+
+# openpeerpower.components.cmus
+pycmus==0.1.1
+
+# openpeerpower.components.comfoconnect
+pycomfoconnect==0.3
+
+# openpeerpower.components.coolmaster
+pycoolmasternet==0.0.4
+
+# openpeerpower.components.microsoft
+pycsspeechtts==1.0.3
+
+# openpeerpower.components.cups
+# pycups==1.9.73
+
+# openpeerpower.components.daikin
+pydaikin==1.6.2
+
+# openpeerpower.components.danfoss_air
+pydanfossair==0.1.0
+
+# openpeerpower.components.deconz
+pydeconz==70
+
+# openpeerpower.components.delijn
+pydelijn==0.5.1
+
+# openpeerpower.components.zwave
+pydispatcher==2.0.5
+
+# openpeerpower.components.doods
+pydoods==1.0.2
+
+# openpeerpower.components.android_ip_webcam
+pydroid-ipcam==0.8
+
+# openpeerpower.components.ebox
+pyebox==1.1.4
+
+# openpeerpower.components.econet
+pyeconet==0.0.11
+
+# openpeerpower.components.edimax
+pyedimax==0.2.1
+
+# openpeerpower.components.eight_sleep
+pyeight==0.1.3
+
+# openpeerpower.components.emby
+pyemby==1.6
+
+# openpeerpower.components.envisalink
+pyenvisalink==4.0
+
+# openpeerpower.components.ephember
+pyephember==0.3.1
+
+# openpeerpower.components.everlights
+pyeverlights==0.1.0
+
+# openpeerpower.components.fortigate
+pyfgt==0.5.1
+
+# openpeerpower.components.fido
+pyfido==2.1.1
+
+# openpeerpower.components.flexit
+pyflexit==0.3
+
+# openpeerpower.components.flic
+pyflic-openpeerpower==0.4.dev0
+
+# openpeerpower.components.flume
+pyflume==0.2.4
+
+# openpeerpower.components.flunearyou
+pyflunearyou==1.0.3
+
+# openpeerpower.components.futurenow
+pyfnip==0.2
+
+# openpeerpower.components.fritzbox
+pyfritzhome==0.4.0
+
+# openpeerpower.components.fronius
+pyfronius==0.4.6
+
+# openpeerpower.components.ifttt
+pyfttt==0.3
+
+# openpeerpower.components.bluetooth_le_tracker
+# openpeerpower.components.skybeacon
+pygatt[GATTTOOL]==4.0.5
+
+# openpeerpower.components.gogogate2
+pygogogate2==0.1.1
+
+# openpeerpower.components.gtfs
+pygtfs==0.1.5
+
+# openpeerpower.components.version
+pyhaversion==3.2.0
+
+# openpeerpower.components.heos
+pyheos==0.6.0
+
+# openpeerpower.components.hikvision
+pyhik==0.2.5
+
+# openpeerpower.components.hive
+pyhiveapi==0.2.19.3
+
+# openpeerpower.components.homematic
+pyhomematic==0.1.64
+
+# openpeerpower.components.homeworks
+pyhomeworks==0.0.6
+
+# openpeerpower.components.ialarm
+pyialarm==0.3
+
+# openpeerpower.components.icloud
+pyicloud==0.9.2
+
+# openpeerpower.components.intesishome
+pyintesishome==1.6
+
+# openpeerpower.components.ipma
+pyipma==2.0.3
+
+# openpeerpower.components.iqvia
+pyiqvia==0.2.1
+
+# openpeerpower.components.irish_rail_transport
+pyirishrail==0.0.2
+
+# openpeerpower.components.iss
+pyiss==1.0.1
+
+# openpeerpower.components.itach
+pyitachip2ir==0.0.7
+
+# openpeerpower.components.kira
+pykira==0.1.1
+
+# openpeerpower.components.kwb
+pykwb==0.0.8
+
+# openpeerpower.components.lacrosse
+pylacrosse==0.4.0
+
+# openpeerpower.components.lastfm
+pylast==3.2.0
+
+# openpeerpower.components.launch_library
+pylaunches==0.2.0
+
+# openpeerpower.components.lg_netcast
+pylgnetcast-openpeerpower==0.2.0.dev0
+
+# openpeerpower.components.linky
+pylinky==0.4.0
+
+# openpeerpower.components.litejet
+pylitejet==0.1
+
+# openpeerpower.components.loopenergy
+pyloopenergy==0.1.3
+
+# openpeerpower.components.lutron_caseta
+pylutron-caseta==0.5.1
+
+# openpeerpower.components.lutron
+pylutron==0.2.5
+
+# openpeerpower.components.mailgun
+pymailgunner==1.4
+
+# openpeerpower.components.mediaroom
+pymediaroom==0.6.4
+
+# openpeerpower.components.melcloud
+pymelcloud==2.1.0
+
+# openpeerpower.components.somfy
+pymfy==0.7.1
+
+# openpeerpower.components.xiaomi_tv
+pymitv==1.4.3
+
+# openpeerpower.components.mochad
+pymochad==0.2.0
+
+# openpeerpower.components.modbus
+pymodbus==1.5.2
+
+# openpeerpower.components.monoprice
+pymonoprice==0.3
+
+# openpeerpower.components.msteams
+pymsteams==0.1.12
+
+# openpeerpower.components.yamaha_musiccast
+pymusiccast==0.1.6
+
+# openpeerpower.components.myq
+pymyq==2.0.1
+
+# openpeerpower.components.mysensors
+pymysensors==0.18.0
+
+# openpeerpower.components.nanoleaf
+pynanoleaf==0.0.5
+
+# openpeerpower.components.nello
+pynello==2.0.2
+
+# openpeerpower.components.netgear
+pynetgear==0.6.1
+
+# openpeerpower.components.netio
+pynetio==0.1.9.1
+
+# openpeerpower.components.nuki
+pynuki==1.3.3
+
+# openpeerpower.components.nut
+pynut2==2.1.2
+
+# openpeerpower.components.nws
+pynws==0.10.4
+
+# openpeerpower.components.nx584
+pynx584==0.4
+
+# openpeerpower.components.nzbget
+pynzbgetapi==0.2.0
+
+# openpeerpower.components.obihai
+pyobihai==1.2.0
+
+# openpeerpower.components.ombi
+pyombi==0.1.10
+
+# openpeerpower.components.openuv
+pyopenuv==1.0.9
+
+# openpeerpower.components.opnsense
+pyopnsense==0.2.0
+
+# openpeerpower.components.opple
+pyoppleio==1.0.5
+
+# openpeerpower.components.iota
+pyota==2.0.5
+
+# openpeerpower.components.opentherm_gw
+pyotgw==0.5b1
+
+# openpeerpower.auth.mfa_modules.notify
+# openpeerpower.auth.mfa_modules.totp
+# openpeerpower.components.otp
+pyotp==2.3.0
+
+# openpeerpower.components.openweathermap
+pyowm==2.10.0
+
+# openpeerpower.components.onewire
+pyownet==0.10.0.post1
+
+# openpeerpower.components.elv
+pypca==0.0.7
+
+# openpeerpower.components.lcn
+pypck==0.6.3
+
+# openpeerpower.components.pjlink
+pypjlink2==1.2.0
+
+# openpeerpower.components.point
+pypoint==1.1.2
+
+# openpeerpower.components.ps4
+pyps4-2ndscreen==1.0.7
+
+# openpeerpower.components.qwikswitch
+pyqwikswitch==0.93
+
+# openpeerpower.components.nmbs
+pyrail==0.0.3
+
+# openpeerpower.components.rainbird
+pyrainbird==0.4.1
+
+# openpeerpower.components.recswitch
+pyrecswitch==1.0.2
+
+# openpeerpower.components.repetier
+pyrepetier==3.0.5
+
+# openpeerpower.components.sabnzbd
+pysabnzbd==1.1.0
+
+# openpeerpower.components.saj
+pysaj==0.0.14
+
+# openpeerpower.components.sony_projector
+pysdcp==1
+
+# openpeerpower.components.sensibo
+pysensibo==1.0.3
+
+# openpeerpower.components.serial
+pyserial-asyncio==0.4
+
+# openpeerpower.components.acer_projector
+pyserial==3.1.1
+
+# openpeerpower.components.sesame
+pysesame2==1.0.1
+
+# openpeerpower.components.goalfeed
+pysher==1.0.1
+
+# openpeerpower.components.signal_messenger
+pysignalclirestapi==0.2.4
+
+# openpeerpower.components.sma
+pysma==0.3.5
+
+# openpeerpower.components.smartthings
+pysmartapp==0.3.2
+
+# openpeerpower.components.smartthings
+pysmartthings==0.7.0
+
+# openpeerpower.components.smarty
+pysmarty==0.8
+
+# openpeerpower.components.snmp
+pysnmp==4.4.12
+
+# openpeerpower.components.soma
+pysoma==0.0.10
+
+# openpeerpower.components.sonos
+pysonos==0.0.24
+
+# openpeerpower.components.spc
+pyspcwebgw==0.4.0
+
+# openpeerpower.components.stiebel_eltron
+pystiebeleltron==0.0.1.dev2
+
+# openpeerpower.components.suez_water
+pysuez==0.1.17
+
+# openpeerpower.components.supla
+pysupla==0.0.3
+
+# openpeerpower.components.syncthru
+pysyncthru==0.5.0
+
+# openpeerpower.components.tautulli
+pytautulli==0.5.0
+
+# openpeerpower.components.tfiac
+pytfiac==0.4
+
+# openpeerpower.components.thinkingcleaner
+pythinkingcleaner==0.0.3
+
+# openpeerpower.components.blockchain
+python-blockchain-api==0.0.2
+
+# openpeerpower.components.clementine
+python-clementine-remote==1.0.1
+
+# openpeerpower.components.digital_ocean
+python-digitalocean==1.13.2
+
+# openpeerpower.components.ecobee
+python-ecobee-api==0.2.1
+
+# openpeerpower.components.eq3btsmart
+# python-eq3bt==0.1.11
+
+# openpeerpower.components.etherscan
+python-etherscan-api==0.0.3
+
+# openpeerpower.components.familyhub
+python-family-hub-local==0.0.2
+
+# openpeerpower.components.darksky
+python-forecastio==1.4.0
+
+# openpeerpower.components.sms
+# python-gammu==2.12
+
+# openpeerpower.components.gc100
+python-gc100==1.0.3a
+
+# openpeerpower.components.gitlab_ci
+python-gitlab==1.6.0
+
+# openpeerpower.components.hp_ilo
+python-hpilo==4.3
+
+# openpeerpower.components.izone
+python-izone==1.1.1
+
+# openpeerpower.components.joaoapps_join
+python-join-api==0.0.4
+
+# openpeerpower.components.juicenet
+python-juicenet==0.1.6
+
+# openpeerpower.components.lirc
+# python-lirc==1.2.3
+
+# openpeerpower.components.xiaomi_miio
+python-miio==0.4.8
+
+# openpeerpower.components.mpd
+python-mpd2==1.0.0
+
+# openpeerpower.components.mystrom
+python-mystrom==0.5.0
+
+# openpeerpower.components.nest
+python-nest==4.1.0
+
+# openpeerpower.components.nmap_tracker
+python-nmap==0.6.1
+
+# openpeerpower.components.qbittorrent
+python-qbittorrent==0.4.1
+
+# openpeerpower.components.ripple
+python-ripple-api==0.0.3
+
+# openpeerpower.components.sochain
+python-sochain-api==0.0.2
+
+# openpeerpower.components.songpal
+python-songpal==0.11.2
+
+# openpeerpower.components.synologydsm
+python-synology==0.4.0
+
+# openpeerpower.components.tado
+python-tado==0.3.0
+
+# openpeerpower.components.telegram_bot
+python-telegram-bot==11.1.0
+
+# openpeerpower.components.vlc_telnet
+python-telnet-vlc==1.0.4
+
+# openpeerpower.components.twitch
+python-twitch-client==0.6.0
+
+# openpeerpower.components.velbus
+python-velbus==2.0.41
+
+# openpeerpower.components.vlc
+python-vlc==1.1.2
+
+# openpeerpower.components.whois
+python-whois==0.7.2
+
+# openpeerpower.components.wink
+python-wink==1.10.5
+
+# openpeerpower.components.awair
+python_awair==0.0.4
+
+# openpeerpower.components.swiss_public_transport
+python_opendata_transport==0.2.1
+
+# openpeerpower.components.egardia
+pythonegardia==1.0.40
+
+# openpeerpower.components.tile
+pytile==3.0.1
+
+# openpeerpower.components.touchline
+pytouchline==0.7
+
+# openpeerpower.components.traccar
+pytraccar==0.9.0
+
+# openpeerpower.components.trackr
+pytrackr==0.0.5
+
+# openpeerpower.components.tradfri
+pytradfri[async]==6.4.0
+
+# openpeerpower.components.trafikverket_train
+# openpeerpower.components.trafikverket_weatherstation
+pytrafikverket==0.1.6.1
+
+# openpeerpower.components.ubee
+pyubee==0.8
+
+# openpeerpower.components.uptimerobot
+pyuptimerobot==0.0.5
+
+# openpeerpower.components.keyboard
+# pyuserinput==0.1.11
+
+# openpeerpower.components.vera
+pyvera==0.3.7
+
+# openpeerpower.components.versasense
+pyversasense==0.0.6
+
+# openpeerpower.components.vesync
+pyvesync==1.1.0
+
+# openpeerpower.components.vizio
+pyvizio==0.1.21
+
+# openpeerpower.components.velux
+pyvlx==0.2.12
+
+# openpeerpower.components.html5
+pywebpush==1.9.2
+
+# openpeerpower.components.wemo
+pywemo==0.4.34
+
+# openpeerpower.components.xeoma
+pyxeoma==1.4.1
+
+# openpeerpower.components.zabbix
+pyzabbix==0.7.4
+
+# openpeerpower.components.qrcode
+pyzbar==0.1.7
+
+# openpeerpower.components.qnap
+qnapstats==0.2.7
+
+# openpeerpower.components.quantum_gateway
+quantum-gateway==0.0.5
+
+# openpeerpower.components.rachio
+rachiopy==0.1.3
+
+# openpeerpower.components.radiotherm
+radiotherm==2.0.0
+
+# openpeerpower.components.raincloud
+raincloudy==0.0.7
+
+# openpeerpower.components.raspihats
+# raspihats==2.2.3
+
+# openpeerpower.components.raspyrfm
+raspyrfm-client==1.2.8
+
+# openpeerpower.components.recollect_waste
+recollect-waste==1.0.1
+
+# openpeerpower.components.rainmachine
+regenmaschine==1.5.1
+
+# openpeerpower.components.python_script
+restrictedpython==5.0
+
+# openpeerpower.components.idteck_prox
+rfk101py==0.0.1
+
+# openpeerpower.components.rflink
+rflink==0.0.51
+
+# openpeerpower.components.ring
+ring_doorbell==0.6.0
+
+# openpeerpower.components.fleetgo
+ritassist==0.9.2
+
+# openpeerpower.components.rejseplanen
+rjpl==0.3.5
+
+# openpeerpower.components.rocketchat
+rocketchat-API==0.6.1
+
+# openpeerpower.components.roku
+roku==4.0.0
+
+# openpeerpower.components.roomba
+roombapy==1.4.2
+
+# openpeerpower.components.rova
+rova==0.1.0
+
+# openpeerpower.components.rpi_rf
+# rpi-rf==0.9.7
+
+# openpeerpower.components.russound_rnet
+russound==0.1.9
+
+# openpeerpower.components.russound_rio
+russound_rio==0.1.7
+
+# openpeerpower.components.yamaha
+rxv==0.6.0
+
+# openpeerpower.components.salt
+saltbox==0.1.3
+
+# openpeerpower.components.samsungtv
+samsungctl[websocket]==0.7.1
+
+# openpeerpower.components.satel_integra
+satel_integra==0.3.4
+
+# openpeerpower.components.deutsche_bahn
+schiene==0.23
+
+# openpeerpower.components.scsgate
+scsgate==0.1.0
+
+# openpeerpower.components.sendgrid
+sendgrid==6.1.1
+
+# openpeerpower.components.sensehat
+sense-hat==2.2.0
+
+# openpeerpower.components.sense
+sense_energy==0.7.0
+
+# openpeerpower.components.sentry
+sentry-sdk==0.13.5
+
+# openpeerpower.components.aquostv
+sharp_aquos_rc==0.3.2
+
+# openpeerpower.components.shodan
+shodan==1.21.3
+
+# openpeerpower.components.sighthound
+simplehound==0.3
+
+# openpeerpower.components.simplepush
+simplepush==1.1.4
+
+# openpeerpower.components.simplisafe
+simplisafe-python==8.1.1
+
+# openpeerpower.components.sisyphus
+sisyphus-control==2.2.1
+
+# openpeerpower.components.skybell
+skybellpy==0.4.0
+
+# openpeerpower.components.slack
+slacker==0.13.0
+
+# openpeerpower.components.sleepiq
+sleepyq==0.7
+
+# openpeerpower.components.xmpp
+slixmpp==1.4.2
+
+# openpeerpower.components.smappee
+smappy==0.2.16
+
+# openpeerpower.components.smarthab
+smarthab==0.20
+
+# openpeerpower.components.bh1750
+# openpeerpower.components.bme280
+# openpeerpower.components.bme680
+# openpeerpower.components.envirophat
+# openpeerpower.components.htu21d
+# openpeerpower.components.raspihats
+# smbus-cffi==0.5.1
+
+# openpeerpower.components.smhi
+smhi-pkg==1.0.10
+
+# openpeerpower.components.snapcast
+snapcast==2.0.10
+
+# openpeerpower.components.socialblade
+socialbladeclient==0.5
+
+# openpeerpower.components.solaredge_local
+solaredge-local==0.2.0
+
+# openpeerpower.components.solaredge
+solaredge==0.0.2
+
+# openpeerpower.components.solax
+solax==0.2.2
+
+# openpeerpower.components.honeywell
+somecomfort==0.5.2
+
+# openpeerpower.components.somfy_mylink
+somfy-mylink-synergy==1.0.6
+
+# openpeerpower.components.marytts
+speak2mary==1.4.0
+
+# openpeerpower.components.speedtestdotnet
+speedtest-cli==2.1.2
+
+# openpeerpower.components.spider
+spiderpy==1.3.1
+
+# openpeerpower.components.spotcrime
+spotcrime==1.0.4
+
+# openpeerpower.components.spotify
+spotipy==2.7.1
+
+# openpeerpower.components.recorder
+# openpeerpower.components.sql
+sqlalchemy==1.3.13
+
+# openpeerpower.components.starline
+starline==0.1.3
+
+# openpeerpower.components.starlingbank
+starlingbank==3.2
+
+# openpeerpower.components.statsd
+statsd==3.2.1
+
+# openpeerpower.components.steam_online
+steamodd==4.21
+
+# openpeerpower.components.stookalert
+stookalert==0.1.4
+
+# openpeerpower.components.streamlabswater
+streamlabswater==1.0.1
+
+# openpeerpower.components.huawei_lte
+# openpeerpower.components.solaredge
+# openpeerpower.components.thermoworks_smoke
+# openpeerpower.components.traccar
+stringcase==1.2.0
+
+# openpeerpower.components.ecovacs
+sucks==0.9.4
+
+# openpeerpower.components.solarlog
+sunwatcher==0.2.1
+
+# openpeerpower.components.surepetcare
+surepy==0.2.3
+
+# openpeerpower.components.swiss_hydrological_data
+swisshydrodata==0.0.3
+
+# openpeerpower.components.synology_srm
+synology-srm==0.0.7
+
+# openpeerpower.components.tahoma
+tahoma-api==0.0.16
+
+# openpeerpower.components.tank_utility
+tank_utility==1.4.0
+
+# openpeerpower.components.tapsaff
+tapsaff==0.2.1
+
+# openpeerpower.components.tellstick
+tellcore-net==0.4
+
+# openpeerpower.components.tellstick
+tellcore-py==1.1.2
+
+# openpeerpower.components.tellduslive
+tellduslive==0.10.10
+
+# openpeerpower.components.lg_soundbar
+temescal==0.1
+
+# openpeerpower.components.temper
+temperusb==1.5.3
+
+# openpeerpower.components.tensorflow
+# tensorflow==1.13.2
+
+# openpeerpower.components.tesla
+teslajsonpy==0.3.0
+
+# openpeerpower.components.thermoworks_smoke
+thermoworks_smoke==0.1.8
+
+# openpeerpower.components.thingspeak
+thingspeak==1.0.0
+
+# openpeerpower.components.tikteck
+tikteck==0.4
+
+# openpeerpower.components.tmb
+tmb==0.0.4
+
+# openpeerpower.components.todoist
+todoist-python==8.0.0
+
+# openpeerpower.components.toon
+toonapilib==3.2.4
+
+# openpeerpower.components.totalconnect
+total_connect_client==0.50
+
+# openpeerpower.components.tplink_lte
+tp-connected==0.0.4
+
+# openpeerpower.components.transmission
+transmissionrpc==0.11
+
+# openpeerpower.components.tuya
+tuyaha==0.0.5
+
+# openpeerpower.components.twentemilieu
+twentemilieu==0.2.0
+
+# openpeerpower.components.twilio
+twilio==6.32.0
+
+# openpeerpower.components.rainforest_eagle
+uEagle==0.0.1
+
+# openpeerpower.components.unifiled
+unifiled==0.11
+
+# openpeerpower.components.upcloud
+upcloud-api==0.4.5
+
+# openpeerpower.components.huawei_lte
+url-normalize==1.4.1
+
+# openpeerpower.components.uscis
+uscisstatus==0.1.1
+
+# openpeerpower.components.uvc
+uvcclient==0.11.0
+
+# openpeerpower.components.vallox
+vallox-websocket-api==2.4.0
+
+# openpeerpower.components.venstar
+venstarcolortouch==0.12
+
+# openpeerpower.components.meteo_france
+vigilancemeteo==3.0.0
+
+# openpeerpower.components.vilfo
+vilfo-api-client==0.3.2
+
+# openpeerpower.components.volkszaehler
+volkszaehler==0.1.2
+
+# openpeerpower.components.volvooncall
+volvooncall==0.8.7
+
+# openpeerpower.components.verisure
+vsure==1.5.4
+
+# openpeerpower.components.vasttrafik
+vtjp==0.1.14
+
+# openpeerpower.components.vultr
+vultr==0.1.2
+
+# openpeerpower.components.panasonic_viera
+# openpeerpower.components.wake_on_lan
+wakeonlan==1.1.6
+
+# openpeerpower.components.waqi
+waqiasync==1.0.0
+
+# openpeerpower.components.folder_watcher
+watchdog==0.8.3
+
+# openpeerpower.components.waterfurnace
+waterfurnace==1.1.0
+
+# openpeerpower.components.cisco_webex_teams
+webexteamssdk==1.1.1
+
+# openpeerpower.components.gpmdp
+websocket-client==0.54.0
+
+# openpeerpower.components.wirelesstag
+wirelesstagpy==0.4.0
+
+# openpeerpower.components.withings
+withings-api==2.1.3
+
+# openpeerpower.components.wled
+wled==0.2.1
+
+# openpeerpower.components.wunderlist
+wunderpy2==0.1.6
+
+# openpeerpower.components.zigbee
+xbee-helper==0.0.7
+
+# openpeerpower.components.xbox_live
+xboxapi==0.1.1
+
+# openpeerpower.components.xfinity
+xfinity-gateway==0.0.4
+
+# openpeerpower.components.knx
+xknx==0.11.2
+
+# openpeerpower.components.bluesound
+# openpeerpower.components.rest
+# openpeerpower.components.startca
+# openpeerpower.components.ted5000
+# openpeerpower.components.yr
+# openpeerpower.components.zestimate
+xmltodict==0.12.0
+
+# openpeerpower.components.xs1
+xs1-api-client==2.3.5
+
+# openpeerpower.components.yandex_transport
+ya_ma==0.3.8
+
+# openpeerpower.components.yweather
+yahooweather==0.10
+
+# openpeerpower.components.yale_smart_alarm
+yalesmartalarmclient==0.1.6
+
+# openpeerpower.components.yeelight
+yeelight==0.5.0
+
+# openpeerpower.components.yeelightsunflower
+yeelightsunflower==0.0.10
+
+# openpeerpower.components.media_extractor
+youtube_dl==2020.02.16
+
+# openpeerpower.components.zengge
+zengge==0.2
+
+# openpeerpower.components.zeroconf
+zeroconf==0.24.4
+
+# openpeerpower.components.zha
+zha-quirks==0.0.33
+
+# openpeerpower.components.zhong_hong
+zhong_hong_hvac==1.0.9
+
+# openpeerpower.components.ziggo_mediabox_xl
+ziggo-mediabox-xl==1.1.0
+
+# openpeerpower.components.zha
+zigpy-cc==0.1.0
+
+# openpeerpower.components.zha
+zigpy-deconz==0.7.0
+
+# openpeerpower.components.zha
+zigpy-openpeerpower==0.13.2
+
+# openpeerpower.components.zha
+zigpy-xbee-openpeerpower==0.9.0
+
+# openpeerpower.components.zha
+zigpy-zigate==0.5.1
+
+# openpeerpower.components.zoneminder
+zm-py==0.4.0

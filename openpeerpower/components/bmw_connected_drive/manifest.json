@@ -1,0 +1,8 @@
+{
+  "domain": "bmw_connected_drive",
+  "name": "BMW Connected Drive",
+  "documentation": "https://www.open-peer-power.io/integrations/bmw_connected_drive",
+  "requirements": ["bimmer_connected==0.7.1"],
+  "dependencies": [],
+  "codeowners": ["@gerard33"]
+}

@@ -1,0 +1,9 @@
+{
+  "domain": "input_text",
+  "name": "Input Text",
+  "documentation": "https://www.open-peer-power.io/integrations/input_text",
+  "requirements": [],
+  "dependencies": [],
+  "codeowners": ["@open-peer-power/core"],
+  "quality_scale": "internal"
+}
