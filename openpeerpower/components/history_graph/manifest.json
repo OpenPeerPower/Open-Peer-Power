@@ -1,12 +1,9 @@
 {
   "domain": "history_graph",
-  "name": "History graph",
+  "name": "History Graph",
   "documentation": "https://www.open-peer-power.io/integrations/history_graph",
   "requirements": [],
-  "dependencies": [
-    "history"
-  ],
-  "codeowners": [
-    "@andrey-git"
-  ]
+  "dependencies": ["history"],
+  "codeowners": ["@andrey-git"],
+  "quality_scale": "internal"
 }

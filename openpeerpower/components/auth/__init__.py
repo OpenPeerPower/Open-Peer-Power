@@ -82,6 +82,11 @@ The result payload likes
         "credentials": [{
             "auth_provider_type": "openpeerpower",
             "auth_provider_id": null
+        }],
+        "mfa_modules": [{
+            "id": "totp",
+            "name": "TOTP",
+            "enabled": true
         }]
     }
 }
@@ -131,7 +136,7 @@ from openpeerpower.core import OpenPeerPower, callback
 from openpeerpower.loader import bind_opp
 from openpeerpower.util import dt as dt_util
 
-from . import indieauth, login_flow
+from . import indieauth, login_flow, mfa_setup_flow
 
 DOMAIN = "auth"
 WS_TYPE_CURRENT_USER = "auth/current_user"
@@ -213,6 +218,7 @@ async def async_setup(opp, config):
     )
 
     await login_flow.async_setup(opp, store_result)
+    await mfa_setup_flow.async_setup(opp)
 
     return True
 
@@ -437,6 +443,7 @@ async def websocket_current_user(
 ):
     """Return the current user."""
     user = connection.user
+    enabled_modules = await opp.auth.async_get_enabled_mfa(user)
 
     connection.send_message(
         websocket_api.result_message(
@@ -452,6 +459,14 @@ async def websocket_current_user(
                         "auth_provider_id": c.auth_provider_id,
                     }
                     for c in user.credentials
+                ],
+                "mfa_modules": [
+                    {
+                        "id": module.id,
+                        "name": module.name,
+                        "enabled": module.id in enabled_modules,
+                    }
+                    for module in opp.auth.auth_mfa_modules
                 ],
             },
         )

@@ -1,13 +1,9 @@
 {
   "domain": "met",
-  "name": "Met",
+  "name": "Meteorologisk institutt (Met.no)",
   "config_flow": true,
   "documentation": "https://www.open-peer-power.io/integrations/met",
-  "requirements": [
-    "pyMetno==0.4.6"
-  ],
+  "requirements": ["pyMetno==0.4.6"],
   "dependencies": [],
-  "codeowners": [
-    "@danielhiversen"
-  ]
+  "codeowners": ["@danielhiversen"]
 }

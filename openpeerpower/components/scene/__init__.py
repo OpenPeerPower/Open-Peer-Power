@@ -5,7 +5,7 @@ import logging
 import voluptuous as vol
 
 from openpeerpower.const import CONF_PLATFORM, SERVICE_TURN_ON
-from openpeerpower.core import DOMAIN as OP_DOMAIN
+from openpeerpower.core import DOMAIN as HA_DOMAIN
 from openpeerpower.helpers.entity import Entity
 from openpeerpower.helpers.entity_component import EntityComponent
 
@@ -19,7 +19,7 @@ STATES = "states"
 def _opp_domain_validator(config):
     """Validate platform in config for openpeerpower domain."""
     if CONF_PLATFORM not in config:
-        config = {CONF_PLATFORM: OP_DOMAIN, STATES: config}
+        config = {CONF_PLATFORM: HA_DOMAIN, STATES: config}
 
     return config
 
@@ -61,10 +61,7 @@ async def async_setup(opp, config):
 
     await component.async_setup(config)
     # Ensure Open Peer Power platform always loaded.
-    await component.async_setup_platform(
-        OP_DOMAIN, {"platform": "openpeerpower", STATES: []}
-    )
-
+    await component.async_setup_platform(HA_DOMAIN, {"platform": HA_DOMAIN, STATES: []})
     component.async_register_entity_service(SERVICE_TURN_ON, {}, "async_activate")
 
     return True
@@ -97,9 +94,6 @@ class Scene(Entity):
         """Activate scene. Try to get entities into requested state."""
         raise NotImplementedError()
 
-    def async_activate(self):
-        """Activate scene. Try to get entities into requested state.
-
-        This method must be run in the event loop and returns a coroutine.
-        """
-        return self.opp.async_add_job(self.activate)
+    async def async_activate(self):
+        """Activate scene. Try to get entities into requested state."""
+        await self.opp.async_add_job(self.activate)

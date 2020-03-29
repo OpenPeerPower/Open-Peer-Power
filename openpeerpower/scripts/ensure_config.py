@@ -11,9 +11,7 @@ from openpeerpower.core import OpenPeerPower
 def run(args):
     """Handle ensure config commandline script."""
     parser = argparse.ArgumentParser(
-        description=(
-            "Ensure a Open Peer Power config exists, " "creates one if necessary."
-        )
+        description=("Ensure a Open Peer Power config exists, creates one if necessary.")
     )
     parser.add_argument(
         "-c",
@@ -34,13 +32,14 @@ def run(args):
         os.makedirs(config_dir)
 
     opp = OpenPeerPower()
-    config_path = opp.loop.run_until_complete(async_run(opp, config_dir))
+    opp.config.config_dir = config_dir
+    config_path = opp.loop.run_until_complete(async_run(opp))
     print("Configuration file:", config_path)
     return 0
 
 
-async def async_run(opp, config_dir):
+async def async_run(opp):
     """Make sure config exists."""
-    path = await config_util.async_ensure_config_exists(opp, config_dir)
+    path = await config_util.async_ensure_config_exists(opp)
     await opp.async_stop(force=True)
     return path

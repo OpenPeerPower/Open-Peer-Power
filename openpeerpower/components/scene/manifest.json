@@ -1,10 +1,9 @@
 {
   "domain": "scene",
-  "name": "Scene",
+  "name": "Scenes",
   "documentation": "https://www.open-peer-power.io/integrations/scene",
   "requirements": [],
   "dependencies": [],
-  "codeowners": [
-    "@open-peer-power/core"
-  ]
+  "codeowners": ["@open-peer-power/core"],
+  "quality_scale": "internal"
 }

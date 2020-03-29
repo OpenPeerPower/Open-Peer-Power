@@ -1,5 +1,4 @@
 """Authentication for HTTP component."""
-import base64
 import logging
 import secrets
 
@@ -7,15 +6,11 @@ from aiohttp import hdrs
 from aiohttp.web import middleware
 import jwt
 
-from openpeerpower.auth.providers import legacy_api_password
 from openpeerpower.core import callback
 from openpeerpower.util import dt as dt_util
 
-from .const import (
-    KEY_AUTHENTICATED,
-    KEY_OPP_USER,
-    KEY_REAL_IP,
-)
+from .const import KEY_AUTHENTICATED, KEY_OPP_USER, KEY_REAL_IP
+
 # mypy: allow-untyped-defs, no-check-untyped-defs
 
 _LOGGER = logging.getLogger(__name__)
@@ -49,15 +44,10 @@ def async_sign_path(opp, refresh_token_id, path, expiration):
         ).decode(),
     )
 
+
 @callback
 def setup_auth(opp, app):
     """Create auth middleware for the app."""
-    old_auth_warning = set()
-
-    support_legacy = opp.auth.support_legacy
-    if support_legacy:
-        _LOGGER.warning("legacy_api_password support has been enabled.")
-
 
     async def async_validate_auth_header(request):
         """
@@ -66,8 +56,7 @@ def setup_auth(opp, app):
         Basic auth_type is legacy code, should be removed with api_password.
         """
         try:
-            auth_type, auth_val = \
-                request.headers.get(hdrs.AUTHORIZATION).split(' ', 1)
+            auth_type, auth_val = request.headers.get(hdrs.AUTHORIZATION).split(" ", 1)
         except ValueError:
             # If no space in authorization header
             return False
@@ -83,32 +72,6 @@ def setup_auth(opp, app):
         request[KEY_OPP_USER] = refresh_token.user
         return True
 
-        if auth_type == 'Basic' and support_legacy:
-            decoded = base64.b64decode(auth_val).decode('utf-8')
-            try:
-                username, password = decoded.split(':', 1)
-            except ValueError:
-                # If no ':' in decoded
-                return False
-
-            if username != 'openpeerpower':
-                return False
-
-            user = await legacy_api_password.async_validate_password(
-                opp, password)
-            if user is None:
-                return False
-
-            request[KEY_OPP_USER] = user
-            _LOGGER.info(
-                'Basic auth with api_password is going to deprecate,'
-                ' please use a bearer token to access %s from %s',
-                request.path, request[KEY_REAL_IP])
-            old_auth_warning.add(request.path)
-            return True
-
-        return False
-
     async def async_validate_signed_request(request):
         """Validate a signed request."""
         secret = opp.data.get(DATA_SIGN_SECRET)
@@ -123,10 +86,7 @@ def setup_auth(opp, app):
 
         try:
             claims = jwt.decode(
-                signature,
-                secret,
-                algorithms=['HS256'],
-                options={'verify_iss': False}
+                signature, secret, algorithms=["HS256"], options={"verify_iss": False}
             )
         except jwt.InvalidTokenError:
             return False
@@ -142,36 +102,16 @@ def setup_auth(opp, app):
         request[KEY_OPP_USER] = refresh_token.user
         return True
 
-
-    async def async_validate_legacy_api_password(request, password):
-        """Validate api_password."""
-        user = await legacy_api_password.async_validate_password(
-            opp, password)
-        if user is None:
-            return False
-
-        request[KEY_OPP_USER] = user
-        return True
-
     @middleware
     async def auth_middleware(request, handler):
         """Authenticate as middleware."""
         authenticated = False
 
-        if (HTTP_HEADER_OP_AUTH in request.headers or
-                DATA_API_PASSWORD in request.query):
-            if request.path not in old_auth_warning:
-                _LOGGER.log(
-                    logging.INFO if support_legacy else logging.WARNING,
-                    'api_password is going to deprecate. You need to use a'
-                    ' bearer token to access %s from %s',
-                    request.path, request[KEY_REAL_IP])
-                old_auth_warning.add(request.path)
-
-        if (hdrs.AUTHORIZATION in request.headers and
-                await async_validate_auth_header(request)):
-            # it included both use_auth and api_password Basic auth
+        if hdrs.AUTHORIZATION in request.headers and await async_validate_auth_header(
+            request
+        ):
             authenticated = True
+            auth_type = "bearer token"
 
         # We first start with a string check to avoid parsing query params
         # for every request.
@@ -181,11 +121,8 @@ def setup_auth(opp, app):
             and await async_validate_signed_request(request)
         ):
             authenticated = True
+            auth_type = "signed request"
 
-        elif (support_legacy and DATA_API_PASSWORD in request.query and
-              await async_validate_legacy_api_password(
-                  request, request.query[DATA_API_PASSWORD])):
-            authenticated = True
         if authenticated:
             _LOGGER.debug(
                 "Authenticated %s for %s using %s",

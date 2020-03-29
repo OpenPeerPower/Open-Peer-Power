@@ -5,17 +5,30 @@ import uuid
 from openpeerpower.components.scene import DOMAIN, PLATFORM_SCHEMA
 from openpeerpower.config import SCENE_CONFIG_PATH
 from openpeerpower.const import CONF_ID, SERVICE_RELOAD
-import openpeerpower.helpers.config_validation as cv
+from openpeerpower.core import DOMAIN as HA_DOMAIN
+from openpeerpower.helpers import config_validation as cv, entity_registry
 
-from . import EditIdBasedConfigView
+from . import ACTION_DELETE, EditIdBasedConfigView
 
 
 async def async_setup(opp):
     """Set up the Scene config API."""
 
-    async def hook(opp):
+    async def hook(action, config_key):
         """post_write_hook for Config View that reloads scenes."""
         await opp.services.async_call(DOMAIN, SERVICE_RELOAD)
+
+        if action != ACTION_DELETE:
+            return
+
+        ent_reg = await entity_registry.async_get_registry(opp)
+
+        entity_id = ent_reg.async_get_entity_id(DOMAIN, HA_DOMAIN, config_key)
+
+        if entity_id is None:
+            return
+
+        ent_reg.async_remove(entity_id)
 
     opp.http.register_view(
         EditSceneConfigView(

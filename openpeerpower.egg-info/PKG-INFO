@@ -1,14 +1,22 @@
 Metadata-Version: 1.2
 Name: openpeerpower
-Version: 0.104.0.dev0
-Summary: UNKNOWN
+Version: 0.106.0
+Summary: Open-source home automation platform running on Python 3.
 Home-page: https://OpenPeerPower.io/
 Author: Paul Caston
 Author-email: paul@caston.id.au
-License: UNKNOWN
-Download-URL: https://github.com/open-peer-power/open-peer-power/archive/0.104.0.dev0.zip
+License: Apache License 2.0
+Download-URL: https://github.com/open-peer-power/open-peer-power/archive/0.106.0.zip
 Project-URL: Bug Reports, https://github.com/open-peer-power/open-peer-power/issues
 Project-URL: Forum, https://community.open-peer-power.io/
 Description: UNKNOWN
-Platform: UNKNOWN
+Keywords: home,automation
+Platform: any
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: End Users/Desktop
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: Apache Software License
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Topic :: Home Automation
 Requires-Python: >=3.7.0

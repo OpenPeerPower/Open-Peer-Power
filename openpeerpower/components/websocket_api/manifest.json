@@ -1,12 +1,9 @@
 {
   "domain": "websocket_api",
-  "name": "Websocket api",
+  "name": "Home Asssitant WebSocket API",
   "documentation": "https://www.open-peer-power.io/integrations/websocket_api",
   "requirements": [],
-  "dependencies": [
-    "http"
-  ],
-  "codeowners": [
-    "@open-peer-power/core"
-  ]
+  "dependencies": ["http"],
+  "codeowners": ["@open-peer-power/core"],
+  "quality_scale": "internal"
 }

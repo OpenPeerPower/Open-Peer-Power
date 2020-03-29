@@ -5,6 +5,7 @@ import voluptuous as vol
 from openpeerpower import config_entries, data_entry_flow
 from openpeerpower.components.http import OpenPeerPowerView
 from openpeerpower.components.http.data_validator import RequestDataValidator
+import openpeerpower.helpers.config_validation as cv
 
 # mypy: allow-untyped-calls, allow-untyped-defs
 
@@ -36,7 +37,9 @@ class _BaseFlowManagerView(OpenPeerPowerView):
         if schema is None:
             data["data_schema"] = []
         else:
-            data["data_schema"] = voluptuous_serialize.convert(schema)
+            data["data_schema"] = voluptuous_serialize.convert(
+                schema, custom_serializer=cv.custom_serializer
+            )
 
         return data
 

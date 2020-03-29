@@ -22,7 +22,7 @@ from openpeerpower.const import (
     DEVICE_CLASS_TEMPERATURE,
     DEVICE_CLASS_TIMESTAMP,
 )
-from openpeerpower.core import OpenPeerPower
+from openpeerpower.core import OpenPeerPower, callback
 from openpeerpower.helpers import condition, config_validation as cv
 from openpeerpower.helpers.entity_registry import (
     async_entries_for_device,
@@ -128,6 +128,7 @@ async def async_get_conditions(
     return conditions
 
 
+@callback
 def async_condition_from_config(
     config: ConfigType, config_validation: bool
 ) -> condition.ConditionCheckerType:

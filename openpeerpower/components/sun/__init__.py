@@ -76,7 +76,7 @@ async def async_setup(opp, config):
     """Track the state of the sun."""
     if config.get(CONF_ELEVATION) is not None:
         _LOGGER.warning(
-            "Elevation is now configured in open peer power core. "
+            "Elevation is now configured in Open Peer Power core. "
             "See https://open-peer-power.io/docs/configuration/basic/"
         )
     Sun(opp)

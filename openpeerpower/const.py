@@ -1,9 +1,9 @@
 """Constants used by Open Peer Power components."""
 MAJOR_VERSION = 0
-MINOR_VERSION = 104
-PATCH_VERSION = "0.dev0"
-__short_version__ = "{}.{}".format(MAJOR_VERSION, MINOR_VERSION)
-__version__ = "{}.{}".format(__short_version__, PATCH_VERSION)
+MINOR_VERSION = 106
+PATCH_VERSION = "0"
+__short_version__ = f"{MAJOR_VERSION}.{MINOR_VERSION}"
+__version__ = f"{__short_version__}.{PATCH_VERSION}"
 REQUIRED_PYTHON_VER = (3, 7, 0)
 # Truthy date string triggers showing related deprecation warning messages.
 REQUIRED_NEXT_PYTHON_VER = (3, 8, 0)
@@ -16,6 +16,7 @@ PLATFORM_FORMAT = "{platform}.{domain}"
 MATCH_ALL = "*"
 
 # Entity target all constant
+ENTITY_MATCH_NONE = "none"
 ENTITY_MATCH_ALL = "all"
 
 # If no name is specified
@@ -35,6 +36,7 @@ CONF_API_KEY = "api_key"
 CONF_API_VERSION = "api_version"
 CONF_AT = "at"
 CONF_AUTHENTICATION = "authentication"
+CONF_AUTH_MFA_MODULES = "auth_mfa_modules"
 CONF_AUTH_PROVIDERS = "auth_providers"
 CONF_BASE = "base"
 CONF_BEFORE = "before"
@@ -317,6 +319,7 @@ ATTR_GPS_ACCURACY = "gps_accuracy"
 ATTR_ASSUMED_STATE = "assumed_state"
 ATTR_STATE = "state"
 
+ATTR_EDITABLE = "editable"
 ATTR_OPTION = "option"
 
 # Bitfield of supported component features for the entity
@@ -374,6 +377,40 @@ MASS_POUNDS: str = "lb"
 
 # UV Index units
 UNIT_UV_INDEX: str = "UV index"
+
+# Data units
+DATA_BITS = "bit"
+DATA_KILOBITS = "kbit"
+DATA_MEGABITS = "Mbit"
+DATA_GIGABITS = "Gbit"
+DATA_BYTES = "B"
+DATA_KILOBYTES = "kB"
+DATA_MEGABYTES = "MB"
+DATA_GIGABYTES = "GB"
+DATA_TERABYTES = "TB"
+DATA_PETABYTES = "PB"
+DATA_EXABYTES = "EB"
+DATA_ZETTABYTES = "ZB"
+DATA_YOTTABYTES = "YB"
+DATA_KIBIBYTES = "KiB"
+DATA_MEBIBYTES = "MiB"
+DATA_GIBIBYTES = "GiB"
+DATA_TEBIBYTES = "TiB"
+DATA_PEBIBYTES = "PiB"
+DATA_EXBIBYTES = "EiB"
+DATA_ZEBIBYTES = "ZiB"
+DATA_YOBIBYTES = "YiB"
+DATA_RATE_BITS_PER_SECOND = f"{DATA_BITS}/s"
+DATA_RATE_KILOBITS_PER_SECOND = f"{DATA_KILOBITS}/s"
+DATA_RATE_MEGABITS_PER_SECOND = f"{DATA_MEGABITS}/s"
+DATA_RATE_GIGABITS_PER_SECOND = f"{DATA_GIGABITS}/s"
+DATA_RATE_BYTES_PER_SECOND = f"{DATA_BYTES}/s"
+DATA_RATE_KILOBYTES_PER_SECOND = f"{DATA_KILOBYTES}/s"
+DATA_RATE_MEGABYTES_PER_SECOND = f"{DATA_MEGABYTES}/s"
+DATA_RATE_GIGABYTES_PER_SECOND = f"{DATA_GIGABYTES}/s"
+DATA_RATE_KIBIBYTES_PER_SECOND = f"{DATA_KIBIBYTES}/s"
+DATA_RATE_MEBIBYTES_PER_SECOND = f"{DATA_MEBIBYTES}/s"
+DATA_RATE_GIBIBYTES_PER_SECOND = f"{DATA_GIBIBYTES}/s"
 
 # #### SERVICES ####
 SERVICE_OPENPEERPOWER_STOP = "stop"

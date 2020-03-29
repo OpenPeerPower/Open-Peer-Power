@@ -1,8 +1,9 @@
 {
   "domain": "onboarding",
-  "name": "Onboarding",
+  "name": "Open Peer Power Onboarding",
   "documentation": "https://www.open-peer-power.io/integrations/onboarding",
   "requirements": [],
   "dependencies": ["auth", "http", "person"],
-  "codeowners": ["@open-peer-power/core"]
+  "codeowners": ["@open-peer-power/core"],
+  "quality_scale": "internal"
 }

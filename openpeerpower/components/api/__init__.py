@@ -411,6 +411,7 @@ async def async_services_json(opp):
     return [{"domain": key, "services": value} for key, value in descriptions.items()]
 
 
+@op.callback
 def async_events_json(opp):
     """Generate event data to JSONify."""
     return [

@@ -4,7 +4,6 @@ import logging
 
 import voluptuous as vol
 
-from openpeerpower.components import group
 from openpeerpower.const import (
     SERVICE_TOGGLE,
     SERVICE_TURN_OFF,
@@ -23,9 +22,6 @@ from openpeerpower.loader import bind_opp
 
 DOMAIN = "switch"
 SCAN_INTERVAL = timedelta(seconds=30)
-
-GROUP_NAME_ALL_SWITCHES = "all switches"
-ENTITY_ID_ALL_SWITCHES = group.ENTITY_ID_FORMAT.format("all_switches")
 
 ENTITY_ID_FORMAT = DOMAIN + ".{}"
 
@@ -50,19 +46,18 @@ _LOGGER = logging.getLogger(__name__)
 
 
 @bind_opp
-def is_on(opp, entity_id=None):
+def is_on(opp, entity_id):
     """Return if the switch is on based on the statemachine.
 
     Async friendly.
     """
-    entity_id = entity_id or ENTITY_ID_ALL_SWITCHES
     return opp.states.is_state(entity_id, STATE_ON)
 
 
 async def async_setup(opp, config):
     """Track states and offer events for switches."""
     component = opp.data[DOMAIN] = EntityComponent(
-        _LOGGER, DOMAIN, opp, SCAN_INTERVAL, GROUP_NAME_ALL_SWITCHES
+        _LOGGER, DOMAIN, opp, SCAN_INTERVAL
     )
     await component.async_setup(config)
 

@@ -137,7 +137,7 @@ class MetWeather(WeatherEntity):
             )
             return
 
-        # Wait between 55-65 minutes. If people update OP on the hour, this
+        # Wait between 55-65 minutes. If people update HA on the hour, this
         # will make sure it will spread it out.
 
         self._unsub_fetch_data = async_call_later(

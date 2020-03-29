@@ -41,7 +41,6 @@ DATA_INTEGRATIONS = "integrations"
 DATA_CUSTOM_COMPONENTS = "custom_components"
 PACKAGE_CUSTOM_COMPONENTS = "custom_components"
 PACKAGE_BUILTIN = "openpeerpower.components"
-LOOKUP_PATHS = [PACKAGE_CUSTOM_COMPONENTS, PACKAGE_BUILTIN]
 CUSTOM_WARNING = (
     "You are using a custom integration for %s which has not "
     "been tested by Open Peer Power. This component might "
@@ -67,6 +66,9 @@ async def _async_get_custom_components(
     opp: "OpenPeerPower",
 ) -> Dict[str, "Integration"]:
     """Return list of custom integrations."""
+    if opp.config.safe_mode:
+        return {}
+
     try:
         import custom_components
     except ImportError:
@@ -178,7 +180,7 @@ class Integration:
 
         Will create a stub manifest.
         """
-        comp = _load_file(opp, domain, LOOKUP_PATHS)
+        comp = _load_file(opp, domain, _lookup_path(opp))
 
         if comp is None:
             return None
@@ -238,6 +240,21 @@ class Integration:
     def documentation(self) -> Optional[str]:
         """Return documentation."""
         return cast(str, self.manifest.get("documentation"))
+
+    @property
+    def quality_scale(self) -> Optional[str]:
+        """Return Integration Quality Scale."""
+        return cast(str, self.manifest.get("quality_scale"))
+
+    @property
+    def logo(self) -> Optional[str]:
+        """Return Integration Logo."""
+        return cast(str, self.manifest.get("logo"))
+
+    @property
+    def icon(self) -> Optional[str]:
+        """Return Integration Icon."""
+        return cast(str, self.manifest.get("icon"))
 
     @property
     def is_built_in(self) -> bool:
@@ -407,7 +424,7 @@ def _load_file(
 
             if str(err) not in white_listed_errors:
                 _LOGGER.exception(
-                    ("Error loading %s. Make sure all " "dependencies are installed"),
+                    ("Error loading %s. Make sure all dependencies are installed"),
                     path,
                 )
 
@@ -449,7 +466,7 @@ class Components:
             component: Optional[ModuleType] = integration.get_component()
         else:
             # Fallback to importing old-school
-            component = _load_file(self._opp, comp_name, LOOKUP_PATHS)
+            component = _load_file(self._opp, comp_name, _lookup_path(self._opp))
 
         if component is None:
             raise ImportError(f"Unable to load {comp_name}")
@@ -526,8 +543,15 @@ def _async_mount_config_dir(opp: "OpenPeerPower") -> bool:
     Async friendly but not a coroutine.
     """
     if opp.config.config_dir is None:
-        _LOGGER.error("Can't load integrations - config dir is not set")
+        _LOGGER.error("Can't load integrations - configuration directory is not set")
         return False
     if opp.config.config_dir not in sys.path:
         sys.path.insert(0, opp.config.config_dir)
     return True
+
+
+def _lookup_path(opp: "OpenPeerPower") -> List[str]:
+    """Return the lookup paths for legacy lookups."""
+    if opp.config.safe_mode:
+        return [PACKAGE_BUILTIN]
+    return [PACKAGE_CUSTOM_COMPONENTS, PACKAGE_BUILTIN]

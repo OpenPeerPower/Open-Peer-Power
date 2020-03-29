@@ -2,11 +2,8 @@
   "domain": "updater",
   "name": "Updater",
   "documentation": "https://www.open-peer-power.io/integrations/updater",
-  "requirements": [
-    "distro==1.4.0"
-  ],
+  "requirements": ["distro==1.4.0"],
   "dependencies": [],
-  "codeowners": [
-    "@open-peer-power/core"
-  ]
+  "codeowners": ["@open-peer-power/core"],
+  "quality_scale": "internal"
 }

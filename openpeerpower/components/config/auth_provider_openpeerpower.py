@@ -81,7 +81,7 @@ async def websocket_create(opp, connection, msg):
         await opp.async_add_executor_job(
             provider.data.add_auth, msg["username"], msg["password"]
         )
-    except auth_op.InvalidUser:
+    except auth_ha.InvalidUser:
         connection.send_message(
             websocket_api.error_message(
                 msg["id"], "username_exists", "Username already exists"
@@ -120,7 +120,7 @@ async def websocket_delete(opp, connection, msg):
     try:
         provider.data.async_remove_auth(msg["username"])
         await provider.data.async_save()
-    except auth_op.InvalidUser:
+    except auth_ha.InvalidUser:
         connection.send_message(
             websocket_api.error_message(
                 msg["id"], "auth_not_found", "Given username was not found."
@@ -160,7 +160,7 @@ async def websocket_change_password(opp, connection, msg):
 
     try:
         await provider.async_validate_login(username, msg["current_password"])
-    except auth_op.InvalidAuth:
+    except auth_ha.InvalidAuth:
         connection.send_message(
             websocket_api.error_message(
                 msg["id"], "invalid_password", "Invalid password"

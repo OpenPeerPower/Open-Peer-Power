@@ -275,6 +275,9 @@ async def async_setup(opp, config):
     use_include_order = conf.get(CONF_ORDER)
 
     opp.http.register_view(HistoryPeriodView(filters, use_include_order))
+    opp.components.frontend.async_register_built_in_panel(
+        "history", "history", "opp:poll-box"
+    )
 
     return True
 

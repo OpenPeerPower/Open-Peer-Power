@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Open Peer Power setup script."""
 from datetime import datetime as dt
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
 
 import openpeerpower.const as opp_const
 

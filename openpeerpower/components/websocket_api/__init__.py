@@ -1,5 +1,9 @@
 """WebSocket based API for Open Peer Power."""
-from openpeerpower.core import callback
+from typing import Optional, Union, cast
+
+import voluptuous as vol
+
+from openpeerpower.core import OpenPeerPower, callback
 from openpeerpower.loader import bind_opp
 
 from . import commands, connection, const, decorators, http, messages
@@ -26,13 +30,18 @@ websocket_command = decorators.websocket_command
 
 @bind_opp
 @callback
-def async_register_command(opp, command_or_handler, handler=None, schema=None):
+def async_register_command(
+    opp: OpenPeerPower,
+    command_or_handler: Union[str, const.WebSocketCommandHandler],
+    handler: Optional[const.WebSocketCommandHandler] = None,
+    schema: Optional[vol.Schema] = None,
+) -> None:
     """Register a websocket command."""
     # pylint: disable=protected-access
     if handler is None:
-        handler = command_or_handler
-        command = handler._ws_command
-        schema = handler._ws_schema
+        handler = cast(const.WebSocketCommandHandler, command_or_handler)
+        command = handler._ws_command  # type: ignore
+        schema = handler._ws_schema  # type: ignore
     else:
         command = command_or_handler
     handlers = opp.data.get(DOMAIN)

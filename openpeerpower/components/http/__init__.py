@@ -3,7 +3,7 @@ from ipaddress import ip_network
 import logging
 import os
 import ssl
-from typing import Optional
+from typing import Optional, cast
 
 from aiohttp import web
 from aiohttp.web_exceptions import HTTPMovedPermanently
@@ -14,7 +14,10 @@ from openpeerpower.const import (
     EVENT_OPENPEERPOWER_STOP,
     SERVER_PORT,
 )
+from openpeerpower.core import OpenPeerPower
+from openpeerpower.helpers import storage
 import openpeerpower.helpers.config_validation as cv
+from openpeerpower.loader import bind_opp
 import openpeerpower.util as opp_util
 from openpeerpower.util import ssl as ssl_util
 
@@ -54,6 +57,11 @@ DEFAULT_DEVELOPMENT = "0"
 DEFAULT_CORS = "https://cast.open-peer-power.io"
 NO_LOGIN_ATTEMPT_THRESHOLD = -1
 
+MAX_CLIENT_SIZE: int = 1024 ** 2 * 16
+
+STORAGE_KEY = DOMAIN
+STORAGE_VERSION = 1
+
 
 HTTP_SCHEMA = vol.Schema(
     {
@@ -81,6 +89,13 @@ HTTP_SCHEMA = vol.Schema(
 )
 
 CONFIG_SCHEMA = vol.Schema({DOMAIN: HTTP_SCHEMA}, extra=vol.ALLOW_EXTRA)
+
+
+@bind_opp
+async def async_get_last_config(opp: OpenPeerPower) -> Optional[dict]:
+    """Return the last known working config."""
+    store = storage.Store(opp, STORAGE_VERSION, STORAGE_KEY)
+    return cast(Optional[dict], await store.async_load())
 
 
 class ApiConfig:
@@ -149,6 +164,19 @@ async def async_setup(opp, config):
         opp.bus.async_listen_once(EVENT_OPENPEERPOWER_STOP, stop_server)
         await server.start()
 
+        # If we are set up successful, we store the HTTP settings for safe mode.
+        store = storage.Store(opp, STORAGE_VERSION, STORAGE_KEY)
+
+        if CONF_TRUSTED_PROXIES in conf:
+            conf_to_save = dict(conf)
+            conf_to_save[CONF_TRUSTED_PROXIES] = [
+                str(ip.network_address) for ip in conf_to_save[CONF_TRUSTED_PROXIES]
+            ]
+        else:
+            conf_to_save = conf
+
+        await store.async_save(conf_to_save)
+
     opp.bus.async_listen_once(EVENT_OPENPEERPOWER_START, start_server)
 
     opp.http = server
@@ -188,7 +216,9 @@ class OpenPeerPowerHTTP:
         ssl_profile,
     ):
         """Initialize the HTTP Open Peer Power server."""
-        app = self.app = web.Application(middlewares=[])
+        app = self.app = web.Application(
+            middlewares=[], client_max_size=MAX_CLIENT_SIZE
+        )
         app[KEY_OPP] = opp
 
         # This order matters

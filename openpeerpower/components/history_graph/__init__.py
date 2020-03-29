@@ -33,9 +33,14 @@ CONFIG_SCHEMA = vol.Schema(
 )
 
 
-async def async_setup(opp, config):
+async def async_setup(oppconfig):
     """Load graph configurations."""
-    component = EntityComponent(_LOGGER, DOMAIN, opp)
+    _LOGGER.warning(
+        "The history_graph integration has been deprecated and is pending for removal "
+        "in Open Peer Power 0.107.0."
+    )
+
+    component = EntityComponent(_LOGGER, DOMAIN, opp
     graphs = []
 
     for object_id, cfg in config[DOMAIN].items():

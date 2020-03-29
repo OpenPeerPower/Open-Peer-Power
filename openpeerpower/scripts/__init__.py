@@ -38,7 +38,7 @@ def run(args: List) -> int:
         print("Available scripts:", ", ".join(scripts))
         return 1
 
-    script = importlib.import_module("openpeerpower.scripts." + args[0])
+    script = importlib.import_module(f"openpeerpower.scripts.{args[0]}")
 
     config_dir = extract_config_dir()
 

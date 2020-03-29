@@ -225,7 +225,7 @@ track_point_in_time = threaded_listener_factory(async_track_point_in_time)
 @callback
 @bind_opp
 def async_track_point_in_utc_time(
-    opp: OpenPeerPower, action: Callable[..., None], point_in_time: datetime
+    opp: OpenPeerPower, action: Callable[..., Any], point_in_time: datetime
 ) -> CALLBACK_TYPE:
     """Add a listener that fires once after a specific point in UTC time."""
     # Ensure point_in_time is UTC

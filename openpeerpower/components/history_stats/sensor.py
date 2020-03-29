@@ -45,7 +45,7 @@ def exactly_two_period_keys(conf):
     """Ensure exactly 2 of CONF_PERIOD_KEYS are provided."""
     if sum(param in conf for param in CONF_PERIOD_KEYS) != 2:
         raise vol.Invalid(
-            "You must provide exactly 2 of the following:" " start, end, duration"
+            "You must provide exactly 2 of the following: start, end, duration"
         )
     return conf
 
@@ -67,7 +67,7 @@ PLATFORM_SCHEMA = vol.All(
 
 
 # noinspection PyUnusedLocal
-def setup_platform(opp, config, add_entities, discovery_info=None):
+def setup_platform(opponfig, add_entities, discovery_info=None):
     """Set up the History Stats sensor."""
     entity_id = config.get(CONF_ENTITY_ID)
     entity_state = config.get(CONF_STATE)
@@ -79,12 +79,12 @@ def setup_platform(opp, config, add_entities, discovery_info=None):
 
     for template in [start, end]:
         if template is not None:
-            template.opp = opp
+            template.oppoooopp
 
     add_entities(
         [
             HistoryStatsSensor(
-                opp, entity_id, entity_state, start, end, duration, sensor_type, name
+                oppntity_id, entity_state, start, end, duration, sensor_type, name
             )
         ]
     )
@@ -96,7 +96,7 @@ class HistoryStatsSensor(Entity):
     """Representation of a HistoryStats sensor."""
 
     def __init__(
-        self, opp, entity_id, entity_state, start, end, duration, sensor_type, name
+        self, oppntity_id, entity_state, start, end, duration, sensor_type, name
     ):
         """Initialize the HistoryStats sensor."""
         self._entity_id = entity_id
@@ -122,10 +122,10 @@ class HistoryStatsSensor(Entity):
                 self.async_schedule_update_op_state(True)
 
             force_refresh()
-            async_track_state_change(self.opp, self._entity_id, force_refresh)
+            async_track_state_change(self.oppelf._entity_id, force_refresh)
 
         # Delay first refresh to keep startup fast
-        opp.bus.listen_once(EVENT_OPENPEERPOWER_START, start_refresh)
+        opps.listen_once(EVENT_OPENPEERPOWER_START, start_refresh)
 
     @property
     def name(self):
@@ -205,14 +205,14 @@ class HistoryStatsSensor(Entity):
 
         # Get history between start and end
         history_list = history.state_changes_during_period(
-            self.opp, start, end, str(self._entity_id)
+            self.opptart, end, str(self._entity_id)
         )
 
         if self._entity_id not in history_list.keys():
             return
 
         # Get the first state
-        last_state = history.get_state(self.opp, start, self._entity_id)
+        last_state = history.get_state(self.opptart, self._entity_id)
         last_state = last_state is not None and last_state == self._entity_state
         last_time = start_timestamp
         elapsed = 0
@@ -262,7 +262,7 @@ class HistoryStatsSensor(Entity):
                     )
                 except ValueError:
                     _LOGGER.error(
-                        "Parsing error: start must be a datetime" "or a timestamp"
+                        "Parsing error: start must be a datetime or a timestamp"
                     )
                     return
 
@@ -281,7 +281,7 @@ class HistoryStatsSensor(Entity):
                     )
                 except ValueError:
                     _LOGGER.error(
-                        "Parsing error: end must be a datetime " "or a timestamp"
+                        "Parsing error: end must be a datetime or a timestamp"
                     )
                     return
 
@@ -330,7 +330,7 @@ class HistoryStatsHelper:
     def handle_template_exception(ex, field):
         """Log an error nicely if the template cannot be interpreted."""
         if ex.args and ex.args[0].startswith("UndefinedError: 'None' has no attribute"):
-            # Common during OP startup - so just a warning
+            # Common during HA startup - so just a warning
             _LOGGER.warning(ex)
             return
         _LOGGER.error("Error parsing template for field %s", field)

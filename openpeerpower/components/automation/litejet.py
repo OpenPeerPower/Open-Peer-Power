@@ -92,6 +92,7 @@ async def async_attach_trigger(opp, config, action, automation_info):
     opp.data["litejet_system"].on_switch_pressed(number, pressed)
     opp.data["litejet_system"].on_switch_released(number, released)
 
+    @callback
     def async_remove():
         """Remove all subscriptions used for this trigger."""
         return

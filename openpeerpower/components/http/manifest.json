@@ -2,11 +2,8 @@
   "domain": "http",
   "name": "HTTP",
   "documentation": "https://www.open-peer-power.io/integrations/http",
-  "requirements": [
-    "aiohttp_cors==0.7.0"
-  ],
+  "requirements": ["aiohttp_cors==0.7.0"],
   "dependencies": [],
-  "codeowners": [
-    "@open-peer-power/core"
-  ]
+  "codeowners": ["@open-peer-power/core"],
+  "quality_scale": "internal"
 }

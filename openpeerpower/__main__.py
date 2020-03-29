@@ -1,57 +1,33 @@
 """Start Open Peer Power."""
-from __future__ import print_function
-
 import argparse
-import os
-import sys
-import platform
 import asyncio
-import json
+import os
+import platform
 import subprocess
 import sys
 import threading
-from typing import (  # noqa pylint: disable=unused-import
-    List, Dict, Any, TYPE_CHECKING
-)
+from typing import List
 
-from openpeerpower.const import (
-    __version__,
-    EVENT_OPENPEERPOWER_START,
-    REQUIRED_PYTHON_VER,
-    RESTART_EXIT_CODE,
-)
-
-if TYPE_CHECKING:
-    from openpeerpower import core
+from openpeerpower.const import REQUIRED_PYTHON_VER, RESTART_EXIT_CODE, __version__
 
 
 def set_loop() -> None:
-    """Attempt to use uvloop."""
-    import asyncio
+    """Attempt to use different loop."""
     from asyncio.events import BaseDefaultEventLoopPolicy
 
-    policy = None
-
-    if sys.platform == 'win32':
-        if hasattr(asyncio, 'WindowsProactorEventLoopPolicy'):
+    if sys.platform == "win32":
+        if hasattr(asyncio, "WindowsProactorEventLoopPolicy"):
             # pylint: disable=no-member
             policy = asyncio.WindowsProactorEventLoopPolicy()
         else:
+
             class ProactorPolicy(BaseDefaultEventLoopPolicy):
                 """Event loop policy to create proactor loops."""
 
                 _loop_factory = asyncio.ProactorEventLoop
 
             policy = ProactorPolicy()
-    else:
-        try:
-            import uvloop
-        except ImportError:
-            pass
-        else:
-            policy = uvloop.EventLoopPolicy()
 
-    if policy is not None:
         asyncio.set_event_loop_policy(policy)
 
 
@@ -69,16 +45,15 @@ def validate_python() -> None:
 def ensure_config_path(config_dir: str) -> None:
     """Validate the configuration directory."""
     import openpeerpower.config as config_util
-    lib_dir = os.path.join(config_dir, 'deps')
+
+    lib_dir = os.path.join(config_dir, "deps")
 
     # Test if configuration directory exists
     if not os.path.isdir(config_dir):
         if config_dir != config_util.get_default_config_dir():
             print(
-                (
-                    "Fatal Error: Specified configuration directory does "
-                    "not exist {} "
-                ).format(config_dir)
+                f"Fatal Error: Specified configuration directory {config_dir} "
+                "does not exist"
             )
             sys.exit(1)
 
@@ -86,10 +61,8 @@ def ensure_config_path(config_dir: str) -> None:
             os.mkdir(config_dir)
         except OSError:
             print(
-                (
-                    "Fatal Error: Unable to create default configuration "
-                    "directory {} "
-                ).format(config_dir)
+                "Fatal Error: Unable to create default configuration "
+                f"directory {config_dir}"
             )
             sys.exit(1)
 
@@ -98,31 +71,17 @@ def ensure_config_path(config_dir: str) -> None:
         try:
             os.mkdir(lib_dir)
         except OSError:
-            print(
-                ("Fatal Error: Unable to create library " "directory {} ").format(
-                    lib_dir
-                )
-            )
+            print(f"Fatal Error: Unable to create library directory {lib_dir}")
             sys.exit(1)
 
-
-async def ensure_config_file(opp: "core.OpenPeerPower", config_dir: str) -> str:
-    """Ensure configuration file exists."""
-    import openpeerpower.config as config_util
-    config_path = await config_util.async_ensure_config_exists(
-        opp, config_dir)
-
-    if config_path is None:
-        print("Error getting configuration path")
-        sys.exit(1)
-
-    return config_path
 
 def get_arguments() -> argparse.Namespace:
     """Get parsed passed in arguments."""
     import openpeerpower.config as config_util
+
     parser = argparse.ArgumentParser(
-        description="Open Peer Power: Observe, Control, Automate.")
+        description="Open Peer Power: Observe, Control, Automate."
+    )
     parser.add_argument("--version", action="version", version=__version__)
     parser.add_argument(
         "-c",
@@ -132,58 +91,55 @@ def get_arguments() -> argparse.Namespace:
         help="Directory that contains the Open Peer Power configuration",
     )
     parser.add_argument(
-        '--demo-mode',
-        action='store_true',
-        help='Start Open Peer Power in demo mode')
+        "--safe-mode", action="store_true", help="Start Open Peer Power in safe mode"
+    )
     parser.add_argument(
-        '--debug',
-        action='store_true',
-        help='Start Open Peer Power in debug mode')
+        "--debug", action="store_true", help="Start Open Peer Power in debug mode"
+    )
     parser.add_argument(
-        '--open-ui',
-        action='store_true',
-        help='Open the webinterface in a browser')
+        "--open-ui", action="store_true", help="Open the webinterface in a browser"
+    )
     parser.add_argument(
-        '--skip-pip',
-        action='store_true',
-        help='Skips pip install of required packages on startup')
+        "--skip-pip",
+        action="store_true",
+        help="Skips pip install of required packages on startup",
+    )
     parser.add_argument(
-        '-v', '--verbose',
-        action='store_true',
-        help="Enable verbose logging to file.")
+        "-v", "--verbose", action="store_true", help="Enable verbose logging to file."
+    )
     parser.add_argument(
-        '--pid-file',
-        metavar='path_to_pid_file',
+        "--pid-file",
+        metavar="path_to_pid_file",
         default=None,
-        help='Path to PID file useful for running as daemon')
+        help="Path to PID file useful for running as daemon",
+    )
     parser.add_argument(
-        '--log-rotate-days',
+        "--log-rotate-days",
         type=int,
         default=None,
-        help='Enables daily log rotation and keeps up to the specified days')
+        help="Enables daily log rotation and keeps up to the specified days",
+    )
     parser.add_argument(
-        '--log-file',
+        "--log-file",
         type=str,
         default=None,
-        help='Log file to write to.  If not set, CONFIG/open-peer-power.log '
-             'is used')
+        help="Log file to write to.  If not set, CONFIG/open-peer-power.log is used",
+    )
     parser.add_argument(
-        '--log-no-color',
-        action='store_true',
-        help="Disable color logs")
+        "--log-no-color", action="store_true", help="Disable color logs"
+    )
     parser.add_argument(
-        '--runner',
-        action='store_true',
-        help='On restart exit with code {}'.format(RESTART_EXIT_CODE))
+        "--runner",
+        action="store_true",
+        help=f"On restart exit with code {RESTART_EXIT_CODE}",
+    )
     parser.add_argument(
-        '--script',
-        nargs=argparse.REMAINDER,
-        help='Run one of the embedded scripts')
+        "--script", nargs=argparse.REMAINDER, help="Run one of the embedded scripts"
+    )
     if os.name == "posix":
         parser.add_argument(
-            '--daemon',
-            action='store_true',
-            help='Run Open Peer Power as daemon')
+            "--daemon", action="store_true", help="Run Open Peer Power as daemon"
+        )
 
     arguments = parser.parse_args()
     if os.name != "posix" or arguments.debug or arguments.runner:
@@ -236,7 +192,7 @@ def check_pid(pid_file: str) -> None:
     except OSError:
         # PID does not exist
         return
-    print("Fatal Error: OpenPeerPower is already running.")
+    print("Fatal Error: Open Peer Power is already running.")
     sys.exit(1)
 
 
@@ -279,63 +235,27 @@ def cmdline() -> List[str]:
     return [arg for arg in sys.argv if arg != "--daemon"]
 
 
-def appliance_string():
-    print(appliance_list)
-    return json.dumps(appliance_list)
+async def setup_and_run_opp(config_dir: str, args: argparse.Namespace) -> int:
+    """Set up Open Peer Power and run."""
+    from openpeerpower import bootstrap
 
-async def notify_appliances():
-    if USERS:       # asyncio.wait doesn't accept an empty list
-        message = appliance_string()
-        await asyncio.wait([user.send(message) for user in USERS])
+    opp = await bootstrap.async_setup_opp(
+        config_dir=config_dir,
+        verbose=args.verbose,
+        log_rotate_days=args.log_rotate_days,
+        log_file=args.log_file,
+        log_no_color=args.log_no_color,
+        skip_pip=args.skip_pip,
+        safe_mode=args.safe_mode,
+    )
 
-async def register(websocket):
-    USERS.add(websocket)
-#    await notify_users()
+    if opp is None:
+        return 1
 
-async def unregister(websocket):
-    USERS.remove(websocket)
-#    await notify_users()
+    if args.open_ui and opp.config.api is not None:
+        import webbrowser
 
-async def appliances_ws(websocket, path):
-    # register(websocket) sends appliance list to websocket
-    await register(websocket)
-    try:
-        await websocket.send(appliance_string())
-        global appliance_list
-        async for message in websocket:
-            appliance_list = json.loads(message)
-            await notify_appliances()
-    finally:
-        await unregister(websocket)
-
-async def setup_and_run_opp(config_dir: str,
-                             args: argparse.Namespace) -> int:
-    """Set up OPP and run."""
-    # pylint: disable=redefined-outer-name
-    from openpeerpower import bootstrap, core
-
-    opp = core.OpenPeerPower()
-
-    if args.demo_mode:
-        config = {
-            'frontend': {},
-            'demo': {}
-        }  # type: Dict[str, Any]
-        bootstrap.async_from_config_dict(
-            config, opp, config_dir=config_dir, verbose=args.verbose,
-            skip_pip=args.skip_pip, log_rotate_days=args.log_rotate_days,
-            log_file=args.log_file, log_no_color=args.log_no_color)
-    else:
-        config_file = await ensure_config_file(opp, config_dir)
-        print('Config directory:', config_dir)
-        await bootstrap.async_from_config_file(
-            config_file, opp, verbose=args.verbose, skip_pip=args.skip_pip,
-            log_rotate_days=args.log_rotate_days, log_file=args.log_file,
-            log_no_color=args.log_no_color)
-
-    #asyncio.get_event_loop().run_until_complete(
-    #    websockets.serve(appliances_ws, 'localhost', 6789))
-    #asyncio.get_event_loop().run_forever()
+        opp.add_job(webbrowser.open, opp.config.api.base_url)
 
     return await opp.async_run()
 
@@ -389,7 +309,7 @@ def main() -> int:
     set_loop()
 
     # Run a simple daemon runner process on Windows to handle restarts
-    if os.name == "xt" and "--runner" not in sys.argv:
+    if os.name == "nt" and "--runner" not in sys.argv:
         nt_args = cmdline() + ["--runner"]
         while True:
             try:
@@ -405,9 +325,10 @@ def main() -> int:
 
     if args.script is not None:
         from openpeerpower import scripts
+
         return scripts.run(args.script)
 
-    config_dir = os.path.join(os.getcwd(), args.config)
+    config_dir = os.path.abspath(os.path.join(os.getcwd(), args.config))
     ensure_config_path(config_dir)
 
     # Daemon functions

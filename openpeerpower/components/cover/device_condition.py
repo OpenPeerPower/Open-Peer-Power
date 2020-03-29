@@ -18,7 +18,7 @@ from openpeerpower.const import (
     STATE_OPEN,
     STATE_OPENING,
 )
-from openpeerpower.core import OpenPeerPower
+from openpeerpower.core import OpenPeerPower, callback
 from openpeerpower.helpers import (
     condition,
     config_validation as cv,
@@ -163,6 +163,7 @@ async def async_get_condition_capabilities(opp: OpenPeerPower, config: dict) -> 
     }
 
 
+@callback
 def async_condition_from_config(
     config: ConfigType, config_validation: bool
 ) -> condition.ConditionCheckerType:
@@ -196,6 +197,7 @@ def async_condition_from_config(
         f"{{{{ state.attributes.{position} }}}}"
     )
 
+    @callback
     def template_if(opp: OpenPeerPower, variables: TemplateVarsType = None) -> bool:
         """Validate template based if-condition."""
         value_template.opp = opp

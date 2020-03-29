@@ -14,12 +14,14 @@ from voluptuous.humanize import humanize_error
 
 from openpeerpower import auth
 from openpeerpower.auth import (
+    mfa_modules as auth_mfa_modules,
     providers as auth_providers,
 )
 from openpeerpower.const import (
     ATTR_ASSUMED_STATE,
     ATTR_FRIENDLY_NAME,
     ATTR_HIDDEN,
+    CONF_AUTH_MFA_MODULES,
     CONF_AUTH_PROVIDERS,
     CONF_CUSTOMIZE,
     CONF_CUSTOMIZE_DOMAIN,
@@ -49,6 +51,7 @@ from openpeerpower.requirements import (
     RequirementsNotFound,
     async_get_integration_with_requirements,
 )
+from openpeerpower.util.package import is_docker_env
 from openpeerpower.util.unit_system import IMPERIAL_SYSTEM, METRIC_SYSTEM
 from openpeerpower.util.yaml import SECRET_YAML, load_yaml
 
@@ -71,7 +74,7 @@ DEFAULT_CONFIG = f"""
 # Configure a default setup of Open Peer Power (frontend, api, etc)
 default_config:
 
-# Uncomment this if you are using SSL/TLS,.
+# Uncomment this if you are using SSL/TLS, running in Docker container, etc.
 # http:
 #   base_url: example.duckdns.org:8123
 
@@ -120,6 +123,29 @@ def _no_duplicate_auth_provider(
             )
         config_keys.add(key)
     return configs
+
+
+def _no_duplicate_auth_mfa_module(
+    configs: Sequence[Dict[str, Any]]
+) -> Sequence[Dict[str, Any]]:
+    """No duplicate auth mfa module item allowed in a list.
+
+    Each type of mfa module can only have one config without optional id.
+    A global unique id is required if same type of mfa module used multiple
+    times.
+    Note: this is different than auth provider
+    """
+    config_keys: Set[str] = set()
+    for config in configs:
+        key = config.get(CONF_ID, config[CONF_TYPE])
+        if key in config_keys:
+            raise vol.Invalid(
+                "Duplicate mfa module {} found. Please add unique IDs if "
+                "you want to have the same mfa module twice".format(config[CONF_TYPE])
+            )
+        config_keys.add(key)
+    return configs
+
 
 PACKAGES_CONFIG_SCHEMA = cv.schema_with_slug_keys(  # Package names are slugs
     vol.Schema({cv.string: vol.Any(dict, list, None)})  # Component config
@@ -176,6 +202,20 @@ CORE_CONFIG_SCHEMA = CUSTOMIZE_CONFIG_SCHEMA.extend(
             ],
             _no_duplicate_auth_provider,
         ),
+        vol.Optional(CONF_AUTH_MFA_MODULES): vol.All(
+            cv.ensure_list,
+            [
+                auth_mfa_modules.MULTI_FACTOR_AUTH_MODULE_SCHEMA.extend(
+                    {
+                        CONF_TYPE: vol.NotIn(
+                            ["insecure_example"],
+                            "The insecure_example mfa module is for testing only.",
+                        )
+                    }
+                )
+            ],
+            _no_duplicate_auth_mfa_module,
+        ),
     }
 )
 
@@ -186,35 +226,34 @@ def get_default_config_dir() -> str:
     return os.path.join(data_dir, CONFIG_DIR_NAME)  # type: ignore
 
 
-async def async_ensure_config_exists(
-    opp: OpenPeerPower, config_dir: str
-) -> Optional[str]:
+async def async_ensure_config_exists(opp: OpenPeerPower) -> bool:
     """Ensure a configuration file exists in given configuration directory.
 
     Creating a default one if needed.
-    Return path to the configuration file.
+    Return boolean if configuration dir is ready to go.
     """
-    config_path = find_config_file(config_dir)
+    config_path = opp.config.path(YAML_CONFIG_FILE)
 
-    if config_path is None:
-        print("Unable to find configuration. Creating default one in", config_dir)
-        config_path = await async_create_default_config(opp, config_dir)
+    if os.path.isfile(config_path):
+        return True
 
-    return config_path
+    print(
+        "Unable to find configuration. Creating default one in", opp.config.config_dir
+    )
+    return await async_create_default_config(opp)
 
 
-async def async_create_default_config(
-    opp: OpenPeerPower, config_dir: str
-) -> Optional[str]:
+async def async_create_default_config(opp: OpenPeerPower) -> bool:
     """Create a default configuration file in given configuration directory.
 
-    Return path to new config file if success, None if failed.
-    This method needs to run in an executor.
+    Return if creation was successful.
     """
-    return await opp.async_add_executor_job(_write_default_config, config_dir)
+    return await opp.async_add_executor_job(
+        _write_default_config, opp.config.config_dir
+    )
 
 
-def _write_default_config(config_dir: str) -> Optional[str]:
+def _write_default_config(config_dir: str) -> bool:
     """Write the default config."""
     config_path = os.path.join(config_dir, YAML_CONFIG_FILE)
     secret_path = os.path.join(config_dir, SECRET_YAML)
@@ -248,11 +287,11 @@ def _write_default_config(config_dir: str) -> Optional[str]:
         with open(scene_yaml_path, "wt"):
             pass
 
-        return config_path
+        return True
 
     except OSError:
         print("Unable to create default configuration file", config_path)
-        return None
+        return False
 
 
 async def async_opp_config_yaml(opp: OpenPeerPower) -> Dict:
@@ -260,33 +299,14 @@ async def async_opp_config_yaml(opp: OpenPeerPower) -> Dict:
 
     This function allow a component inside the asyncio loop to reload its
     configuration by itself. Include package merge.
-
-    This method is a coroutine.
     """
-
-    def _load_opp_yaml_config() -> Dict:
-        path = find_config_file(opp.config.config_dir)
-        if path is None:
-            raise OpenPeerPowerError(
-                f"Config file not found in: {opp.config.config_dir}"
-            )
-        config = load_yaml_config_file(path)
-        return config
-
     # Not using async_add_executor_job because this is an internal method.
-    config = await opp.loop.run_in_executor(None, _load_opp_yaml_config)
+    config = await opp.loop.run_in_executor(
+        None, load_yaml_config_file, opp.config.path(YAML_CONFIG_FILE)
+    )
     core_config = config.get(CONF_CORE, {})
     await merge_packages_config(opp, config, core_config.get(CONF_PACKAGES, {}))
     return config
-
-
-def find_config_file(config_dir: Optional[str]) -> Optional[str]:
-    """Look in given directory for supported configuration files."""
-    if config_dir is None:
-        return None
-    config_path = os.path.join(config_dir, YAML_CONFIG_FILE)
-
-    return config_path if os.path.isfile(config_path) else None
 
 
 def load_yaml_config_file(config_path: str) -> Dict[Any, Any]:
@@ -342,8 +362,7 @@ def process_op_config_upgrade(opp: OpenPeerPower) -> None:
 
     if version_obj < LooseVersion("0.92"):
         # 0.92 moved google/tts.py to google_translate/tts.py
-        config_path = find_config_file(opp.config.config_dir)
-        assert config_path is not None
+        config_path = opp.config.path(YAML_CONFIG_FILE)
 
         with open(config_path, "rt", encoding="utf-8") as config_file:
             config_raw = config_file.read()
@@ -357,6 +376,13 @@ def process_op_config_upgrade(opp: OpenPeerPower) -> None:
             except OSError:
                 _LOGGER.exception("Migrating to google_translate tts failed")
                 pass
+
+    if version_obj < LooseVersion("0.94") and is_docker_env():
+        # In 0.94 we no longer install packages inside the deps folder when
+        # running inside a Docker container.
+        lib_path = opp.config.path("deps")
+        if os.path.isdir(lib_path):
+            shutil.rmtree(lib_path)
 
     with open(version_path, "wt") as outp:
         outp.write(__version__)
@@ -433,8 +459,13 @@ async def async_process_op_core_config(opp: OpenPeerPower, config: Dict) -> None
         if auth_conf is None:
             auth_conf = [{"type": "openpeerpower"}]
 
+        mfa_conf = config.get(
+            CONF_AUTH_MFA_MODULES,
+            [{"type": "totp", "id": "totp", "name": "Authenticator app"}],
+        )
+
         setattr(
-            opp, "auth", await auth.auth_manager_from_config(opp, auth_conf)
+            opp, "auth", await auth.auth_manager_from_config(opp, auth_conf, mfa_conf)
         )
 
     await opp.config.async_load()
@@ -520,9 +551,7 @@ async def async_process_op_core_config(opp: OpenPeerPower, config: Dict) -> None
 
 def _log_pkg_error(package: str, component: str, config: Dict, message: str) -> None:
     """Log an error while merging packages."""
-    message = "Package {} setup failed. Integration {} {}".format(
-        package, component, message
-    )
+    message = f"Package {package} setup failed. Integration {component} {message}"
 
     pack_config = config[CONF_CORE][CONF_PACKAGES].get(package, config)
     message += " (See {}:{}). ".format(
@@ -668,13 +697,19 @@ async def async_process_component_config(
         except (vol.Invalid, OpenPeerPowerError) as ex:
             async_log_exception(ex, domain, config, opp, integration.documentation)
             return None
+        except Exception:  # pylint: disable=broad-except
+            _LOGGER.exception("Unknown error calling %s config validator", domain)
+            return None
 
     # No custom config validator, proceed with schema validation
     if hasattr(component, "CONFIG_SCHEMA"):
         try:
             return component.CONFIG_SCHEMA(config)  # type: ignore
         except vol.Invalid as ex:
-            async_log_exception(ex, domain, config, opp)
+            async_log_exception(ex, domain, config, opp, integration.documentation)
+            return None
+        except Exception:  # pylint: disable=broad-except
+            _LOGGER.exception("Unknown error calling %s CONFIG_SCHEMA", domain)
             return None
 
     component_platform_schema = getattr(
@@ -690,7 +725,14 @@ async def async_process_component_config(
         try:
             p_validated = component_platform_schema(p_config)
         except vol.Invalid as ex:
-            async_log_exception(ex, domain, p_config, opp)
+            async_log_exception(ex, domain, p_config, opp, integration.documentation)
+            continue
+        except Exception:  # pylint: disable=broad-except
+            _LOGGER.exception(
+                "Unknown error validating %s platform config with %s component platform schema",
+                p_name,
+                domain,
+            )
             continue
 
         # Not all platform components follow same pattern for platforms
@@ -725,6 +767,13 @@ async def async_process_component_config(
                     p_config,
                     opp,
                     p_integration.documentation,
+                )
+                continue
+            except Exception:  # pylint: disable=broad-except
+                _LOGGER.exception(
+                    "Unknown error validating config for %s platform for %s component with PLATFORM_SCHEMA",
+                    p_name,
+                    domain,
                 )
                 continue
 

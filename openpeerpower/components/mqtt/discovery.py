@@ -26,6 +26,7 @@ SUPPORTED_COMPONENTS = [
     "camera",
     "climate",
     "cover",
+    "device_automation",
     "fan",
     "light",
     "lock",
@@ -40,6 +41,7 @@ CONFIG_ENTRY_COMPONENTS = [
     "camera",
     "climate",
     "cover",
+    "device_automation",
     "fan",
     "light",
     "lock",
@@ -197,9 +199,15 @@ async def async_start(
             config_entries_key = "{}.{}".format(component, "mqtt")
             async with opp.data[DATA_CONFIG_ENTRY_LOCK]:
                 if config_entries_key not in opp.data[CONFIG_ENTRY_IS_SETUP]:
-                    await opp.config_entries.async_forward_entry_setup(
-                        config_entry, component
-                    )
+                    if component == "device_automation":
+                        # Local import to avoid circular dependencies
+                        from . import device_automation
+
+                        await device_automation.async_setup_entry(opp, config_entry)
+                    else:
+                        await opp.config_entries.async_forward_entry_setup(
+                            config_entry, component
+                        )
                     opp.data[CONFIG_ENTRY_IS_SETUP].add(config_entries_key)
 
             async_dispatcher_send(

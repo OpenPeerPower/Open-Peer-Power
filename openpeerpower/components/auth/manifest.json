@@ -5,5 +5,6 @@
   "requirements": [],
   "dependencies": ["http"],
   "after_dependencies": ["onboarding"],
-  "codeowners": ["@open-peer-power/core"]
+  "codeowners": ["@open-peer-power/core"],
+  "quality_scale": "internal"
 }

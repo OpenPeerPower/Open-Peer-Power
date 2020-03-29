@@ -8,15 +8,13 @@ import uuid
 
 import aiohttp
 import async_timeout
-from distro import linux_distribution  # pylint: disable=import-error
 import voluptuous as vol
+from distro import linux_distribution  # pylint: disable=import-error
 
 from openpeerpower.const import __version__ as current_version
-from openpeerpower.helpers import discovery, event
+from openpeerpower.helpers import discovery, update_coordinator
 from openpeerpower.helpers.aiohttp_client import async_get_clientsession
 import openpeerpower.helpers.config_validation as cv
-from openpeerpower.helpers.dispatcher import async_dispatcher_send
-import openpeerpower.util.dt as dt_util
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -28,9 +26,8 @@ CONF_COMPONENT_REPORTING = "include_used_components"
 
 DOMAIN = "updater"
 
-DISPATCHER_REMOTE_UPDATE = "updater_remote_update"
-
-UPDATER_URL = "https://updater.open-peer-power.io/"
+#UPDATER_URL = "https://updater.open-peer-power.io/"
+UPDATER_URL = "https://updater.home-assistant.io/"
 UPDATER_UUID_FILE = ".uuid"
 
 CONFIG_SCHEMA = vol.Schema(
@@ -84,52 +81,60 @@ async def async_setup(opp, config):
         # This component only makes sense in release versions
         _LOGGER.info("Running on 'dev', only analytics will be submitted")
 
-    opp.async_create_task(
-        discovery.async_load_platform(opp, "binary_sensor", DOMAIN, {}, config)
-    )
-
-    config = config.get(DOMAIN, {})
-    if config.get(CONF_REPORTING):
+    conf = config.get(DOMAIN, {})
+    if conf.get(CONF_REPORTING):
         huuid = await opp.async_add_job(_load_uuid, opp)
     else:
         huuid = None
 
-    include_components = config.get(CONF_COMPONENT_REPORTING)
+    include_components = conf.get(CONF_COMPONENT_REPORTING)
 
-    async def check_new_version(now):
+    async def check_new_version():
         """Check if a new version is available and report if one is."""
-        result = await get_newest_version(opp, huuid, include_components)
+        newest, release_notes = await get_newest_version(
+            opp, huuid, include_components
+        )
 
-        if result is None:
-            return
-
-        newest, release_notes = result
+        _LOGGER.debug("Fetched version %s: %s", newest, release_notes)
 
         # Skip on dev
-        if newest is None or "dev" in current_version:
-            return
+        if "dev" in current_version:
+            return Updater(False, "", "")
 
-        # Load data from supervisor on opp.io
+        # Load data from supervisor on Opp.io
         if opp.components.oppio.is_oppio():
             newest = opp.components.oppio.get_openpeerpower_version()
 
         # Validate version
         update_available = False
         if StrictVersion(newest) > StrictVersion(current_version):
-            _LOGGER.info("The latest available version of Open Peer Power is %s", newest)
+            _LOGGER.debug(
+                "The latest available version of Open Peer Power is %s", newest
+            )
             update_available = True
         elif StrictVersion(newest) == StrictVersion(current_version):
-            _LOGGER.info("You are on the latest version (%s) of Open Peer Power", newest)
+            _LOGGER.debug(
+                "You are on the latest version (%s) of Open Peer Power", newest
+            )
         elif StrictVersion(newest) < StrictVersion(current_version):
             _LOGGER.debug("Local version is newer than the latest version (%s)", newest)
 
-        updater = Updater(update_available, newest, release_notes)
-        async_dispatcher_send(opp, DISPATCHER_REMOTE_UPDATE, updater)
+        _LOGGER.debug("Update available: %s", update_available)
 
-    # Update daily, start 1 hour after startup
-    _dt = dt_util.utcnow() + timedelta(hours=1)
-    event.async_track_utc_time_change(
-        opp, check_new_version, hour=_dt.hour, minute=_dt.minute, second=_dt.second
+        return Updater(update_available, newest, release_notes)
+
+    coordinator = opp.data[DOMAIN] = update_coordinator.DataUpdateCoordinator(
+        opp,
+        _LOGGER,
+        name="Open Peer Power update",
+        update_method=check_new_version,
+        update_interval=timedelta(days=1),
+    )
+
+    await coordinator.async_refresh()
+
+    opp.async_create_task(
+        discovery.async_load_platform(opp, "binary_sensor", DOMAIN, {}, config)
     )
 
     return True
@@ -164,17 +169,17 @@ async def get_newest_version(opp, huuid, include_components):
         )
     except (asyncio.TimeoutError, aiohttp.ClientError):
         _LOGGER.error("Could not contact Open Peer Power Update to check for updates")
-        return None
+        raise update_coordinator.UpdateFailed
 
     try:
         res = await req.json()
     except ValueError:
         _LOGGER.error("Received invalid JSON from Open Peer Power Update")
-        return None
+        raise update_coordinator.UpdateFailed
 
     try:
         res = RESPONSE_SCHEMA(res)
         return res["version"], res["release-notes"]
     except vol.Invalid:
         _LOGGER.error("Got unexpected response: %s", res)
-        return None
+        raise update_coordinator.UpdateFailed

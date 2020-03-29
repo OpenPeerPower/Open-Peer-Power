@@ -1,6 +1,7 @@
 """Support for scripts."""
 import asyncio
 import logging
+from typing import List
 
 import voluptuous as vol
 
@@ -8,6 +9,7 @@ from openpeerpower.const import (
     ATTR_ENTITY_ID,
     ATTR_NAME,
     CONF_ALIAS,
+    CONF_ICON,
     EVENT_SCRIPT_STARTED,
     SERVICE_RELOAD,
     SERVICE_TOGGLE,
@@ -15,6 +17,7 @@ from openpeerpower.const import (
     SERVICE_TURN_ON,
     STATE_ON,
 )
+from openpeerpower.core import OpenPeerPower, callback
 import openpeerpower.helpers.config_validation as cv
 from openpeerpower.helpers.config_validation import make_entity_service_schema
 from openpeerpower.helpers.entity import ToggleEntity
@@ -38,11 +41,10 @@ CONF_SEQUENCE = "sequence"
 
 ENTITY_ID_FORMAT = DOMAIN + ".{}"
 
-GROUP_NAME_ALL_SCRIPTS = "all scripts"
-
 SCRIPT_ENTRY_SCHEMA = vol.Schema(
     {
-        CONF_ALIAS: cv.string,
+        vol.Optional(CONF_ALIAS): cv.string,
+        vol.Optional(CONF_ICON): cv.icon,
         vol.Required(CONF_SEQUENCE): cv.SCRIPT_SCHEMA,
         vol.Optional(CONF_DESCRIPTION, default=""): cv.string,
         vol.Optional(CONF_FIELDS, default={}): {
@@ -71,11 +73,75 @@ def is_on(opp, entity_id):
     return opp.states.is_state(entity_id, STATE_ON)
 
 
+@callback
+def scripts_with_entity(opp: OpenPeerPower, entity_id: str) -> List[str]:
+    """Return all scripts that reference the entity."""
+    if DOMAIN not in opp.data:
+        return []
+
+    component = opp.data[DOMAIN]
+
+    results = []
+
+    for script_entity in component.entities:
+        if entity_id in script_entity.script.referenced_entities:
+            results.append(script_entity.entity_id)
+
+    return results
+
+
+@callback
+def entities_in_script(opp: OpenPeerPower, entity_id: str) -> List[str]:
+    """Return all entities in a scene."""
+    if DOMAIN not in opp.data:
+        return []
+
+    component = opp.data[DOMAIN]
+
+    script_entity = component.get_entity(entity_id)
+
+    if script_entity is None:
+        return []
+
+    return list(script_entity.script.referenced_entities)
+
+
+@callback
+def scripts_with_device(opp: OpenPeerPower, device_id: str) -> List[str]:
+    """Return all scripts that reference the device."""
+    if DOMAIN not in opp.data:
+        return []
+
+    component = opp.data[DOMAIN]
+
+    results = []
+
+    for script_entity in component.entities:
+        if device_id in script_entity.script.referenced_devices:
+            results.append(script_entity.entity_id)
+
+    return results
+
+
+@callback
+def devices_in_script(opp: OpenPeerPower, entity_id: str) -> List[str]:
+    """Return all devices in a scene."""
+    if DOMAIN not in opp.data:
+        return []
+
+    component = opp.data[DOMAIN]
+
+    script_entity = component.get_entity(entity_id)
+
+    if script_entity is None:
+        return []
+
+    return list(script_entity.script.referenced_devices)
+
+
 async def async_setup(opp, config):
     """Load the scripts from the configuration."""
-    component = EntityComponent(
-        _LOGGER, DOMAIN, opp, group_name=GROUP_NAME_ALL_SCRIPTS
-    )
+    opp.data[DOMAIN] = component = EntityComponent(_LOGGER, DOMAIN, opp)
 
     await _async_process_config(opp, config, component)
 
@@ -143,9 +209,15 @@ async def _async_process_config(opp, config, component):
     scripts = []
 
     for object_id, cfg in config.get(DOMAIN, {}).items():
-        alias = cfg.get(CONF_ALIAS, object_id)
-        script = ScriptEntity(opp, object_id, alias, cfg[CONF_SEQUENCE])
-        scripts.append(script)
+        scripts.append(
+            ScriptEntity(
+                opp,
+                object_id,
+                cfg.get(CONF_ALIAS, object_id),
+                cfg.get(CONF_ICON),
+                cfg[CONF_SEQUENCE],
+            )
+        )
         opp.services.async_register(
             DOMAIN, object_id, service_handler, schema=SCRIPT_SERVICE_SCHEMA
         )
@@ -163,9 +235,12 @@ async def _async_process_config(opp, config, component):
 class ScriptEntity(ToggleEntity):
     """Representation of a script entity."""
 
-    def __init__(self, opp, object_id, name, sequence):
+    icon = None
+
+    def __init__(self, opp, object_id, name, icon, sequence):
         """Initialize the script."""
         self.object_id = object_id
+        self.icon = icon
         self.entity_id = ENTITY_ID_FORMAT.format(object_id)
         self.script = Script(opp, sequence, name, self.async_update_op_state)
 
@@ -217,7 +292,7 @@ class ScriptEntity(ToggleEntity):
         self.script.async_stop()
 
     async def async_will_remove_from_opp(self):
-        """Stop script and remove service when it will be removed from OPP."""
+        """Stop script and remove service when it will be removed from Open Peer Power."""
         if self.script.is_running:
             self.script.async_stop()
 

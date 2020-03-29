@@ -3,8 +3,7 @@
   "name": "Light",
   "documentation": "https://www.open-peer-power.io/integrations/light",
   "requirements": [],
-  "dependencies": [
-    "group"
-  ],
-  "codeowners": []
+  "dependencies": ["group"],
+  "codeowners": [],
+  "quality_scale": "internal"
 }

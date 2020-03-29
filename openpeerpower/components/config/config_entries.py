@@ -8,6 +8,7 @@ from openpeerpower.auth.permissions.const import CAT_CONFIG_ENTRIES
 from openpeerpower.components import websocket_api
 from openpeerpower.components.http import OpenPeerPowerView
 from openpeerpower.exceptions import Unauthorized
+import openpeerpower.helpers.config_validation as cv
 from openpeerpower.helpers.data_entry_flow import (
     FlowManagerIndexView,
     FlowManagerResourceView,
@@ -23,12 +24,8 @@ async def async_setup(opp):
     opp.http.register_view(ConfigManagerFlowResourceView(opp.config_entries.flow))
     opp.http.register_view(ConfigManagerAvailableFlowView)
 
-    opp.http.register_view(
-        OptionManagerFlowIndexView(opp.config_entries.options.flow)
-    )
-    opp.http.register_view(
-        OptionManagerFlowResourceView(opp.config_entries.options.flow)
-    )
+    opp.http.register_view(OptionManagerFlowIndexView(opp.config_entries.options))
+    opp.http.register_view(OptionManagerFlowResourceView(opp.config_entries.options))
 
     opp.components.websocket_api.async_register_command(config_entries_progress)
     opp.components.websocket_api.async_register_command(system_options_list)
@@ -49,7 +46,9 @@ def _prepare_json(result):
     if schema is None:
         data["data_schema"] = []
     else:
-        data["data_schema"] = voluptuous_serialize.convert(schema)
+        data["data_schema"] = voluptuous_serialize.convert(
+            schema, custom_serializer=cv.custom_serializer
+        )
 
     return data
 

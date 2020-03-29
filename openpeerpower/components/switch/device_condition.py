@@ -5,7 +5,7 @@ import voluptuous as vol
 
 from openpeerpower.components.device_automation import toggle_entity
 from openpeerpower.const import CONF_DOMAIN
-from openpeerpower.core import OpenPeerPower
+from openpeerpower.core import OpenPeerPower, callback
 from openpeerpower.helpers.condition import ConditionCheckerType
 from openpeerpower.helpers.typing import ConfigType
 
@@ -16,6 +16,7 @@ CONDITION_SCHEMA = toggle_entity.CONDITION_SCHEMA.extend(
 )
 
 
+@callback
 def async_condition_from_config(
     config: ConfigType, config_validation: bool
 ) -> ConditionCheckerType:
