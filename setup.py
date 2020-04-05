@@ -9,7 +9,7 @@ PROJECT_NAME = 'Open Peer Power'
 PROJECT_PACKAGE_NAME = 'openpeerpower'
 PROJECT_LICENSE = 'Apache License 2.0'
 PROJECT_AUTHOR = 'Paul Caston'
-PROJECT_COPYRIGHT = ' 2018-{}, {}'.format(dt.now().year, PROJECT_AUTHOR)
+PROJECT_COPYRIGHT = ' 2020-{}, {}'.format(dt.now().year, PROJECT_AUTHOR)
 PROJECT_URL = 'https://OpenPeerPower.io/'
 PROJECT_EMAIL = 'paul@caston.id.au'
 

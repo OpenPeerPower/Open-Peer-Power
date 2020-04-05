@@ -121,7 +121,7 @@ IGNORE_VIOLATIONS = {
     # This should become a helper method that integrations can submit data to
     ("websocket_api", "devcon"),
     ("websocket_api", "shopping_list"),
-    # Expose HA to external systems
+    # Expose OP to external systems
     "homekit",
     "alexa",
     "google_assistant",

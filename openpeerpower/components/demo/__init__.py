@@ -23,6 +23,7 @@ COMPONENTS_WITH_CONFIG_ENTRY_DEMO_PLATFORM = [
     "media_player",
     "sensor",
     "switch",
+    "vacuum",
     "water_heater",
 ]
 
@@ -55,7 +56,7 @@ async def async_setup(opp, config):
             opp.helpers.discovery.async_load_platform(component, DOMAIN, {}, config)
         )
 
-    config.setdefault(ha.DOMAIN, {})
+    config.setdefault(op.DOMAIN, {})
     config.setdefault(DOMAIN, {})
 
     # Set up sun
@@ -119,19 +120,6 @@ async def async_setup(opp, config):
                         "name": "Allowed Noise",
                         "unit_of_measurement": "dB",
                     }
-                }
-            },
-        )
-    )
-
-    # Set up weblink
-    tasks.append(
-        bootstrap.async_setup_component(
-            opp,
-            "weblink",
-            {
-                "weblink": {
-                    "entities": [{"name": "Router", "url": "http://192.168.1.1"}]
                 }
             },
         )
@@ -208,22 +196,6 @@ async def finish_setup(opp, config):
             await asyncio.sleep(0)
         switches = sorted(opp.states.async_entity_ids("switch"))
         lights = sorted(opp.states.async_entity_ids("light"))
-
-    # Set up history graph
-    await bootstrap.async_setup_component(
-        opp,
-        "history_graph",
-        {
-            "history_graph": {
-                "switches": {
-                    "name": "Recent Switches",
-                    "entities": switches,
-                    "hours_to_show": 1,
-                    "refresh": 60,
-                }
-            }
-        },
-    )
 
     # Set up scripts
     await bootstrap.async_setup_component(

@@ -319,9 +319,6 @@ blinkstick==1.1.8
 # openpeerpower.components.blinkt
 # blinkt==0.1.0
 
-# openpeerpower.components.bitcoin
-blockchain==1.4.4
-
 # openpeerpower.components.decora
 # openpeerpower.components.miflora
 # bluepy==1.3.0
@@ -433,9 +430,6 @@ directpy==0.6
 
 # openpeerpower.components.discogs
 discogs_client==2.2.2
-
-# openpeerpower.components.discord
-discord.py==1.3.1
 
 # openpeerpower.components.updater
 distro==1.4.0
@@ -815,9 +809,6 @@ locationsharinglib==4.1.0
 # openpeerpower.components.logi_circle
 logi_circle==0.2.2
 
-# openpeerpower.components.london_underground
-london-tube-status==0.2
-
 # openpeerpower.components.luftdaten
 luftdaten==0.6.3
 
@@ -911,9 +902,6 @@ niluclient==0.1.2
 
 # openpeerpower.components.nederlandse_spoorwegen
 nsapi==3.0.3
-
-# openpeerpower.components.nsw_fuel_station
-nsw-fuel-api-client==1.0.10
 
 # openpeerpower.components.nuheat
 nuheat==0.3.0
@@ -1099,7 +1087,6 @@ pyCEC==0.4.13
 pyHS100==0.3.5
 
 # openpeerpower.components.met
-# openpeerpower.components.norway_air
 pyMetno==0.4.6
 
 # openpeerpower.components.rfxtrx
@@ -1286,9 +1273,6 @@ pyheos==0.6.0
 # openpeerpower.components.hikvision
 pyhik==0.2.5
 
-# openpeerpower.components.hive
-pyhiveapi==0.2.19.3
-
 # openpeerpower.components.homematic
 pyhomematic==0.1.64
 
@@ -1309,9 +1293,6 @@ pyipma==2.0.3
 
 # openpeerpower.components.iqvia
 pyiqvia==0.2.1
-
-# openpeerpower.components.irish_rail_transport
-pyirishrail==0.0.2
 
 # openpeerpower.components.iss
 pyiss==1.0.1
