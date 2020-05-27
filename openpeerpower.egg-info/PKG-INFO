@@ -1,22 +1,45 @@
 Metadata-Version: 1.2
 Name: openpeerpower
-Version: 0.106.0
-Summary: Open-source home automation platform running on Python 3.
+Version: 0.2.0
+Summary: Open-source power management platform running on Python 3.
 Home-page: https://OpenPeerPower.io/
 Author: Paul Caston
 Author-email: paul@caston.id.au
 License: Apache License 2.0
-Download-URL: https://github.com/open-peer-power/open-peer-power/archive/0.106.0.zip
-Project-URL: Bug Reports, https://github.com/open-peer-power/open-peer-power/issues
-Project-URL: Forum, https://community.open-peer-power.io/
-Description: UNKNOWN
-Keywords: home,automation
+Download-URL: https://github.com/OpenPeerPower/Open-Peer-Power/archive/0.2.0.zip
+Project-URL: Bug Reports, https://github.com/OpenPeerPower/Open-Peer-Power/issues
+Description: Open Peer Power
+        =================================================================================
+        
+        Open source nano-grid power management automation utility that emphasises local control, privacy and security.
+        
+        See `openpeerpower.io <https://openpeerpower.io>`__ for `a
+        demo <https://openpeerpower.io/demo/>`__, `installation instructions <https://openpeerpower.io/getting-started/>`__,
+        `tutorials <https://openpeerpower.io/getting-started/automation-2/>`__ and `documentation <https://openpeerpower.io/docs/>`__.
+        
+        |screenshot-states|
+        
+        Featured integrations
+        ---------------------
+        
+        |screenshot-components|
+        
+        The system has a modular architecture that allows expansion of control to new smart devices. See also the `section on architecture <https://developers.openpeerpower.io/docs/en/architecture_index.html>`__ and the `section on creating your own
+        components <https://developers.openpeerpower.io/docsen/creating_component_index.html>`__.
+        
+        For help during development see `Open Peer Power help section <https://openpeerpower.io/help/>`__ of our website for further help and information.
+        
+        .. |screenshot-states| image:: https://raw.github.com/open-peer-power/master/docs/screenshots.png
+           :target: https://openpeerpower.io/demo/
+        .. |screenshot-components| image:: https://raw.github.com/open-peer-power/develop/docs/screenshot-components.png
+           :target: https://openpeerpower.io/integrations/
+        
+Keywords: power,management
 Platform: any
-Classifier: Development Status :: 4 - Beta
+Classifier: Development Status :: 3 - Alpha
 Classifier: Intended Audience :: End Users/Desktop
 Classifier: Intended Audience :: Developers
 Classifier: License :: OSI Approved :: Apache Software License
 Classifier: Operating System :: OS Independent
 Classifier: Programming Language :: Python :: 3.7
-Classifier: Topic :: Home Automation
 Requires-Python: >=3.7.0

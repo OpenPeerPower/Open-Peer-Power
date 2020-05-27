@@ -2,8 +2,13 @@
 
 bandit==1.6.2
 black==19.10b0
+check-executables-have-shebangs==v2.4.0
 codespell==v1.16.0
 flake8-docstrings==1.5.0
-flake8==3.7.9
+flake8==3.8.1
 isort==v4.3.21
+no-commit-to-branch==v2.4.0
+prettier==2.0.4
 pydocstyle==5.0.2
+pyupgrade==v2.3.0
+yamllint==v1.23.0

@@ -13,17 +13,15 @@ PROJECT_COPYRIGHT = ' 2020-{}, {}'.format(dt.now().year, PROJECT_AUTHOR)
 PROJECT_URL = 'https://OpenPeerPower.io/'
 PROJECT_EMAIL = 'paul@caston.id.au'
 
-PROJECT_GITHUB_USERNAME = "open-peer-power"
-PROJECT_GITHUB_REPOSITORY = "open-peer-power"
+PROJECT_GITHUB_USERNAME = "OpenPeerPower"
+PROJECT_GITHUB_REPOSITORY = "Open-Peer-Power"
 
 PYPI_URL = "https://pypi.python.org/pypi/{}".format(PROJECT_PACKAGE_NAME)
 GITHUB_PATH = "{}/{}".format(PROJECT_GITHUB_USERNAME, PROJECT_GITHUB_REPOSITORY)
 GITHUB_URL = "https://github.com/{}".format(GITHUB_PATH)
 
-DOWNLOAD_URL = "{}/archive/{}.zip".format(GITHUB_URL, opp_const.__version__)
 PROJECT_URLS = {
-    "Bug Reports": "{}/issues".format(GITHUB_URL),
-    "Forum": "https://community.open-peer-power.io/",
+    "Bug Reports": "{}/issues".format(GITHUB_URL)
 }
 
 PACKAGES = find_packages(exclude=["tests", "tests.*"])
@@ -56,7 +54,6 @@ setup(
     name=PROJECT_PACKAGE_NAME,
     version=opp_const.__version__,
     url=PROJECT_URL,
-    download_url=DOWNLOAD_URL,
     project_urls=PROJECT_URLS,
     author=PROJECT_AUTHOR,
     author_email=PROJECT_EMAIL,

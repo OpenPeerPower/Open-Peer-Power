@@ -15,14 +15,9 @@ from openpeerpower.util.yaml.loader import load_yaml
 COMMENT_REQUIREMENTS = (
     "Adafruit_BBIO",
     "Adafruit-DHT",
-    "avion",
     "beacontools",
-    "blinkt",
     "bluepy",
-    "bme680",
     "credstash",
-    "decora",
-    "envirophat",
     "evdev",
     "face_recognition",
     "i2csense",
@@ -36,11 +31,7 @@ COMMENT_REQUIREMENTS = (
     "python-gammu",
     "python-lirc",
     "pyuserinput",
-    "raspihats",
-    "rpi-rf",
-    "RPi.GPIO",
     "smbus-cffi",
-    "tensorflow",
     "VL53L1X2",
 )
 
