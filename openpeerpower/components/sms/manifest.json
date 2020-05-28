@@ -1,0 +1,8 @@
+{
+  "domain": "sms",
+  "name": "SMS notifications via GSM-modem",
+  "documentation": "https://www.open-peer-power.io/integrations/sms",
+  "requirements": ["python-gammu==2.12"],
+  "dependencies": [],
+  "codeowners": ["@ocalvo"]
+}

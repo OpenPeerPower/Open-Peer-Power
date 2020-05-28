@@ -1,0 +1,9 @@
+{
+  "domain": "input_select",
+  "name": "Input Select",
+  "documentation": "https://www.open-peer-power.io/integrations/input_select",
+  "requirements": [],
+  "dependencies": [],
+  "codeowners": ["@open-peer-power/core"],
+  "quality_scale": "internal"
+}

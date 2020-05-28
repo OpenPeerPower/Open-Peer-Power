@@ -1,0 +1,10 @@
+{
+  "domain": "zone",
+  "name": "Zone",
+  "config_flow": false,
+  "documentation": "https://www.open-peer-power.io/integrations/zone",
+  "requirements": [],
+  "dependencies": [],
+  "codeowners": ["@open-peer-power/core"],
+  "quality_scale": "internal"
+}

@@ -1,0 +1,55 @@
+[run]
+source = openpeerpower
+
+omit =
+    openpeerpower/__main__.py
+    openpeerpower/helpers/signal.py
+    openpeerpower/helpers/typing.py
+    openpeerpower/scripts/*.py
+
+    # omit pieces of code that rely on external devices being present
+    openpeerpower/components/automatic/device_tracker.py
+    openpeerpower/components/bmw_connected_drive/*
+    openpeerpower/components/bom/sensor.py
+    openpeerpower/components/bom/weather.py
+    openpeerpower/components/browser/*
+    openpeerpower/components/daikin/*
+    openpeerpower/components/fronius/sensor.py
+    openpeerpower/components/google_maps/device_tracker.py
+    openpeerpower/components/heatmiser/climate.py
+    openpeerpower/components/map/*
+    openpeerpower/components/met/weather.py
+    openpeerpower/components/metoffice/sensor.py
+    openpeerpower/components/metoffice/weather.py
+    openpeerpower/components/modbus/*
+    openpeerpower/components/mqtt_room/sensor.py
+    openpeerpower/components/otp/sensor.py
+    openpeerpower/components/sms/*
+    openpeerpower/components/smtp/notify.py
+    openpeerpower/components/time_date/sensor.py
+    openpeerpower/components/zha/__init__.py
+    openpeerpower/components/zha/api.py
+    openpeerpower/components/zha/core/const.py
+    openpeerpower/components/zha/core/device.py
+    openpeerpower/components/zha/core/gateway.py
+    openpeerpower/components/zha/core/helpers.py
+    openpeerpower/components/zha/core/patches.py
+    openpeerpower/components/zha/core/registries.py
+    openpeerpower/components/zha/entity.py
+    openpeerpower/components/zha/light.py
+    openpeerpower/components/zha/sensor.py
+    openpeerpower/components/zigbee/*
+    openpeerpower/components/zwave/util.py
+
+[report]
+# Regexes for lines to exclude from consideration
+exclude_lines =
+    # Have to re-enable the standard pragma
+    pragma: no cover
+
+    # Don't complain about missing debug-only code:
+    def __repr__
+
+    # Don't complain if tests don't hit defensive assertion code:
+    raise AssertionError
+    raise NotImplementedError

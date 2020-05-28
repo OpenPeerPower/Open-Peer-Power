@@ -1,0 +1,9 @@
+{
+  "domain": "zwave",
+  "name": "Z-Wave",
+  "config_flow": true,
+  "documentation": "https://www.open-peer-power.io/integrations/zwave",
+  "requirements": ["openpeerpower-pyozw==0.1.8", "pydispatcher==2.0.5"],
+  "dependencies": [],
+  "codeowners": ["@open-peer-power/z-wave"]
+}

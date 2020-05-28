@@ -1,0 +1,22 @@
+{
+  "domain": "frontend",
+  "name": "Open Peer Power Frontend",
+  "documentation": "https://www.open-peer-power.io/integrations/frontend",
+  "requirements": [
+    "open-peer-power-frontend==20200220.4"
+  ],
+  "dependencies": [
+    "api",
+    "auth",
+    "http",
+    "devcon",
+    "onboarding",
+    "search",
+    "system_log",
+    "websocket_api"
+  ],
+  "codeowners": [
+    "@open-peer-power/frontend"
+  ],
+  "quality_scale": "internal"
+}

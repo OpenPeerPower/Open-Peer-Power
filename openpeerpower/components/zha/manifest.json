@@ -1,0 +1,17 @@
+{
+  "domain": "zha",
+  "name": "Zigbee Home Automation",
+  "config_flow": true,
+  "documentation": "https://www.open-peer-power.io/integrations/zha",
+  "requirements": [
+    "bellows-openpeerpower==0.13.2",
+    "zha-quirks==0.0.33",
+    "zigpy-cc==0.1.0",
+    "zigpy-deconz==0.7.0",
+    "zigpy-openpeerpower==0.13.2",
+    "zigpy-xbee-openpeerpower==0.9.0",
+    "zigpy-zigate==0.5.1"
+  ],
+  "dependencies": [],
+  "codeowners": ["@dmulcahey", "@adminiuga"]
+}

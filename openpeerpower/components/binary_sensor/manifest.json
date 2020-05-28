@@ -1,0 +1,9 @@
+{
+  "domain": "binary_sensor",
+  "name": "Binary Sensor",
+  "documentation": "https://www.open-peer-power.io/integrations/binary_sensor",
+  "requirements": [],
+  "dependencies": [],
+  "codeowners": [],
+  "quality_scale": "internal"
+}

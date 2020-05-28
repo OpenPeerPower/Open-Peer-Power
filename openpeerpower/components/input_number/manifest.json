@@ -1,0 +1,9 @@
+{
+  "domain": "input_number",
+  "name": "Input Number",
+  "documentation": "https://www.open-peer-power.io/integrations/input_number",
+  "requirements": [],
+  "dependencies": [],
+  "codeowners": ["@open-peer-power/core"],
+  "quality_scale": "internal"
+}

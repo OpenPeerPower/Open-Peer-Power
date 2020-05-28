@@ -1,0 +1,9 @@
+{
+  "domain": "automation",
+  "name": "Automation",
+  "documentation": "https://www.open-peer-power.io/integrations/automation",
+  "requirements": [],
+  "dependencies": ["device_automation", "group", "webhook"],
+  "codeowners": ["@open-peer-power/core"],
+  "quality_scale": "internal"
+}

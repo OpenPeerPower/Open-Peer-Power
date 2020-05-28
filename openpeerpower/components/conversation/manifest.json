@@ -1,0 +1,9 @@
+{
+  "domain": "conversation",
+  "name": "Conversation",
+  "documentation": "https://www.open-peer-power.io/integrations/conversation",
+  "requirements": [],
+  "dependencies": ["http"],
+  "codeowners": ["@open-peer-power/core"],
+  "quality_scale": "internal"
+}

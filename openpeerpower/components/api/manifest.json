@@ -1,0 +1,9 @@
+{
+  "domain": "api",
+  "name": "Open Peer Power API",
+  "documentation": "https://www.open-peer-power.io/integrations/api",
+  "requirements": [],
+  "dependencies": ["http"],
+  "codeowners": ["@open-peer-power/core"],
+  "quality_scale": "internal"
+}

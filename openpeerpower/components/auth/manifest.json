@@ -1,0 +1,10 @@
+{
+  "domain": "auth",
+  "name": "Auth",
+  "documentation": "https://www.open-peer-power.io/integrations/auth",
+  "requirements": [],
+  "dependencies": ["http"],
+  "after_dependencies": ["onboarding"],
+  "codeowners": ["@open-peer-power/core"],
+  "quality_scale": "internal"
+}
