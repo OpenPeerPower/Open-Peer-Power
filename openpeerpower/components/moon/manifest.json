@@ -1,0 +1,9 @@
+{
+  "domain": "moon",
+  "name": "Moon",
+  "documentation": "https://www.open-peer-power.io/integrations/moon",
+  "requirements": [],
+  "dependencies": [],
+  "codeowners": ["@fabaff"],
+  "quality_scale": "internal"
+}

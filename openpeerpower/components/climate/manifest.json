@@ -1,0 +1,9 @@
+{
+  "domain": "climate",
+  "name": "Climate",
+  "documentation": "https://www.open-peer-power.io/integrations/climate",
+  "requirements": [],
+  "dependencies": [],
+  "codeowners": [],
+  "quality_scale": "internal"
+}

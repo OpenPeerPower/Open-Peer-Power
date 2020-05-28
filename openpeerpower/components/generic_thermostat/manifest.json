@@ -1,0 +1,8 @@
+{
+  "domain": "generic_thermostat",
+  "name": "Generic Thermostat",
+  "documentation": "https://www.open-peer-power.io/integrations/generic_thermostat",
+  "requirements": [],
+  "dependencies": ["sensor", "switch"],
+  "codeowners": []
+}

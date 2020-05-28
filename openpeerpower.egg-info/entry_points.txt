@@ -1,0 +1,3 @@
+[console_scripts]
+opp = openpeerpower.__main__:main
+

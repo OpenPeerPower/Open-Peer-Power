@@ -1,0 +1,9 @@
+{
+  "domain": "sun",
+  "name": "Sun",
+  "documentation": "https://www.open-peer-power.io/integrations/sun",
+  "requirements": [],
+  "dependencies": [],
+  "codeowners": ["@Swamp-Ig"],
+  "quality_scale": "internal"
+}

@@ -1,0 +1,8 @@
+{
+  "domain": "alexa",
+  "name": "Amazon Alexa",
+  "documentation": "https://www.open-peer-power.io/integrations/alexa",
+  "requirements": [],
+  "dependencies": ["http"],
+  "codeowners": ["@open-peer-power/cloud", "@ochlocracy"]
+}

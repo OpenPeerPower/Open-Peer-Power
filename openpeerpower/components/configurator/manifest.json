@@ -1,0 +1,9 @@
+{
+  "domain": "configurator",
+  "name": "Configurator",
+  "documentation": "https://www.open-peer-power.io/integrations/configurator",
+  "requirements": [],
+  "dependencies": [],
+  "codeowners": ["@open-peer-power/core"],
+  "quality_scale": "internal"
+}

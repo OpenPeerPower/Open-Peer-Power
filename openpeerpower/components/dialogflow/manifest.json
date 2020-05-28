@@ -1,0 +1,9 @@
+{
+  "domain": "dialogflow",
+  "name": "Dialogflow",
+  "config_flow": true,
+  "documentation": "https://www.open-peer-power.io/integrations/dialogflow",
+  "requirements": [],
+  "dependencies": ["webhook"],
+  "codeowners": []
+}

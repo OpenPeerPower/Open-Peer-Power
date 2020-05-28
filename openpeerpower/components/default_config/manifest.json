@@ -1,0 +1,22 @@
+{
+  "domain": "default_config",
+  "name": "Default Config",
+  "documentation": "https://www.open-peer-power.io/integrations/default_config",
+  "requirements": [],
+  "dependencies": [
+    "automation",
+    "config",
+    "history",
+    "logbook",
+    "map",
+    "person",
+    "script",
+    "ssdp",
+    "sun",
+    "system_health",
+    "updater",
+    "zeroconf",
+    "zone"
+  ],
+  "codeowners": []
+}

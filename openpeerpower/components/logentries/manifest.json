@@ -1,0 +1,8 @@
+{
+  "domain": "logentries",
+  "name": "Logentries",
+  "documentation": "https://www.open-peer-power.io/integrations/logentries",
+  "requirements": [],
+  "dependencies": [],
+  "codeowners": []
+}

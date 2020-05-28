@@ -1,0 +1,19 @@
+{
+    "config": {
+        "abort": {
+            "already_setup": "You can only configure one Almond account.",
+            "cannot_connect": "Unable to connect to the Almond server.",
+            "missing_configuration": "Please check the documentation on how to set up Almond."
+        },
+        "step": {
+            "oppio_confirm": {
+                "description": "Do you want to configure Open Peer Power to connect to Almond provided by the Opp.io add-on: {addon}?",
+                "title": "Almond via Opp.io add-on"
+            },
+            "pick_implementation": {
+                "title": "Pick Authentication Method"
+            }
+        },
+        "title": "Almond"
+    }
+}

@@ -1,0 +1,10 @@
+{
+  "domain": "person",
+  "name": "Person",
+  "documentation": "https://www.open-peer-power.io/integrations/person",
+  "requirements": [],
+  "dependencies": [],
+  "after_dependencies": ["device_tracker"],
+  "codeowners": [],
+  "quality_scale": "internal"
+}
