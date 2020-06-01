@@ -104,7 +104,7 @@ async def test_handler_google_actions(opp):
     data = {"requestId": reqid, "inputs": [{"intent": "action.devices.SYNC"}]}
 
     with patch(
-        "opp_nabucasa.Cloud._decode_claims",
+        "opp_cloud.Cloud._decode_claims",
         return_value={"cognito:username": "myUserName"},
     ):
         await cloud.client.get_google_config()
@@ -130,7 +130,7 @@ async def test_handler_google_actions_disabled(opp, mock_cloud_fixture):
     """Test handler Google Actions when user has disabled it."""
     mock_cloud_fixture._prefs[PREF_ENABLE_GOOGLE] = False
 
-    with patch("opp_nabucasa.Cloud.start", return_value=mock_coro()):
+    with patch("opp_cloud.Cloud.start", return_value=mock_coro()):
         assert await async_setup_component(opp, "cloud", {})
 
     reqid = "5711642932632160983"
@@ -145,7 +145,7 @@ async def test_handler_google_actions_disabled(opp, mock_cloud_fixture):
 
 async def test_webhook_msg(opp):
     """Test webhook msg."""
-    with patch("opp_nabucasa.Cloud.start", return_value=mock_coro()):
+    with patch("opp_cloud.Cloud.start", return_value=mock_coro()):
         setup = await async_setup_component(opp, "cloud", {"cloud": {}})
         assert setup
     cloud = opp.data["cloud"]

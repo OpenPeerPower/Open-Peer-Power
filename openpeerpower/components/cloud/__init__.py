@@ -1,11 +1,11 @@
-"""Component to integrate the Open Peer Powerrrr cloud."""
+"""Component to integrate the Open Peer Power cloud."""
 import logging
 
-from opp_nabucasa import Cloud
+from openpeerpower.components.opp_cloud import Cloud
 import voluptuous as vol
 
 from openpeerpower.components.alexa import const as alexa_const
-from openpeerpower.components.google_assistant import const as ga_c
+
 from openpeerpower.const import (
     CONF_MODE,
     CONF_NAME,
@@ -64,7 +64,6 @@ GOOGLE_ENTITY_SCHEMA = vol.Schema(
     {
         vol.Optional(CONF_NAME): cv.string,
         vol.Optional(CONF_ALIASES): vol.All(cv.ensure_list, [cv.string]),
-        vol.Optional(ga_c.CONF_ROOM_HINT): cv.string,
     }
 )
 
@@ -237,9 +236,6 @@ async def async_setup(opp, config):
         )
         opp.async_create_task(
             opp.helpers.discovery.async_load_platform("stt", DOMAIN, {}, config)
-        )
-        opp.async_create_task(
-            opp.helpers.discovery.async_load_platform("tts", DOMAIN, {}, config)
         )
 
     cloud.iot.register_on_connect(_on_connect)

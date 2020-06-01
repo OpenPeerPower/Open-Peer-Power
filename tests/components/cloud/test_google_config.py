@@ -45,7 +45,7 @@ async def test_sync_entities(aioclient_mock, opp, cloud_prefs):
     )
 
     with patch(
-        "opp_nabucasa.cloud_api.async_google_actions_request_sync",
+        "opp_cloud.cloud_api.async_google_actions_request_sync",
         return_value=mock_coro(Mock(status=404)),
     ) as mock_request_sync:
         assert await config.async_sync_entities("user") == 404

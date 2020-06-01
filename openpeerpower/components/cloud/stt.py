@@ -2,8 +2,8 @@
 from typing import List
 
 from aiohttp import StreamReader
-from opp_nabucasa import Cloud
-from opp_nabucasa.voice import VoiceError
+from opp_cloud import Cloud
+from opp_cloud.voice import VoiceError
 
 from openpeerpower.components.stt import Provider, SpeechMetadata, SpeechResult
 from openpeerpower.components.stt.const import (

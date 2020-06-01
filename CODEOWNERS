@@ -65,7 +65,6 @@ openpeerpower/components/smtp/* @fabaff
 openpeerpower/components/stream/* @hunterjm
 openpeerpower/components/sun/* @Swamp-Ig
 openpeerpower/components/time_date/* @fabaff
-openpeerpower/components/tts/* @robbiet480
 openpeerpower/components/updater/* @open-peer-power/core
 openpeerpower/components/weather/* @fabaff
 openpeerpower/components/websocket_api/* @open-peer-power/core

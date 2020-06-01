@@ -78,10 +78,6 @@ default_config:
 # http:
 #   base_url: example.duckdns.org:8123
 
-# Text to speech
-tts:
-  - platform: google_translate
-
 group: !include {GROUP_CONFIG_PATH}
 automation: !include {AUTOMATION_CONFIG_PATH}
 script: !include {SCRIPT_CONFIG_PATH}
@@ -93,13 +89,10 @@ DEFAULT_SECRETS = """
 some_password: welcome
 """
 TTS_PRE_92 = """
-tts:
-  - platform: google
+
 """
 TTS_92 = """
-tts:
-  - platform: google_translate
-    service_name: google_say
+
 """
 
 

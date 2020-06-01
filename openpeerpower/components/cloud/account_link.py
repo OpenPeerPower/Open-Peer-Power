@@ -3,7 +3,7 @@ import asyncio
 import logging
 from typing import Any
 
-from opp_nabucasa import account_link
+from opp_cloud import account_link
 
 from openpeerpower.const import MAJOR_VERSION, MINOR_VERSION, PATCH_VERSION
 from openpeerpower.core import OpenPeerPower, callback

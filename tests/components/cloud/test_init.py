@@ -16,7 +16,7 @@ from tests.common import mock_coro
 
 async def test_constructor_loads_info_from_config(opp):
     """Test non-dev mode loads info from SERVERS constant."""
-    with patch("opp_nabucasa.Cloud.start", return_value=mock_coro()):
+    with patch("opp_cloud.Cloud.start", return_value=mock_coro()):
         result = await async_setup_component(
             opp,
             "cloud",
@@ -64,7 +64,7 @@ async def test_remote_services(opp, mock_cloud_fixture, opp_read_only_user):
     assert opp.services.has_service(DOMAIN, "remote_disconnect")
 
     with patch(
-        "opp_nabucasa.remote.RemoteUI.connect", return_value=mock_coro()
+        "opp_cloud.remote.RemoteUI.connect", return_value=mock_coro()
     ) as mock_connect:
         await opp.services.async_call(DOMAIN, "remote_connect", blocking=True)
 
@@ -72,7 +72,7 @@ async def test_remote_services(opp, mock_cloud_fixture, opp_read_only_user):
     assert cloud.client.remote_autostart
 
     with patch(
-        "opp_nabucasa.remote.RemoteUI.disconnect", return_value=mock_coro()
+        "opp_cloud.remote.RemoteUI.disconnect", return_value=mock_coro()
     ) as mock_disconnect:
         await opp.services.async_call(DOMAIN, "remote_disconnect", blocking=True)
 
@@ -83,7 +83,7 @@ async def test_remote_services(opp, mock_cloud_fixture, opp_read_only_user):
     non_admin_context = Context(user_id=opp_read_only_user.id)
 
     with patch(
-        "opp_nabucasa.remote.RemoteUI.connect", return_value=mock_coro()
+        "opp_cloud.remote.RemoteUI.connect", return_value=mock_coro()
     ) as mock_connect, pytest.raises(Unauthorized):
         await opp.services.async_call(
             DOMAIN, "remote_connect", blocking=True, context=non_admin_context
@@ -92,7 +92,7 @@ async def test_remote_services(opp, mock_cloud_fixture, opp_read_only_user):
     assert mock_connect.called is False
 
     with patch(
-        "opp_nabucasa.remote.RemoteUI.disconnect", return_value=mock_coro()
+        "opp_cloud.remote.RemoteUI.disconnect", return_value=mock_coro()
     ) as mock_disconnect, pytest.raises(Unauthorized):
         await opp.services.async_call(
             DOMAIN, "remote_disconnect", blocking=True, context=non_admin_context
@@ -103,13 +103,13 @@ async def test_remote_services(opp, mock_cloud_fixture, opp_read_only_user):
 
 async def test_startup_shutdown_events(opp, mock_cloud_fixture):
     """Test if the cloud will start on startup event."""
-    with patch("opp_nabucasa.Cloud.start", return_value=mock_coro()) as mock_start:
+    with patch("opp_cloud.Cloud.start", return_value=mock_coro()) as mock_start:
         opp.bus.async_fire(EVENT_OPENPEERPOWER_START)
         await opp.async_block_till_done()
 
     assert mock_start.called
 
-    with patch("opp_nabucasa.Cloud.stop", return_value=mock_coro()) as mock_stop:
+    with patch("opp_cloud.Cloud.stop", return_value=mock_coro()) as mock_stop:
         opp.bus.async_fire(EVENT_OPENPEERPOWER_STOP)
         await opp.async_block_till_done()
 
@@ -120,7 +120,7 @@ async def test_setup_existing_cloud_user(opp, opp_storage):
     """Test setup with API push default data."""
     user = await opp.auth.async_create_system_user("Cloud test")
     opp_storage[STORAGE_KEY] = {"version": 1, "data": {"cloud_user": user.id}}
-    with patch("opp_nabucasa.Cloud.start", return_value=mock_coro()):
+    with patch("opp_cloud.Cloud.start", return_value=mock_coro()):
         result = await async_setup_component(
             opp,
             "cloud",

@@ -97,9 +97,6 @@ netdisco==2.6.0
 # openpeerpower.components.zwave
 openpeerpower-pyozw==0.1.8
 
-# openpeerpower.components.cloud
-opp-nabucasa==0.31
-
 # openpeerpower.components.frontend
 opp-ui==0.1.0
 

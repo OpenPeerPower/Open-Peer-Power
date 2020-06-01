@@ -174,7 +174,6 @@ openpeerpower/components/cloud/manifest.json
 openpeerpower/components/cloud/prefs.py
 openpeerpower/components/cloud/services.yaml
 openpeerpower/components/cloud/stt.py
-openpeerpower/components/cloud/tts.py
 openpeerpower/components/cloud/utils.py
 openpeerpower/components/config/__init__.py
 openpeerpower/components/config/area_registry.py
@@ -246,7 +245,6 @@ openpeerpower/components/demo/geo_location.py
 openpeerpower/components/demo/image_processing.py
 openpeerpower/components/demo/light.py
 openpeerpower/components/demo/lock.py
-openpeerpower/components/demo/mailbox.py
 openpeerpower/components/demo/manifest.json
 openpeerpower/components/demo/media_player.py
 openpeerpower/components/demo/notify.py
@@ -257,7 +255,6 @@ openpeerpower/components/demo/strings.json
 openpeerpower/components/demo/stt.py
 openpeerpower/components/demo/switch.py
 openpeerpower/components/demo/tts.mp3
-openpeerpower/components/demo/tts.py
 openpeerpower/components/demo/vacuum.py
 openpeerpower/components/demo/water_heater.py
 openpeerpower/components/demo/weather.py
@@ -621,6 +618,21 @@ openpeerpower/components/openpeerpower/__init__.py
 openpeerpower/components/openpeerpower/manifest.json
 openpeerpower/components/openpeerpower/scene.py
 openpeerpower/components/openpeerpower/services.yaml
+openpeerpower/components/opp_cloud/__init__.py
+openpeerpower/components/opp_cloud/account_link.py
+openpeerpower/components/opp_cloud/acme.py
+openpeerpower/components/opp_cloud/auth.py
+openpeerpower/components/opp_cloud/client.py
+openpeerpower/components/opp_cloud/cloud_api.py
+openpeerpower/components/opp_cloud/cloudhooks.py
+openpeerpower/components/opp_cloud/const.py
+openpeerpower/components/opp_cloud/google_report_state.py
+openpeerpower/components/opp_cloud/iot.py
+openpeerpower/components/opp_cloud/iot_base.py
+openpeerpower/components/opp_cloud/remote.py
+openpeerpower/components/opp_cloud/thingtalk.py
+openpeerpower/components/opp_cloud/utils.py
+openpeerpower/components/opp_cloud/voice.py
 openpeerpower/components/oppio/__init__.py
 openpeerpower/components/oppio/addon_panel.py
 openpeerpower/components/oppio/auth.py
@@ -818,9 +830,6 @@ openpeerpower/components/timer/__init__.py
 openpeerpower/components/timer/manifest.json
 openpeerpower/components/timer/reproduce_state.py
 openpeerpower/components/timer/services.yaml
-openpeerpower/components/tts/__init__.py
-openpeerpower/components/tts/manifest.json
-openpeerpower/components/tts/services.yaml
 openpeerpower/components/updater/__init__.py
 openpeerpower/components/updater/binary_sensor.py
 openpeerpower/components/updater/manifest.json
