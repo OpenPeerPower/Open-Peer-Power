@@ -1,12 +1,11 @@
 Metadata-Version: 1.2
 Name: openpeerpower
-Version: 0.2.0
+Version: 0.1.0
 Summary: Open-source power management platform running on Python 3.
 Home-page: https://OpenPeerPower.io/
 Author: Paul Caston
 Author-email: paul@caston.id.au
 License: Apache License 2.0
-Download-URL: https://github.com/OpenPeerPower/Open-Peer-Power/archive/0.2.0.zip
 Project-URL: Bug Reports, https://github.com/OpenPeerPower/Open-Peer-Power/issues
 Description: Open Peer Power
         =================================================================================

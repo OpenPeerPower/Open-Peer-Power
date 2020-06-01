@@ -94,14 +94,14 @@ mutagen==1.43.0
 # openpeerpower.components.ssdp
 netdisco==2.6.0
 
-# openpeerpower.components.frontend
-open-peer-power-frontend==20200220.4
-
 # openpeerpower.components.zwave
 openpeerpower-pyozw==0.1.8
 
 # openpeerpower.components.cloud
 opp-nabucasa==0.31
+
+# openpeerpower.components.frontend
+opp-ui==0.1.0
 
 # openpeerpower.components.mqtt
 paho-mqtt==1.5.0
