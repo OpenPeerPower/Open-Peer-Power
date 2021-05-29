@@ -62,7 +62,8 @@ async def oppio_client_supervisor(opp, aiohttp_client, oppio_stubs):
     """Return an authenticated HTTP client."""
     access_token = opp.auth.async_create_access_token(oppio_stubs)
     return await aiohttp_client(
-        opp.http.app, headers={"Authorization": f"Bearer {access_token}"},
+        opp.http.app,
+        headers={"Authorization": f"Bearer {access_token}"},
     )
 
 

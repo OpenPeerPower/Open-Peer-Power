@@ -63,9 +63,7 @@ async def async_setup_entry(opp, config_entry, async_add_entities):
         del opp.data[DATA_ZHA][light.DOMAIN]
 
 
-async def _async_setup_entities(
-    opp, config_entry, async_add_entities, discovery_infos
-):
+async def _async_setup_entities(opp, config_entry, async_add_entities, discovery_infos):
     """Set up the ZHA lights."""
     entities = []
     for discovery_info in discovery_infos:

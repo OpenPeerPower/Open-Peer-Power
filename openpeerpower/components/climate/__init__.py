@@ -102,9 +102,7 @@ SET_TEMPERATURE_SCHEMA = vol.All(
 
 async def async_setup(opp: OpenPeerPowerType, config: ConfigType) -> bool:
     """Set up climate devices."""
-    component = opp.data[DOMAIN] = EntityComponent(
-        _LOGGER, DOMAIN, opp, SCAN_INTERVAL
-    )
+    component = opp.data[DOMAIN] = EntityComponent(_LOGGER, DOMAIN, opp, SCAN_INTERVAL)
     await component.async_setup(config)
 
     component.async_register_entity_service(SERVICE_TURN_ON, {}, "async_turn_on")
@@ -125,7 +123,9 @@ async def async_setup(opp: OpenPeerPowerType, config: ConfigType) -> bool:
         async_service_aux_heat,
     )
     component.async_register_entity_service(
-        SERVICE_SET_TEMPERATURE, SET_TEMPERATURE_SCHEMA, async_service_temperature_set,
+        SERVICE_SET_TEMPERATURE,
+        SET_TEMPERATURE_SCHEMA,
+        async_service_temperature_set,
     )
     component.async_register_entity_service(
         SERVICE_SET_HUMIDITY,

@@ -241,7 +241,10 @@ async def async_setup(opp: OpenPeerPower, config: Dict) -> bool:
     if component.get_entity("zone.home"):
         return True
 
-    home_zone = Zone(_home_conf(opp), True,)
+    home_zone = Zone(
+        _home_conf(opp),
+        True,
+    )
     home_zone.entity_id = ENTITY_ID_HOME
     await component.async_add_entities([home_zone])  # type: ignore
 

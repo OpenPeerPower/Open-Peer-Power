@@ -53,9 +53,7 @@ def is_locked(opp, entity_id):
 
 async def async_setup(opp, config):
     """Track states and offer events for locks."""
-    component = opp.data[DOMAIN] = EntityComponent(
-        _LOGGER, DOMAIN, opp, SCAN_INTERVAL
-    )
+    component = opp.data[DOMAIN] = EntityComponent(_LOGGER, DOMAIN, opp, SCAN_INTERVAL)
 
     await component.async_setup(config)
 

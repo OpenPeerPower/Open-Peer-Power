@@ -85,9 +85,7 @@ def is_closed(opp, entity_id):
 
 async def async_setup(opp, config):
     """Track states and offer events for covers."""
-    component = opp.data[DOMAIN] = EntityComponent(
-        _LOGGER, DOMAIN, opp, SCAN_INTERVAL
-    )
+    component = opp.data[DOMAIN] = EntityComponent(_LOGGER, DOMAIN, opp, SCAN_INTERVAL)
 
     await component.async_setup(config)
 
@@ -300,9 +298,7 @@ class CoverDevice(Entity):
 
     async def async_set_cover_tilt_position(self, **kwargs):
         """Move the cover tilt to a specific position."""
-        await self.opp.async_add_job(
-            ft.partial(self.set_cover_tilt_position, **kwargs)
-        )
+        await self.opp.async_add_job(ft.partial(self.set_cover_tilt_position, **kwargs))
 
     def stop_cover_tilt(self, **kwargs):
         """Stop the cover."""

@@ -271,7 +271,8 @@ async def test_webhook_enable_encryption(opp, webhook_client, create_registratio
     webhook_id = create_registrations[1]["webhook_id"]
 
     enable_enc_resp = await webhook_client.post(
-        "/api/webhook/{}".format(webhook_id), json={"type": "enable_encryption"},
+        "/api/webhook/{}".format(webhook_id),
+        json={"type": "enable_encryption"},
     )
 
     assert enable_enc_resp.status == 200
@@ -283,7 +284,8 @@ async def test_webhook_enable_encryption(opp, webhook_client, create_registratio
     key = enable_enc_json["secret"]
 
     enc_required_resp = await webhook_client.post(
-        "/api/webhook/{}".format(webhook_id), json=RENDER_TEMPLATE,
+        "/api/webhook/{}".format(webhook_id),
+        json=RENDER_TEMPLATE,
     )
 
     assert enc_required_resp.status == 400

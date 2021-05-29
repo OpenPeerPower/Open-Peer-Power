@@ -308,7 +308,8 @@ async def webhook_update_registration(opp, config_entry, data):
     opp.config_entries.async_update_entry(config_entry, data=new_registration)
 
     return webhook_response(
-        safe_registration(new_registration), registration=new_registration,
+        safe_registration(new_registration),
+        registration=new_registration,
     )
 
 
@@ -385,7 +386,9 @@ async def webhook_register_sensor(opp, config_entry, data):
     async_dispatcher_send(opp, register_signal, data)
 
     return webhook_response(
-        {"success": True}, registration=config_entry.data, status=HTTP_CREATED,
+        {"success": True},
+        registration=config_entry.data,
+        status=HTTP_CREATED,
     )
 
 

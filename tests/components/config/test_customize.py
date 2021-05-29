@@ -55,7 +55,8 @@ async def test_update_entity(opp, opp_client):
     with patch("openpeerpower.components.config._read", mock_read), patch(
         "openpeerpower.components.config._write", mock_write
     ), patch(
-        "openpeerpower.config.async_opp_config_yaml", return_value={},
+        "openpeerpower.config.async_opp_config_yaml",
+        return_value={},
     ):
         resp = await client.post(
             "/api/config/customize/config/hello.world",

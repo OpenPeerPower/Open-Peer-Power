@@ -60,9 +60,7 @@ class TestSensorMoldIndicator(unittest.TestCase):
         self.opp.states.set(
             "test.outdoortemp", "10", {ATTR_UNIT_OF_MEASUREMENT: TEMP_CELSIUS}
         )
-        self.opp.states.set(
-            "test.indoorhumidity", "0", {ATTR_UNIT_OF_MEASUREMENT: "%"}
-        )
+        self.opp.states.set("test.indoorhumidity", "0", {ATTR_UNIT_OF_MEASUREMENT: "%"})
 
         assert setup_component(
             self.opp,
@@ -119,9 +117,7 @@ class TestSensorMoldIndicator(unittest.TestCase):
         assert moldind.attributes.get(ATTR_DEWPOINT) is None
         assert moldind.attributes.get(ATTR_CRITICAL_TEMP) is None
 
-        self.opp.states.set(
-            "test.indoorhumidity", "A", {ATTR_UNIT_OF_MEASUREMENT: "%"}
-        )
+        self.opp.states.set("test.indoorhumidity", "A", {ATTR_UNIT_OF_MEASUREMENT: "%"})
         self.opp.block_till_done()
         moldind = self.opp.states.get("sensor.mold_indicator")
         assert moldind

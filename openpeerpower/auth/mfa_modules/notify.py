@@ -30,7 +30,9 @@ CONFIG_SCHEMA = MULTI_FACTOR_AUTH_MODULE_SCHEMA.extend(
     {
         vol.Optional(CONF_INCLUDE): vol.All(cv.ensure_list, [cv.string]),
         vol.Optional(CONF_EXCLUDE): vol.All(cv.ensure_list, [cv.string]),
-        vol.Optional(CONF_MESSAGE, default="{} is your Open Peer Power login code"): str,
+        vol.Optional(
+            CONF_MESSAGE, default="{} is your Open Peer Power login code"
+        ): str,
     },
     extra=vol.PREVENT_EXTRA,
 )

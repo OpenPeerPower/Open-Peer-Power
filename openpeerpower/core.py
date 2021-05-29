@@ -135,9 +135,7 @@ def async_loop_exception_handler(_: Any, context: Dict) -> None:
     if exception:
         kwargs["exc_info"] = (type(exception), exception, exception.__traceback__)
 
-    _LOGGER.error(
-        "Error doing job: %s", context["message"], **kwargs  # type: ignore
-    )
+    _LOGGER.error("Error doing job: %s", context["message"], **kwargs)  # type: ignore
 
 
 class CoreState(enum.Enum):
@@ -161,7 +159,7 @@ class OpenPeerPower:
 
     def __init__(self, loop: Optional[asyncio.events.AbstractEventLoop] = None) -> None:
         """Initialize new Open Peer Power object."""
-        self.loop: asyncio.events.AbstractEventLoop = (loop or asyncio.get_event_loop())
+        self.loop: asyncio.events.AbstractEventLoop = loop or asyncio.get_event_loop()
 
         executor_opts: Dict[str, Any] = {
             "max_workers": None,
@@ -303,9 +301,7 @@ class OpenPeerPower:
         elif is_callback(check_target):
             self.loop.call_soon(target, *args)
         else:
-            task = self.loop.run_in_executor(  # type: ignore
-                None, target, *args
-            )
+            task = self.loop.run_in_executor(None, target, *args)  # type: ignore
 
         # If a task is scheduled
         if self._track_task and task is not None:

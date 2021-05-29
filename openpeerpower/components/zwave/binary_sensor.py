@@ -88,9 +88,7 @@ class ZWaveTriggerSensor(ZWaveBinarySensor):
         self.invalidate_after = dt_util.utcnow() + datetime.timedelta(
             seconds=self.re_arm_sec
         )
-        track_point_in_time(
-            self.opp, self.async_update_op_state, self.invalidate_after
-        )
+        track_point_in_time(self.opp, self.async_update_op_state, self.invalidate_after)
 
     @property
     def is_on(self):

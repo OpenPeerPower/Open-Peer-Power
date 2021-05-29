@@ -186,9 +186,7 @@ class Searcher:
 
         Will only be called if automation is an entry point.
         """
-        for entity in automation.entities_in_automation(
-            self.opp, automation_entity_id
-        ):
+        for entity in automation.entities_in_automation(self.opp, automation_entity_id):
             self._add_or_resolve("entity", entity)
 
         for device in automation.devices_in_automation(self.opp, automation_entity_id):

@@ -98,7 +98,7 @@ netdisco==2.6.0
 openpeerpower-pyozw==0.1.8
 
 # openpeerpower.components.frontend
-opp-ui==0.1.0
+openpeerpower-frontend==20210523.1
 
 # openpeerpower.components.mqtt
 paho-mqtt==1.5.0

@@ -41,7 +41,9 @@ async def test_sync_entities(aioclient_mock, opp, cloud_prefs):
         GACTIONS_SCHEMA({}),
         "mock-user-id",
         cloud_prefs,
-        Mock(auth=Mock(async_check_token=Mock(side_effect=mock_coro)),),
+        Mock(
+            auth=Mock(async_check_token=Mock(side_effect=mock_coro)),
+        ),
     )
 
     with patch(

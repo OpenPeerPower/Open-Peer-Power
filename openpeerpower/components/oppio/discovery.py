@@ -44,9 +44,7 @@ def async_setup_discovery_view(opp: OpenPeerPowerView, oppio):
         if jobs:
             await asyncio.wait(jobs)
 
-    opp.bus.async_listen_once(
-        EVENT_OPENPEERPOWER_START, _async_discovery_start_handler
-    )
+    opp.bus.async_listen_once(EVENT_OPENPEERPOWER_START, _async_discovery_start_handler)
 
 
 class OppIODiscovery(OpenPeerPowerView):

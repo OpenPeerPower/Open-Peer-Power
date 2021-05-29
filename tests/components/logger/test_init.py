@@ -102,9 +102,7 @@ class TestUpdater(unittest.TestCase):
 
         self.assert_logged("test", logging.DEBUG)
 
-        self.opp.services.call(
-            logger.DOMAIN, "set_default_level", {"level": "warning"}
-        )
+        self.opp.services.call(logger.DOMAIN, "set_default_level", {"level": "warning"})
         self.opp.block_till_done()
 
         self.assert_not_logged("test", logging.DEBUG)

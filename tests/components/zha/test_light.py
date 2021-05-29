@@ -74,7 +74,11 @@ LIGHT_COLOR = {
     [(LIGHT_ON_OFF, (1, 0, 0)), (LIGHT_LEVEL, (1, 1, 0)), (LIGHT_COLOR, (1, 1, 3))],
 )
 async def test_light(
-    opp, zigpy_device_mock, zha_device_joined_restored, device, reporting,
+    opp,
+    zigpy_device_mock,
+    zha_device_joined_restored,
+    device,
+    reporting,
 ):
     """Test zha light platform."""
 
@@ -111,9 +115,7 @@ async def test_light(
 
         # test getting a brightness change from the network
         await async_test_on_from_light(opp, cluster_on_off, entity_id)
-        await async_test_dimmer_from_light(
-            opp, cluster_level, entity_id, 150, STATE_ON
-        )
+        await async_test_dimmer_from_light(opp, cluster_level, entity_id, 150, STATE_ON)
 
     # test rejoin
     await async_test_off_from_opp(opp, cluster_on_off, entity_id)

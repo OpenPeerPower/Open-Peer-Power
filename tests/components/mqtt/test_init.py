@@ -497,9 +497,7 @@ class TestMQTTCallbacks(unittest.TestCase):
         """Test if connection failure leads to disconnect."""
         for result_code in range(1, 6):
             self.opp.data["mqtt"]._mqttc = mock.MagicMock()
-            self.opp.data["mqtt"]._mqtt_on_connect(
-                None, {"topics": {}}, 0, result_code
-            )
+            self.opp.data["mqtt"]._mqtt_on_connect(None, {"topics": {}}, 0, result_code)
             assert self.opp.data["mqtt"]._mqttc.disconnect.called
 
     def test_mqtt_disconnect_tries_no_reconnect_on_stop(self):

@@ -110,9 +110,7 @@ def websocket_depose_mfa(
         """Remove user from mfa auth module."""
         mfa_module_id = msg["mfa_module_id"]
         try:
-            await opp.auth.async_disable_user_mfa(
-                connection.user, msg["mfa_module_id"]
-            )
+            await opp.auth.async_disable_user_mfa(connection.user, msg["mfa_module_id"])
         except ValueError as err:
             connection.send_message(
                 websocket_api.error_message(

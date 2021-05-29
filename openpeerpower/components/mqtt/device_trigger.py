@@ -90,7 +90,10 @@ class TriggerInstance:
         if self.remove:
             self.remove()
         self.remove = await automation_mqtt.async_attach_trigger(
-            self.trigger.opp, mqtt_config, self.action, self.automation_info,
+            self.trigger.opp,
+            mqtt_config,
+            self.action,
+            self.automation_info,
         )
 
 

@@ -11,7 +11,9 @@ from openpeerpower.core import OpenPeerPower
 def run(args):
     """Handle ensure config commandline script."""
     parser = argparse.ArgumentParser(
-        description=("Ensure a Open Peer Power config exists, creates one if necessary.")
+        description=(
+            "Ensure a Open Peer Power config exists, creates one if necessary."
+        )
     )
     parser.add_argument(
         "-c",

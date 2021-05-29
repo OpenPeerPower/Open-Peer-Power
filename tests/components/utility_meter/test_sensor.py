@@ -221,9 +221,7 @@ async def test_self_reset_hourly(opp):
 
 async def test_self_reset_daily(opp):
     """Test daily reset of meter."""
-    await _test_self_reset(
-        opp, gen_config("daily"), "2017-12-31T23:59:00.000000+00:00"
-    )
+    await _test_self_reset(opp, gen_config("daily"), "2017-12-31T23:59:00.000000+00:00")
 
 
 async def test_self_reset_weekly(opp):

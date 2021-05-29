@@ -281,9 +281,7 @@ class TestLight(unittest.TestCase):
         assert {} == data
 
         # faulty attributes will not trigger a service call
-        common.turn_on(
-            self.opp, ent1.entity_id, profile=prof_name, brightness="bright"
-        )
+        common.turn_on(self.opp, ent1.entity_id, profile=prof_name, brightness="bright")
         common.turn_on(self.opp, ent1.entity_id, rgb_color="yellowish")
         common.turn_on(self.opp, ent2.entity_id, white_value="high")
 

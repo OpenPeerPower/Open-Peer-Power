@@ -19,6 +19,7 @@ class TestBinarySensor(unittest.TestCase):
         ):
             assert STATE_OFF == binary_sensor.BinarySensorDevice().state
         with mock.patch(
-            "openpeerpower.components.binary_sensor.BinarySensorDevice.is_on", new=True,
+            "openpeerpower.components.binary_sensor.BinarySensorDevice.is_on",
+            new=True,
         ):
             assert STATE_ON == binary_sensor.BinarySensorDevice().state

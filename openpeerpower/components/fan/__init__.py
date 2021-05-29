@@ -61,9 +61,7 @@ def is_on(opp, entity_id: str) -> bool:
 
 async def async_setup(opp, config: dict):
     """Expose fan control via statemachine and services."""
-    component = opp.data[DOMAIN] = EntityComponent(
-        _LOGGER, DOMAIN, opp, SCAN_INTERVAL
-    )
+    component = opp.data[DOMAIN] = EntityComponent(_LOGGER, DOMAIN, opp, SCAN_INTERVAL)
 
     await component.async_setup(config)
 

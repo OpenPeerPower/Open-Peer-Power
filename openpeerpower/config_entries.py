@@ -211,9 +211,7 @@ class ConfigEntry:
                 return
 
         try:
-            result = await component.async_setup_entry(  # type: ignore
-                opp, self
-            )
+            result = await component.async_setup_entry(opp, self)  # type: ignore
 
             if not isinstance(result, bool):
                 _LOGGER.error(
@@ -290,9 +288,7 @@ class ConfigEntry:
             return False
 
         try:
-            result = await component.async_unload_entry(  # type: ignore
-                opp, self
-            )
+            result = await component.async_unload_entry(opp, self)  # type: ignore
 
             assert isinstance(result, bool)
 
@@ -319,9 +315,7 @@ class ConfigEntry:
         if not hasattr(component, "async_remove_entry"):
             return
         try:
-            await component.async_remove_entry(  # type: ignore
-                opp, self
-            )
+            await component.async_remove_entry(opp, self)  # type: ignore
         except Exception:  # pylint: disable=broad-except
             _LOGGER.exception(
                 "Error calling entry remove callback %s for %s",
@@ -359,9 +353,7 @@ class ConfigEntry:
             return False
 
         try:
-            result = await component.async_migrate_entry(  # type: ignore
-                opp, self
-            )
+            result = await component.async_migrate_entry(opp, self)  # type: ignore
             if not isinstance(result, bool):
                 _LOGGER.error(
                     "%s.async_migrate_entry did not return boolean", self.domain

@@ -387,9 +387,7 @@ async def test_invalid_values(opp, mqtt_mock):
     assert not state.attributes.get(ATTR_ASSUMED_STATE)
 
     # turn on the light, full white
-    async_fire_mqtt_message(
-        opp, "test_light_rgb", "on,255,215,222,255-255-255,rainbow"
-    )
+    async_fire_mqtt_message(opp, "test_light_rgb", "on,255,215,222,255-255-255,rainbow")
 
     state = opp.states.get("light.test")
     assert state.state == STATE_ON

@@ -56,9 +56,7 @@ def is_on(opp, entity_id):
 
 async def async_setup(opp, config):
     """Track states and offer events for switches."""
-    component = opp.data[DOMAIN] = EntityComponent(
-        _LOGGER, DOMAIN, opp, SCAN_INTERVAL
-    )
+    component = opp.data[DOMAIN] = EntityComponent(_LOGGER, DOMAIN, opp, SCAN_INTERVAL)
     await component.async_setup(config)
 
     component.async_register_entity_service(SERVICE_TURN_OFF, {}, "async_turn_off")

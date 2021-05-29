@@ -35,9 +35,7 @@ class TestDteEnergyBridgeSetup(unittest.TestCase):
             "http://{}/instantaneousdemand".format(DTE_ENERGY_BRIDGE_CONFIG["ip"]),
             text=".411 kW",
         )
-        assert setup_component(
-            self.opp, "sensor", {"sensor": DTE_ENERGY_BRIDGE_CONFIG}
-        )
+        assert setup_component(self.opp, "sensor", {"sensor": DTE_ENERGY_BRIDGE_CONFIG})
         assert "0.411" == self.opp.states.get("sensor.current_energy_usage").state
 
     @requests_mock.Mocker()
@@ -47,9 +45,7 @@ class TestDteEnergyBridgeSetup(unittest.TestCase):
             "http://{}/instantaneousdemand".format(DTE_ENERGY_BRIDGE_CONFIG["ip"]),
             text="411 kW",
         )
-        assert setup_component(
-            self.opp, "sensor", {"sensor": DTE_ENERGY_BRIDGE_CONFIG}
-        )
+        assert setup_component(self.opp, "sensor", {"sensor": DTE_ENERGY_BRIDGE_CONFIG})
         assert "0.411" == self.opp.states.get("sensor.current_energy_usage").state
 
     @requests_mock.Mocker()
@@ -59,7 +55,5 @@ class TestDteEnergyBridgeSetup(unittest.TestCase):
             "http://{}/instantaneousdemand".format(DTE_ENERGY_BRIDGE_CONFIG["ip"]),
             text="411",
         )
-        assert setup_component(
-            self.opp, "sensor", {"sensor": DTE_ENERGY_BRIDGE_CONFIG}
-        )
+        assert setup_component(self.opp, "sensor", {"sensor": DTE_ENERGY_BRIDGE_CONFIG})
         assert "unknown" == self.opp.states.get("sensor.current_energy_usage").state

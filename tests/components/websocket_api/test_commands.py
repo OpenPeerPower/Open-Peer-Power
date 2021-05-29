@@ -387,9 +387,7 @@ async def test_subscribe_unsubscribe_events_state_changed(
     assert msg["event"]["data"]["entity_id"] == "light.permitted"
 
 
-async def test_render_template_renders_template(
-    opp, websocket_client, opp_admin_user
-):
+async def test_render_template_renders_template(opp, websocket_client, opp_admin_user):
     """Test simple template is rendered and updated."""
     opp.states.async_set("light.test", "on")
 

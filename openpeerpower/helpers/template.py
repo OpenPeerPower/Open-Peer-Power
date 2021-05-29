@@ -636,9 +636,7 @@ def distance(opp, *args):
     if len(locations) == 1:
         return opp.config.distance(*locations[0])
 
-    return opp.config.units.length(
-        loc_util.distance(*locations[0] + locations[1]), "m"
-    )
+    return opp.config.units.length(loc_util.distance(*locations[0] + locations[1]), "m")
 
 
 def is_state(opp: OpenPeerPowerType, entity_id: str, state: State) -> bool:

@@ -10,15 +10,11 @@ from tests.common import MockUser, register_auth_provider
 @pytest.fixture(autouse=True)
 def setup_config(opp):
     """Fixture that sets up the auth provider openpeerpower module."""
-    opp.loop.run_until_complete(
-        register_auth_provider(opp, {"type": "openpeerpower"})
-    )
+    opp.loop.run_until_complete(register_auth_provider(opp, {"type": "openpeerpower"}))
     opp.loop.run_until_complete(auth_ha.async_setup(opp))
 
 
-async def test_create_auth_system_generated_user(
-    opp, opp_access_token, opp_ws_client
-):
+async def test_create_auth_system_generated_user(opp, opp_access_token, opp_ws_client):
     """Test we can't add auth to system generated users."""
     system_user = MockUser(system_generated=True).add_to_opp(opp)
     client = await opp_ws_client(opp, opp_access_token)

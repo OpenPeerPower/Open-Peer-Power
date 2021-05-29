@@ -158,9 +158,7 @@ async def async_setup(opp: OpenPeerPowerType, config: ConfigType):
     discovery.async_listen_platform(opp, DOMAIN, async_platform_discovered)
 
     # Clean up stale devices
-    async_track_utc_time_change(
-        opp, tracker.async_update_stale, second=range(0, 60, 5)
-    )
+    async_track_utc_time_change(opp, tracker.async_update_stale, second=range(0, 60, 5))
 
     async def async_see_service(call):
         """Service to see a device."""

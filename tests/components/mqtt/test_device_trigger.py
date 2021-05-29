@@ -401,9 +401,7 @@ async def test_if_fires_on_mqtt_message_late_discover(
     assert calls[1].data["some"] == "long_press"
 
 
-async def test_if_fires_on_mqtt_message_after_update(
-    opp, device_reg, calls, mqtt_mock
-):
+async def test_if_fires_on_mqtt_message_after_update(opp, device_reg, calls, mqtt_mock):
     """Test triggers firing after update."""
     config_entry = MockConfigEntry(domain=DOMAIN, data={})
     config_entry.add_to_opp(opp)

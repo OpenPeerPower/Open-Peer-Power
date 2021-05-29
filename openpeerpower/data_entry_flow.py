@@ -50,7 +50,10 @@ class AbortFlow(FlowError):
 class FlowManager(abc.ABC):
     """Manage all the flows that are in progress."""
 
-    def __init__(self, opp: OpenPeerPower,) -> None:
+    def __init__(
+        self,
+        opp: OpenPeerPower,
+    ) -> None:
         """Initialize the flow manager."""
         self.opp = opp
         self._progress: Dict[str, Any] = {}

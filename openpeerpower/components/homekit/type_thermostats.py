@@ -335,9 +335,7 @@ class Thermostat(HomeAccessory):
         # Set current operation mode for supported thermostats
         hvac_action = new_state.attributes.get(ATTR_HVAC_ACTION)
         if hvac_action:
-            self.char_current_heat_cool.set_value(
-                HC_OPP_TO_HOMEKIT_ACTION[hvac_action]
-            )
+            self.char_current_heat_cool.set_value(HC_OPP_TO_HOMEKIT_ACTION[hvac_action])
 
 
 @TYPES.register("WaterHeater")

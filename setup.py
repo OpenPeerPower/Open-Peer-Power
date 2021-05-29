@@ -5,13 +5,13 @@ from setuptools import find_packages, setup
 
 import openpeerpower.const as opp_const
 
-PROJECT_NAME = 'Open Peer Power'
-PROJECT_PACKAGE_NAME = 'openpeerpower'
-PROJECT_LICENSE = 'Apache License 2.0'
-PROJECT_AUTHOR = 'Paul Caston'
-PROJECT_COPYRIGHT = ' 2020-{}, {}'.format(dt.now().year, PROJECT_AUTHOR)
-PROJECT_URL = 'https://OpenPeerPower.io/'
-PROJECT_EMAIL = 'paul@caston.id.au'
+PROJECT_NAME = "Open Peer Power"
+PROJECT_PACKAGE_NAME = "openpeerpower"
+PROJECT_LICENSE = "Apache License 2.0"
+PROJECT_AUTHOR = "Paul Caston"
+PROJECT_COPYRIGHT = " 2020-{}, {}".format(dt.now().year, PROJECT_AUTHOR)
+PROJECT_URL = "https://OpenPeerPower.io/"
+PROJECT_EMAIL = "paul@caston.id.au"
 
 PROJECT_GITHUB_USERNAME = "OpenPeerPower"
 PROJECT_GITHUB_REPOSITORY = "Open-Peer-Power"
@@ -20,9 +20,7 @@ PYPI_URL = "https://pypi.python.org/pypi/{}".format(PROJECT_PACKAGE_NAME)
 GITHUB_PATH = "{}/{}".format(PROJECT_GITHUB_USERNAME, PROJECT_GITHUB_REPOSITORY)
 GITHUB_URL = "https://github.com/{}".format(GITHUB_PATH)
 
-PROJECT_URLS = {
-    "Bug Reports": "{}/issues".format(GITHUB_URL)
-}
+PROJECT_URLS = {"Bug Reports": "{}/issues".format(GITHUB_URL)}
 
 PACKAGES = find_packages(exclude=["tests", "tests.*"])
 
@@ -61,11 +59,7 @@ setup(
     include_package_data=True,
     zip_safe=False,
     install_requires=REQUIRES,
-    python_requires='>={}'.format(MIN_PY_VERSION),
-    test_suite='tests',
-    entry_points={
-        'console_scripts': [
-            'opp = openpeerpower.__main__:main'
-        ]
-    },
+    python_requires=">={}".format(MIN_PY_VERSION),
+    test_suite="tests",
+    entry_points={"console_scripts": ["opp = openpeerpower.__main__:main"]},
 )

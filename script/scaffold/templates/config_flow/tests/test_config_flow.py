@@ -21,7 +21,8 @@ async def test_form(opp):
     ), patch(
         "openpeerpower.components.NEW_DOMAIN.async_setup", return_value=True
     ) as mock_setup, patch(
-        "openpeerpower.components.NEW_DOMAIN.async_setup_entry", return_value=True,
+        "openpeerpower.components.NEW_DOMAIN.async_setup_entry",
+        return_value=True,
     ) as mock_setup_entry:
         result2 = await opp.config_entries.flow.async_configure(
             result["flow_id"],

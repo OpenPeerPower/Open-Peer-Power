@@ -1084,9 +1084,7 @@ async def test_precision_default(opp, mqtt_mock):
     """Test that setting precision to tenths works as intended."""
     assert await async_setup_component(opp, CLIMATE_DOMAIN, DEFAULT_CONFIG)
 
-    await common.async_set_temperature(
-        opp, temperature=23.67, entity_id=ENTITY_CLIMATE
-    )
+    await common.async_set_temperature(opp, temperature=23.67, entity_id=ENTITY_CLIMATE)
     state = opp.states.get(ENTITY_CLIMATE)
     assert state.attributes.get("temperature") == 23.7
     mqtt_mock.async_publish.reset_mock()
@@ -1098,9 +1096,7 @@ async def test_precision_halves(opp, mqtt_mock):
     config["climate"]["precision"] = 0.5
     assert await async_setup_component(opp, CLIMATE_DOMAIN, config)
 
-    await common.async_set_temperature(
-        opp, temperature=23.67, entity_id=ENTITY_CLIMATE
-    )
+    await common.async_set_temperature(opp, temperature=23.67, entity_id=ENTITY_CLIMATE)
     state = opp.states.get(ENTITY_CLIMATE)
     assert state.attributes.get("temperature") == 23.5
     mqtt_mock.async_publish.reset_mock()
@@ -1112,9 +1108,7 @@ async def test_precision_whole(opp, mqtt_mock):
     config["climate"]["precision"] = 1.0
     assert await async_setup_component(opp, CLIMATE_DOMAIN, config)
 
-    await common.async_set_temperature(
-        opp, temperature=23.67, entity_id=ENTITY_CLIMATE
-    )
+    await common.async_set_temperature(opp, temperature=23.67, entity_id=ENTITY_CLIMATE)
     state = opp.states.get(ENTITY_CLIMATE)
     assert state.attributes.get("temperature") == 24.0
     mqtt_mock.async_publish.reset_mock()

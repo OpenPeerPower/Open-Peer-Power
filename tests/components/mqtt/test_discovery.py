@@ -40,9 +40,7 @@ async def test_invalid_topic(opp, mqtt_mock):
         mock_load_platform.return_value = mock_coro()
         await async_start(opp, "openpeerpower", {}, entry)
 
-        async_fire_mqtt_message(
-            opp, "openpeerpower/binary_sensor/bla/not_config", "{}"
-        )
+        async_fire_mqtt_message(opp, "openpeerpower/binary_sensor/bla/not_config", "{}")
         await opp.async_block_till_done()
         assert not mock_load_platform.called
 
@@ -179,7 +177,9 @@ async def test_discovery_incl_nodeid(opp, mqtt_mock, caplog):
     await async_start(opp, "openpeerpower", {}, entry)
 
     async_fire_mqtt_message(
-        opp, "openpeerpower/binary_sensor/my_node_id/bla/config", '{ "name": "Beer" }',
+        opp,
+        "openpeerpower/binary_sensor/my_node_id/bla/config",
+        '{ "name": "Beer" }',
     )
     await opp.async_block_till_done()
 

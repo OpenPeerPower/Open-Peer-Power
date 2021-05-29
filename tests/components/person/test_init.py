@@ -211,9 +211,7 @@ async def test_setup_two_trackers(opp, opp_admin_user):
 
     opp.bus.async_fire(EVENT_OPENPEERPOWER_START)
     await opp.async_block_till_done()
-    opp.states.async_set(
-        DEVICE_TRACKER, "home", {ATTR_SOURCE_TYPE: SOURCE_TYPE_ROUTER}
-    )
+    opp.states.async_set(DEVICE_TRACKER, "home", {ATTR_SOURCE_TYPE: SOURCE_TYPE_ROUTER})
     await opp.async_block_till_done()
 
     state = opp.states.get("person.tracked_person")
@@ -250,22 +248,16 @@ async def test_setup_two_trackers(opp, opp_admin_user):
     assert state.attributes.get(ATTR_SOURCE) == DEVICE_TRACKER_2
     assert state.attributes.get(ATTR_USER_ID) == user_id
 
-    opp.states.async_set(
-        DEVICE_TRACKER_2, "zone1", {ATTR_SOURCE_TYPE: SOURCE_TYPE_GPS}
-    )
+    opp.states.async_set(DEVICE_TRACKER_2, "zone1", {ATTR_SOURCE_TYPE: SOURCE_TYPE_GPS})
     await opp.async_block_till_done()
 
     state = opp.states.get("person.tracked_person")
     assert state.state == "zone1"
     assert state.attributes.get(ATTR_SOURCE) == DEVICE_TRACKER_2
 
-    opp.states.async_set(
-        DEVICE_TRACKER, "home", {ATTR_SOURCE_TYPE: SOURCE_TYPE_ROUTER}
-    )
+    opp.states.async_set(DEVICE_TRACKER, "home", {ATTR_SOURCE_TYPE: SOURCE_TYPE_ROUTER})
     await opp.async_block_till_done()
-    opp.states.async_set(
-        DEVICE_TRACKER_2, "zone2", {ATTR_SOURCE_TYPE: SOURCE_TYPE_GPS}
-    )
+    opp.states.async_set(DEVICE_TRACKER_2, "zone2", {ATTR_SOURCE_TYPE: SOURCE_TYPE_GPS})
     await opp.async_block_till_done()
 
     state = opp.states.get("person.tracked_person")
@@ -664,9 +656,7 @@ async def test_update_invalid_user_id(opp, storage_collection):
         )
 
 
-async def test_update_person_when_user_removed(
-    opp, storage_setup, opp_read_only_user
-):
+async def test_update_person_when_user_removed(opp, storage_setup, opp_read_only_user):
     """Update person when user is removed."""
     storage_collection = opp.data[DOMAIN][1]
 

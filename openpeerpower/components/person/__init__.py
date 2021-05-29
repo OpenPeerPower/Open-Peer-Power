@@ -342,9 +342,7 @@ async def async_setup(opp: OpenPeerPowerType, config: ConfigType):
             await filter_yaml_data(opp, conf.get(DOMAIN, []))
         )
 
-    service.async_register_admin_service(
-        opp, DOMAIN, SERVICE_RELOAD, async_reload_yaml
-    )
+    service.async_register_admin_service(opp, DOMAIN, SERVICE_RELOAD, async_reload_yaml)
 
     return True
 
@@ -419,9 +417,7 @@ class Person(RestoreEntity):
             async def person_start_opp(now):
                 await self.async_update_config(self._config)
 
-            self.opp.bus.async_listen_once(
-                EVENT_OPENPEERPOWER_START, person_start_opp
-            )
+            self.opp.bus.async_listen_once(EVENT_OPENPEERPOWER_START, person_start_opp)
 
     async def async_update_config(self, config):
         """Handle when the config is updated."""

@@ -57,8 +57,7 @@ class TestDemoPlatform(unittest.TestCase):
                     abs(state.attributes["latitude"] - self.opp.config.latitude) < 1.0
                 )
                 assert (
-                    abs(state.attributes["longitude"] - self.opp.config.longitude)
-                    < 1.0
+                    abs(state.attributes["longitude"] - self.opp.config.longitude) < 1.0
                 )
                 assert (
                     state.attributes["unit_of_measurement"]

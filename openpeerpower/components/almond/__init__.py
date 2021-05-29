@@ -105,8 +105,10 @@ async def async_setup_entry(opp: OpenPeerPower, entry: config_entries.ConfigEntr
         auth = AlmondLocalAuth(entry.data["host"], websession)
     else:
         # OAuth2
-        implementation = await config_entry_oauth2_flow.async_get_config_entry_implementation(
-            opp, entry
+        implementation = (
+            await config_entry_oauth2_flow.async_get_config_entry_implementation(
+                opp, entry
+            )
         )
         oauth_session = config_entry_oauth2_flow.OAuth2Session(
             opp, entry, implementation

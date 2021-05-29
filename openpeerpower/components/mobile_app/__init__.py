@@ -59,9 +59,7 @@ async def async_setup(opp: OpenPeerPowerType, config: ConfigType):
 
     for deleted_id in opp.data[DOMAIN][DATA_DELETED_IDS]:
         try:
-            webhook_register(
-                opp, DOMAIN, "Deleted Webhook", deleted_id, handle_webhook
-            )
+            webhook_register(opp, DOMAIN, "Deleted Webhook", deleted_id, handle_webhook)
         except ValueError:
             pass
 

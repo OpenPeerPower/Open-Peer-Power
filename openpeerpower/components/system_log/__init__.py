@@ -174,9 +174,7 @@ class LogErrorHandler(logging.Handler):
             if not record.exc_info:
                 stack = [f for f, _, _, _ in traceback.extract_stack()]
 
-            entry = LogEntry(
-                record, stack, _figure_out_source(record, stack, self.opp)
-            )
+            entry = LogEntry(record, stack, _figure_out_source(record, stack, self.opp))
             self.records.add_entry(entry)
             if self.fire_event:
                 self.opp.bus.fire(EVENT_SYSTEM_LOG, entry.to_dict())

@@ -380,7 +380,10 @@ async def test_not_allowing_recursion(opp, caplog):
 
     for service in SERVICE_TURN_ON, SERVICE_TURN_OFF, SERVICE_TOGGLE:
         await opp.services.async_call(
-            op.DOMAIN, service, {"entity_id": "openpeerpower.light"}, blocking=True,
+            op.DOMAIN,
+            service,
+            {"entity_id": "openpeerpower.light"},
+            blocking=True,
         )
         assert (
             f"Called service openpeerpower.{service} with invalid entity IDs openpeerpower.light"

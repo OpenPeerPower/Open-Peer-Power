@@ -166,9 +166,7 @@ async def _async_setup_component(
 
     try:
         if hasattr(component, "async_setup"):
-            result = await component.async_setup(  # type: ignore
-                opp, processed_config
-            )
+            result = await component.async_setup(opp, processed_config)  # type: ignore
         elif hasattr(component, "setup"):
             result = await opp.async_add_executor_job(
                 component.setup, opp, processed_config  # type: ignore

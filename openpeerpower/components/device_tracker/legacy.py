@@ -229,9 +229,7 @@ class DeviceTracker:
 
         # update known_devices.yaml
         self.opp.async_create_task(
-            self.async_update_config(
-                self.opp.config.path(YAML_DEVICES), dev_id, device
-            )
+            self.async_update_config(self.opp.config.path(YAML_DEVICES), dev_id, device)
         )
 
     async def async_update_config(self, path, dev_id, device):

@@ -46,9 +46,7 @@ async def async_setup(opp, config):
     # Pass in default to `get` because defaults not set if loaded as dep
     mode = config.get(DOMAIN, {}).get(CONF_MODE, MODE_STORAGE)
 
-    opp.components.frontend.async_register_built_in_panel(
-        DOMAIN, config={"mode": mode}
-    )
+    opp.components.frontend.async_register_built_in_panel(DOMAIN, config={"mode": mode})
 
     if mode == MODE_YAML:
         opp.data[DOMAIN] = DevconYAML(opp)
@@ -59,9 +57,7 @@ async def async_setup(opp, config):
 
     opp.components.websocket_api.async_register_command(websocket_devcon_save_config)
 
-    opp.components.websocket_api.async_register_command(
-        websocket_devcon_delete_config
-    )
+    opp.components.websocket_api.async_register_command(websocket_devcon_delete_config)
 
     opp.components.system_health.async_register_info(DOMAIN, system_health_info)
 

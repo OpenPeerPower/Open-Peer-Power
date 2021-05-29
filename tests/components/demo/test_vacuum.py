@@ -156,9 +156,7 @@ class TestVacuumDemo(unittest.TestCase):
         state = self.opp.states.get(ENTITY_VACUUM_COMPLETE)
         assert "Returning home" in state.attributes.get(ATTR_STATUS)
 
-        common.set_fan_speed(
-            self.opp, FAN_SPEEDS[-1], entity_id=ENTITY_VACUUM_COMPLETE
-        )
+        common.set_fan_speed(self.opp, FAN_SPEEDS[-1], entity_id=ENTITY_VACUUM_COMPLETE)
         self.opp.block_till_done()
         state = self.opp.states.get(ENTITY_VACUUM_COMPLETE)
         assert FAN_SPEEDS[-1] == state.attributes.get(ATTR_FAN_SPEED)

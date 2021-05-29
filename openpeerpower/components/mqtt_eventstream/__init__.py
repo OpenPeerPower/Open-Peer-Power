@@ -97,9 +97,7 @@ def async_setup(opp, config):
                 if state:
                     event_data[key] = state
 
-        opp.bus.async_fire(
-            event_type, event_data=event_data, origin=EventOrigin.remote
-        )
+        opp.bus.async_fire(event_type, event_data=event_data, origin=EventOrigin.remote)
 
     # Only subscribe if you specified a topic.
     if sub_topic:

@@ -107,9 +107,7 @@ class Store:
             if "data_func" in data:
                 data["data"] = data.pop("data_func")()
         else:
-            data = await self.opp.async_add_executor_job(
-                json_util.load_json, self.path
-            )
+            data = await self.opp.async_add_executor_job(json_util.load_json, self.path)
 
             if data == {}:
                 return None
@@ -193,9 +191,7 @@ class Store:
 
         async with self._write_lock:
             try:
-                await self.opp.async_add_executor_job(
-                    self._write_data, self.path, data
-                )
+                await self.opp.async_add_executor_job(self._write_data, self.path, data)
             except (json_util.SerializationError, json_util.WriteError) as err:
                 _LOGGER.error("Error writing config for %s: %s", self.key, err)
 

@@ -110,9 +110,7 @@ async def test_reading_yaml_config(opp, yaml_devices):
         hide_if_away=True,
         icon="mdi:kettle",
     )
-    await opp.async_add_executor_job(
-        legacy.update_config, yaml_devices, dev_id, device
-    )
+    await opp.async_add_executor_job(legacy.update_config, yaml_devices, dev_id, device)
     assert await async_setup_component(opp, device_tracker.DOMAIN, TEST_PLATFORM)
     config = (await legacy.async_load_config(yaml_devices, opp, device.consider_home))[
         0

@@ -272,9 +272,7 @@ async def test_replay_past_chromecasts(opp):
     await opp.async_block_till_done()  # having tasks that add jobs
     assert add_dev1.call_count == 1
 
-    add_dev2 = await async_setup_cast(
-        opp, discovery_info={"host": "host2", "port": 42}
-    )
+    add_dev2 = await async_setup_cast(opp, discovery_info={"host": "host2", "port": 42})
     await opp.async_block_till_done()
     assert add_dev2.call_count == 1
 

@@ -115,9 +115,7 @@ async def test_implementation(opp, flow_handler):
         async_get_tokens=Mock(return_value=flow_finished),
     )
 
-    with patch(
-        "opp_cloud.account_link.AuthorizeAccountHelper", return_value=helper
-    ):
+    with patch("opp_cloud.account_link.AuthorizeAccountHelper", return_value=helper):
         result = await opp.config_entries.flow.async_init(
             TEST_DOMAIN, context={"source": config_entries.SOURCE_USER}
         )
@@ -153,8 +151,6 @@ async def test_implementation(opp, flow_handler):
     entry = opp.config_entries.async_entries(TEST_DOMAIN)[0]
 
     assert (
-        await config_entry_oauth2_flow.async_get_config_entry_implementation(
-            opp, entry
-        )
+        await config_entry_oauth2_flow.async_get_config_entry_implementation(opp, entry)
         is impl
     )

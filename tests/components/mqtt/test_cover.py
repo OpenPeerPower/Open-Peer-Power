@@ -429,27 +429,19 @@ async def test_current_cover_position(opp, mqtt_mock):
     assert not (4 & opp.states.get("cover.test").attributes["supported_features"] == 4)
 
     async_fire_mqtt_message(opp, "get-position-topic", "0")
-    current_cover_position = opp.states.get("cover.test").attributes[
-        "current_position"
-    ]
+    current_cover_position = opp.states.get("cover.test").attributes["current_position"]
     assert current_cover_position == 0
 
     async_fire_mqtt_message(opp, "get-position-topic", "50")
-    current_cover_position = opp.states.get("cover.test").attributes[
-        "current_position"
-    ]
+    current_cover_position = opp.states.get("cover.test").attributes["current_position"]
     assert current_cover_position == 50
 
     async_fire_mqtt_message(opp, "get-position-topic", "non-numeric")
-    current_cover_position = opp.states.get("cover.test").attributes[
-        "current_position"
-    ]
+    current_cover_position = opp.states.get("cover.test").attributes["current_position"]
     assert current_cover_position == 50
 
     async_fire_mqtt_message(opp, "get-position-topic", "101")
-    current_cover_position = opp.states.get("cover.test").attributes[
-        "current_position"
-    ]
+    current_cover_position = opp.states.get("cover.test").attributes["current_position"]
     assert current_cover_position == 100
 
 
@@ -544,9 +536,7 @@ async def test_set_cover_position(opp, mqtt_mock):
     state_attributes_dict = opp.states.get("cover.test").attributes
     assert "current_position" in state_attributes_dict
     assert not ("current_tilt_position" in state_attributes_dict)
-    current_cover_position = opp.states.get("cover.test").attributes[
-        "current_position"
-    ]
+    current_cover_position = opp.states.get("cover.test").attributes["current_position"]
     assert current_cover_position == 22
 
 

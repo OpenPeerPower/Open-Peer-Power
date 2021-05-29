@@ -98,9 +98,7 @@ async def test_pre_auth_only_auth_allowed(no_auth_websocket_client):
     assert msg["message"].startswith("Auth message incorrectly formatted")
 
 
-async def test_auth_active_with_token(
-    opp, no_auth_websocket_client, opp_access_token
-):
+async def test_auth_active_with_token(opp, no_auth_websocket_client, opp_access_token):
     """Test authenticating with a token."""
     assert await async_setup_component(opp, "websocket_api", {})
 

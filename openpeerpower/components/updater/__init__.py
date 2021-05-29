@@ -26,7 +26,7 @@ CONF_COMPONENT_REPORTING = "include_used_components"
 
 DOMAIN = "updater"
 
-#UPDATER_URL = "https://updater.open-peer-power.io/"
+# UPDATER_URL = "https://updater.open-peer-power.io/"
 UPDATER_URL = "https://updater.home-assistant.io/"
 UPDATER_UUID_FILE = ".uuid"
 
@@ -91,9 +91,7 @@ async def async_setup(opp, config):
 
     async def check_new_version():
         """Check if a new version is available and report if one is."""
-        newest, release_notes = await get_newest_version(
-            opp, huuid, include_components
-        )
+        newest, release_notes = await get_newest_version(opp, huuid, include_components)
 
         _LOGGER.debug("Fetched version %s: %s", newest, release_notes)
 

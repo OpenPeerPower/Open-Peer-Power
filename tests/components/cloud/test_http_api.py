@@ -27,9 +27,7 @@ SUBSCRIPTION_INFO_URL = "https://api-test.opp.io/subscription_info"
 @pytest.fixture()
 def mock_auth():
     """Mock check token."""
-    with patch(
-        "opp_cloud.auth.CognitoAuth.async_check_token", side_effect=mock_coro
-    ):
+    with patch("opp_cloud.auth.CognitoAuth.async_check_token", side_effect=mock_coro):
         yield
 
 
@@ -147,9 +145,7 @@ async def test_login_view_invalid_schema(cloud_client):
 
 async def test_login_view_request_timeout(cloud_client):
     """Test request timeout while trying to log in."""
-    with patch(
-        "opp_cloud.auth.CognitoAuth.login", side_effect=asyncio.TimeoutError
-    ):
+    with patch("opp_cloud.auth.CognitoAuth.login", side_effect=asyncio.TimeoutError):
         req = await cloud_client.post(
             "/api/cloud/login", json={"email": "my_username", "password": "my_password"}
         )
@@ -381,9 +377,9 @@ async def test_websocket_subscription_reconnect(
     aioclient_mock.get(SUBSCRIPTION_INFO_URL, json={"provider": "stripe"})
     client = await opp_ws_client(opp)
 
-    with patch(
-        "opp_cloud.auth.CognitoAuth.renew_access_token"
-    ) as mock_renew, patch("opp_cloud.iot.CloudIoT.connect") as mock_connect:
+    with patch("opp_cloud.auth.CognitoAuth.renew_access_token") as mock_renew, patch(
+        "opp_cloud.iot.CloudIoT.connect"
+    ) as mock_connect:
         await client.send_json({"id": 5, "type": "cloud/subscription"})
         response = await client.receive_json()
 
@@ -400,9 +396,9 @@ async def test_websocket_subscription_no_reconnect_if_connected(
     opp.data[DOMAIN].iot.state = STATE_CONNECTED
     client = await opp_ws_client(opp)
 
-    with patch(
-        "opp_cloud.auth.CognitoAuth.renew_access_token"
-    ) as mock_renew, patch("opp_cloud.iot.CloudIoT.connect") as mock_connect:
+    with patch("opp_cloud.auth.CognitoAuth.renew_access_token") as mock_renew, patch(
+        "opp_cloud.iot.CloudIoT.connect"
+    ) as mock_connect:
         await client.send_json({"id": 5, "type": "cloud/subscription"})
         response = await client.receive_json()
 
@@ -418,9 +414,9 @@ async def test_websocket_subscription_no_reconnect_if_expired(
     aioclient_mock.get(SUBSCRIPTION_INFO_URL, json={"provider": "stripe"})
     client = await opp_ws_client(opp)
 
-    with patch(
-        "opp_cloud.auth.CognitoAuth.renew_access_token"
-    ) as mock_renew, patch("opp_cloud.iot.CloudIoT.connect") as mock_connect:
+    with patch("opp_cloud.auth.CognitoAuth.renew_access_token") as mock_renew, patch(
+        "opp_cloud.iot.CloudIoT.connect"
+    ) as mock_connect:
         await client.send_json({"id": 5, "type": "cloud/subscription"})
         response = await client.receive_json()
 

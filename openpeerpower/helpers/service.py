@@ -41,9 +41,7 @@ SERVICE_DESCRIPTION_CACHE = "service_description_cache"
 
 
 @bind_opp
-def call_from_config(
-    opp, config, blocking=False, variables=None, validate_config=True
-):
+def call_from_config(opp, config, blocking=False, variables=None, validate_config=True):
     """Call a service based on a config hash."""
     asyncio.run_coroutine_threadsafe(
         async_call_from_config(opp, config, blocking, variables, validate_config),

@@ -719,9 +719,7 @@ async def async_setup_entry(opp, entry):
     )
 
     if conf.get(CONF_DISCOVERY):
-        await _async_setup_discovery(
-            opp, conf, opp.data[DATA_MQTT_OPP_CONFIG], entry
-        )
+        await _async_setup_discovery(opp, conf, opp.data[DATA_MQTT_OPP_CONFIG], entry)
 
     return True
 

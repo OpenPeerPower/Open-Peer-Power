@@ -44,9 +44,7 @@ async def async_attach_trigger(opp, config, action, automation_info):
     @callback
     def time_automation_listener(now):
         """Listen for time changes and calls action."""
-        opp.async_run_job(
-            action, {"trigger": {"platform": "time_pattern", "now": now}}
-        )
+        opp.async_run_job(action, {"trigger": {"platform": "time_pattern", "now": now}})
 
     return async_track_time_change(
         opp, time_automation_listener, hour=hours, minute=minutes, second=seconds

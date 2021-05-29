@@ -608,9 +608,7 @@ async def merge_packages_config(
             domain = comp_name.split(" ")[0]
 
             try:
-                integration = await async_get_integration_with_requirements(
-                    opp, domain
-                )
+                integration = await async_get_integration_with_requirements(opp, domain)
                 component = integration.get_component()
             except (IntegrationNotFound, RequirementsNotFound, ImportError) as ex:
                 _log_pkg_error(pack_name, comp_name, config, str(ex))
@@ -750,9 +748,7 @@ async def async_process_component_config(
         # Validate platform specific schema
         if hasattr(platform, "PLATFORM_SCHEMA"):
             try:
-                p_validated = platform.PLATFORM_SCHEMA(  # type: ignore
-                    p_config
-                )
+                p_validated = platform.PLATFORM_SCHEMA(p_config)  # type: ignore
             except vol.Invalid as ex:
                 async_log_exception(
                     ex,

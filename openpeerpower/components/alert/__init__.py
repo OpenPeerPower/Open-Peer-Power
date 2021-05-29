@@ -266,9 +266,7 @@ class Alert(ToggleEntity):
         """Schedule a notification."""
         delay = self._delay[self._next_delay]
         next_msg = now() + delay
-        self._cancel = event.async_track_point_in_time(
-            self.opp, self._notify, next_msg
-        )
+        self._cancel = event.async_track_point_in_time(self.opp, self._notify, next_msg)
         self._next_delay = min(self._next_delay + 1, len(self._delay) - 1)
 
     async def _notify(self, *args):

@@ -287,7 +287,7 @@ class HomeKit:
         advertise_ip=None,
     ):
         """Initialize a HomeKit object."""
-        self.opp= oopp
+        self.opp = oopp
         self._name = name
         self._port = port
         self._ip_address = ip_address

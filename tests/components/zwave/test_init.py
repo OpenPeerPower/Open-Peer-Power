@@ -607,13 +607,10 @@ async def test_value_discovery_existing_entity(opp, mock_openzwave):
         await opp.async_block_till_done()
 
     assert (
-        opp.states.get("climate.mock_node_mock_value").attributes["temperature"]
-        == 22.0
+        opp.states.get("climate.mock_node_mock_value").attributes["temperature"] == 22.0
     )
     assert (
-        opp.states.get("climate.mock_node_mock_value").attributes[
-            "current_temperature"
-        ]
+        opp.states.get("climate.mock_node_mock_value").attributes["current_temperature"]
         is None
     )
 
@@ -632,13 +629,10 @@ async def test_value_discovery_existing_entity(opp, mock_openzwave):
         await opp.async_block_till_done()
 
     assert (
-        opp.states.get("climate.mock_node_mock_value").attributes["temperature"]
-        == 22.0
+        opp.states.get("climate.mock_node_mock_value").attributes["temperature"] == 22.0
     )
     assert (
-        opp.states.get("climate.mock_node_mock_value").attributes[
-            "current_temperature"
-        ]
+        opp.states.get("climate.mock_node_mock_value").attributes["current_temperature"]
         == 23.5
     )
 
@@ -674,8 +668,7 @@ async def test_value_discovery_legacy_thermostat(opp, mock_openzwave):
     await opp.async_block_till_done()
 
     assert (
-        opp.states.get("climate.mock_node_mock_value").attributes["temperature"]
-        == 22.0
+        opp.states.get("climate.mock_node_mock_value").attributes["temperature"] == 22.0
     )
 
 
@@ -1420,9 +1413,7 @@ class TestZWaveServices(unittest.TestCase):
 
     def test_replace_failed_node(self):
         """Test zwave replace_failed_node service."""
-        self.opp.services.call(
-            "zwave", "replace_failed_node", {const.ATTR_NODE_ID: 13}
-        )
+        self.opp.services.call("zwave", "replace_failed_node", {const.ATTR_NODE_ID: 13})
         self.opp.block_till_done()
 
         replace_failed_node = self.zwave_network.controller.replace_failed_node
@@ -1759,12 +1750,15 @@ class TestZWaveServices(unittest.TestCase):
 
         assert node.refresh_value.called
         assert len(node.refresh_value.mock_calls) == 2
-        assert sorted(
-            [
-                node.refresh_value.mock_calls[0][1][0],
-                node.refresh_value.mock_calls[1][1][0],
-            ]
-        ) == sorted([value.value_id, power_value.value_id])
+        assert (
+            sorted(
+                [
+                    node.refresh_value.mock_calls[0][1][0],
+                    node.refresh_value.mock_calls[1][1][0],
+                ]
+            )
+            == sorted([value.value_id, power_value.value_id])
+        )
 
     def test_refresh_node(self):
         """Test zwave refresh_node service."""

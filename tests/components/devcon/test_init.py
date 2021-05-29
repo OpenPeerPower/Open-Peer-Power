@@ -46,9 +46,7 @@ async def test_devcon_from_storage(opp, opp_ws_client, opp_storage):
     assert response["error"]["code"] == "config_not_found"
 
 
-async def test_devcon_from_storage_save_before_load(
-    opp, opp_ws_client, opp_storage
-):
+async def test_devcon_from_storage_save_before_load(opp, opp_ws_client, opp_storage):
     """Test we can load devcon config from storage."""
     assert await async_setup_component(opp, "devcon", {})
     client = await opp_ws_client(opp)

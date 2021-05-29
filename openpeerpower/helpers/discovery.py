@@ -126,9 +126,7 @@ def load_platform(opp, component, platform, discovered, opp_config):
 
     Use `listen_platform` to register a callback for these events.
     """
-    opp.add_job(
-        async_load_platform(opp, component, platform, discovered, opp_config)
-    )
+    opp.add_job(async_load_platform(opp, component, platform, discovered, opp_config))
 
 
 @bind_opp

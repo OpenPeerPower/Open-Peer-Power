@@ -225,9 +225,7 @@ def _get_camera_from_entity_id(opp, entity_id):
 
 async def async_setup(opp, config):
     """Set up the camera component."""
-    component = opp.data[DOMAIN] = EntityComponent(
-        _LOGGER, DOMAIN, opp, SCAN_INTERVAL
-    )
+    component = opp.data[DOMAIN] = EntityComponent(_LOGGER, DOMAIN, opp, SCAN_INTERVAL)
 
     prefs = CameraPreferences(opp)
     await prefs.async_initialize()

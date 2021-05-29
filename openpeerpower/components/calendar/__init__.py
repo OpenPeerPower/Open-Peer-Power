@@ -28,9 +28,7 @@ SCAN_INTERVAL = timedelta(seconds=60)
 
 async def async_setup(opp, config):
     """Track states and offer events for calendars."""
-    component = opp.data[DOMAIN] = EntityComponent(
-        _LOGGER, DOMAIN, opp, SCAN_INTERVAL
-    )
+    component = opp.data[DOMAIN] = EntityComponent(_LOGGER, DOMAIN, opp, SCAN_INTERVAL)
 
     opp.http.register_view(CalendarListView(component))
     opp.http.register_view(CalendarEventView(component))

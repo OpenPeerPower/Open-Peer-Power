@@ -200,9 +200,7 @@ def check(config_dir, secrets=False):
         opp = core.OpenPeerPower()
         opp.config.config_dir = config_dir
 
-        res["components"] = opp.loop.run_until_complete(
-            async_check_op_config_file(opp)
-        )
+        res["components"] = opp.loop.run_until_complete(async_check_op_config_file(opp))
         res["secret_cache"] = OrderedDict(yaml_loader.__SECRET_CACHE)
         for err in res["components"].errors:
             domain = err.domain or ERROR_STR

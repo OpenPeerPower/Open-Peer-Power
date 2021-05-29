@@ -29,9 +29,7 @@ async def async_validate_config_item(opp, config, full_config=None):
             "..{}".format(trigger[CONF_PLATFORM]), __name__
         )
         if hasattr(trigger_platform, "async_validate_trigger_config"):
-            trigger = await trigger_platform.async_validate_trigger_config(
-                opp, trigger
-            )
+            trigger = await trigger_platform.async_validate_trigger_config(opp, trigger)
         triggers.append(trigger)
     config[CONF_TRIGGER] = triggers
 
